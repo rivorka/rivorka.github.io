@@ -2,63 +2,54 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <!-- ✅ важно для телефонов -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Каталог коллекционера</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
   <style>
     :root{
       --bg:#0b0f1a;
+      --panel:#121a2a;
+      --card:#0f1626;
       --text:#eaf0ff;
       --muted:#9fb0d0;
       --brand:#7c5cff;
       --brand2:#00d4ff;
       --danger:#ff4d6d;
+      --ok:#22c55e;
       --shadow: 0 10px 30px rgba(0,0,0,.35);
       --radius: 18px;
 
       --site-hero: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,.25), transparent 60%),
                    radial-gradient(900px 500px at 90% 10%, rgba(0,212,255,.18), transparent 55%);
-
-      /* ✅ отступы “окна” модалки от краёв */
-      --modal-inset: clamp(12px, 3.5vw, 28px);
     }
-
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
       background: var(--site-hero), var(--bg);
       color:var(--text);
-      overflow-x: hidden; /* ✅ страховка от горизонтального скролла */
     }
-
     header{
       position:sticky; top:0; z-index:10;
       backdrop-filter: blur(10px);
       background: rgba(11,15,26,.72);
       border-bottom: 1px solid rgba(255,255,255,.06);
     }
-    .wrap{max-width:1200px; margin:0 auto; padding:16px;}
-
+    .wrap{max-width:1200px; margin:0 auto; padding:18px 16px;}
     .top{
       display:flex; gap:12px; align-items:center; justify-content:space-between;
       flex-wrap:wrap;
     }
-    .brand{display:flex; align-items:center; gap:10px; min-width:0;}
+    .brand{display:flex; align-items:center; gap:10px;}
     .logo{
       width:38px; height:38px; border-radius:12px;
       background: linear-gradient(135deg, var(--brand), var(--brand2));
       box-shadow: var(--shadow);
-      flex: 0 0 auto;
     }
-    h1{font-size:18px; margin:0; line-height:1.15}
+    h1{font-size:18px; margin:0;}
     .sub{color:var(--muted); font-size:13px; margin-top:2px}
-
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-
     .tabs{
       display:flex; gap:8px; flex-wrap:wrap;
       padding: 6px;
@@ -87,11 +78,11 @@
       color: var(--text);
       padding: 11px 12px;
       outline:none;
-      min-width: 0;
+      box-shadow: none;
+      min-width: 0; /* <-- важно, чтобы элементы не выталкивали контейнер */
     }
     textarea{min-height:90px; resize: vertical}
     input::placeholder{color:rgba(159,176,208,.75)}
-
     .btn{
       cursor:pointer;
       border: none;
@@ -114,7 +105,6 @@
       font-weight: 900;
       cursor:pointer;
     }
-
     .pill{
       display:inline-flex; gap:8px; align-items:center;
       padding: 6px 10px;
@@ -125,30 +115,17 @@
       font-size: 12px;
       user-select:none;
     }
-
+    main{padding: 18px 0 40px}
     .controls{
       display:grid;
-      grid-template-columns: 1.3fr .85fr .85fr .95fr auto auto;
+      grid-template-columns: 1.4fr .85fr .85fr .85fr .85fr auto auto;
       gap:10px;
       align-items:center;
-      width:100%;
-      margin-top:12px;
+      width:min(1100px, 100%);
     }
-
-    /* ✅ адаптация фильтров под телефон */
     @media (max-width: 980px){
       .controls{grid-template-columns: 1fr 1fr 1fr; }
     }
-    @media (max-width: 560px){
-      .controls{grid-template-columns: 1fr; }
-      .row{width:100%}
-      .tabs{width:100%}
-      .tab{flex:1}
-      #currency, #langBtn, #addBtn{flex:1}
-    }
-
-    main{padding: 16px 0 40px}
-
     .grid{
       display:grid;
       grid-template-columns: repeat(12, 1fr);
@@ -161,6 +138,7 @@
       border-radius: var(--radius);
       overflow:hidden;
       box-shadow: var(--shadow);
+      position:relative;
       min-width: 0;
     }
     @media (max-width: 980px){ .card{grid-column: span 6;} }
@@ -193,12 +171,19 @@
       border: 1px solid rgba(255,255,255,.10);
       white-space:nowrap;
     }
-
+    .badge.ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.18);}
+    .badge.warn{border-color: rgba(255,185,0,.35); background: rgba(255,185,0,.14);}
+    .badge.bad{border-color: rgba(255,77,109,.35); background: rgba(255,77,109,.14);}
     .body{padding: 12px 12px 14px}
+    .titleRow{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
     .title{font-weight: 950; margin:0; font-size: 15px; line-height: 1.25}
+    .metaLine{color: var(--muted); font-size: 12.5px; margin-top:6px; line-height:1.35}
     .money{
       display:flex; gap:8px; flex-wrap:wrap;
       margin-top:10px;
+      color: rgba(234,240,255,.92);
       font-size: 12.5px;
     }
     .money span{
@@ -209,39 +194,39 @@
     }
     .actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
     .actions button{flex:1}
+    .empty{
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+    }
 
-    /* ✅ модалка = “окно”, не прилипает к краям */
+    /* Modal */
     .modalBackdrop{
       position: fixed; inset:0;
       background: rgba(0,0,0,.55);
       display:none;
       align-items:center; justify-content:center;
-      padding: var(--modal-inset);
+      padding: 18px;
       z-index:100;
       overscroll-behavior: contain;
     }
     .modalBackdrop[aria-hidden="false"]{display:flex;}
 
+    /* ✅ главное: модалка не вылезает, внутри прокрутка */
     .modal{
-      width: min(920px, calc(100vw - (var(--modal-inset) * 2)));
-      max-height: calc(100dvh - (var(--modal-inset) * 2));
+      width: min(980px, 100%);
+      max-height: calc(100vh - 36px);
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,.10);
-      background: rgba(18,26,42,.94);
+      background: rgba(18,26,42,.92);
       box-shadow: var(--shadow);
-      overflow: hidden;
+      overflow: hidden; /* чтобы скроллилась modalContent, а не вся карточка */
       display:flex;
       flex-direction: column;
       min-width: 0;
     }
-
-    /* ✅ на телефоне делаем окно чуть уже и скролл внутри */
-    @media (max-width: 560px){
-      .modal{
-        border-radius: 18px;
-      }
-    }
-
     .modalTop{
       padding: 14px 14px;
       display:flex; align-items:center; justify-content:space-between; gap:12px;
@@ -261,6 +246,7 @@
       flex: 0 0 auto;
     }
 
+    /* ✅ прокрутка внутри модалки */
     .modalContent{
       padding: 14px;
       overflow: auto;
@@ -277,10 +263,10 @@
     .field{grid-column: span 6; display:flex; flex-direction:column; gap:6px; min-width:0}
     .field.full{grid-column: span 12}
     @media (max-width: 760px){ .field{grid-column: span 12} }
-
     label{color: var(--muted); font-size: 12px}
     .help{color: rgba(159,176,208,.75); font-size: 12px}
 
+    /* ✅ новый UI фото: компактный + не ломает ширину */
     .photoCard{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
@@ -303,6 +289,7 @@
       background-size: cover;
       background-position:center;
       box-shadow: var(--shadow);
+      flex: 0 0 auto;
     }
     @media (max-width: 560px){
       .photoPreview{width: 100%; height: 180px;}
@@ -319,17 +306,62 @@
     }
     .fileHidden{display:none;}
 
-    .empty{
-      padding: 22px;
-      border-radius: var(--radius);
-      border: 1px dashed rgba(255,255,255,.18);
-      background: rgba(255,255,255,.03);
-      color: var(--muted);
+    /* small popup near input */
+    .errorPop{
+      position: fixed;
+      z-index: 9999;
+      max-width: 320px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,77,109,.16);
+      border: 1px solid rgba(255,77,109,.38);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      line-height: 1.25;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .errorPop.show{ opacity: 1; transform: translateY(0); }
+
+    /* Year stepper */
+    .yearPicker{
+      display:flex; align-items:center; gap:8px;
+      padding: 8px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(18,26,42,.70);
+      min-width: 0;
+    }
+    .yearBtn{
+      width: 38px; height: 38px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      color: var(--text);
+      cursor:pointer;
+      display:grid; place-items:center;
+      font-weight: 950;
+      padding: 0;
+      flex: 0 0 auto;
+    }
+    .yearInput{
+      width: 100%;
+      text-align: center;
+      font-weight: 950;
+      letter-spacing: .3px;
+      background: rgba(18,26,42,.85);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      min-width: 0;
     }
 
-    .hide{display:none !important;}
-    .isLocked{opacity:.55; cursor:not-allowed;}
     .lockedHint{ margin-top:6px; font-size:12px; color: rgba(159,176,208,.80); }
+    .isLocked{ opacity:.55; cursor:not-allowed; }
+    .hide{display:none !important;}
   </style>
 </head>
 
@@ -339,7 +371,7 @@
     <div class="top">
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
-        <div style="min-width:0;">
+        <div>
           <h1 id="ui_title">Каталог коллекционера</h1>
           <div class="sub" id="ui_sub">каталог • вишлист • коллекция • заметки • import/export JSON</div>
         </div>
@@ -365,8 +397,8 @@
       </div>
     </div>
 
-    <div class="controls" role="search">
-      <input id="q" placeholder="Поиск…" autocomplete="off"/>
+    <div style="margin-top:12px;" class="controls" role="search">
+      <input id="q" placeholder="Поиск: имя / персонаж / заметки / теги…" autocomplete="off"/>
       <select id="brand"><option value="all">Все бренды</option></select>
 
       <select id="typeFilter" class="hide">
@@ -424,7 +456,7 @@
       <div class="formGrid">
 
         <div class="field">
-          <label>Тип</label>
+          <label id="l_type">Тип</label>
           <select id="f_type">
             <option value="doll">Кукла</option>
             <option value="accessory">Аксессуар</option>
@@ -432,13 +464,13 @@
         </div>
 
         <div class="field">
-          <label>Название</label>
+          <label id="l_name">Название</label>
           <input id="f_name" placeholder="Напр: Draculaura (Core)" />
           <div class="lockedHint" id="lockedHint" style="display:none;"></div>
         </div>
 
         <div class="field">
-          <label>Бренд</label>
+          <label id="l_brand">Бренд</label>
           <select id="f_brand">
             <option>Monster High</option>
             <option>Ever After High</option>
@@ -448,26 +480,26 @@
         </div>
 
         <div class="field">
-          <label>Линейка / серия</label>
+          <label id="l_line">Линейка / серия</label>
           <input id="f_line" placeholder="Напр: G1 базовая / Creeproduction..." />
         </div>
 
         <div class="field" id="fieldChar">
-          <label>Персонаж</label>
+          <label id="l_char">Персонаж</label>
           <input id="f_char" placeholder="Напр: Frankie / Clawdeen..." />
         </div>
 
         <div class="field">
-          <label>Год</label>
-          <div style="display:flex; gap:8px; min-width:0;">
-            <button class="btnGhost" id="yearDec" type="button" style="width:44px; padding:0;">−</button>
-            <input id="f_year" type="number" min="1950" max="2100" placeholder="2012" style="flex:1; text-align:center; font-weight:900;">
-            <button class="btnGhost" id="yearInc" type="button" style="width:44px; padding:0;">+</button>
+          <label id="l_year">Год</label>
+          <div class="yearPicker" id="yearPicker">
+            <button class="yearBtn" id="yearDec" type="button" aria-label="Year minus">−</button>
+            <input id="f_year" class="yearInput" type="number" min="1950" max="2100" placeholder="Напр: 2012" />
+            <button class="yearBtn" id="yearInc" type="button" aria-label="Year plus">+</button>
           </div>
         </div>
 
         <div class="field">
-          <label>Состояние</label>
+          <label id="l_condition">Состояние</label>
           <select id="f_condition">
             <option value="new">Новое</option>
             <option value="good">Хорошее</option>
@@ -477,7 +509,7 @@
         </div>
 
         <div class="field">
-          <label>Комплектность</label>
+          <label id="l_complete">Комплектность</label>
           <select id="f_complete">
             <option value="full">Полная</option>
             <option value="partial">Частичная</option>
@@ -487,7 +519,7 @@
         </div>
 
         <div class="field">
-          <label>Статус</label>
+          <label id="l_status">Статус</label>
           <select id="f_status">
             <option value="none">Просто в каталоге</option>
             <option value="wish">Вишлист</option>
@@ -495,9 +527,10 @@
           </select>
         </div>
 
-        <!-- Фото -->
+        <!-- ✅ Фото: новый интерфейс + без вылезаний -->
         <div class="field full" id="photoBlock">
-          <label>Фотография</label>
+          <label id="l_photo">Фотография</label>
+
           <div class="photoCard">
             <div class="photoPreview" id="photoPreview" aria-label="Photo preview"></div>
 
@@ -506,35 +539,39 @@
                 <button class="btnGhost" id="pickPhotoBtn" type="button">Выбрать фото</button>
                 <button class="btnGhost" id="clearPhotoBtn" type="button">Убрать фото</button>
               </div>
-              <div class="help" style="margin-top:8px;">Фото хранится локально (в браузере). Лучше до ~1–2 МБ.</div>
+
+              <div class="help" id="h_photo" style="margin-top:8px;">
+                Фото хранится локально (в браузере). Лучше до ~1–2 МБ.
+              </div>
+
               <input id="f_photo" class="fileHidden" type="file" accept="image/*" />
             </div>
           </div>
         </div>
 
         <div class="field">
-          <label>Цена покупки</label>
+          <label id="l_buy">Цена покупки</label>
           <input id="f_buy" type="number" min="0" step="1" placeholder="Напр: 950" />
-          <div class="help">Если не покупала — оставь пустым.</div>
+          <div class="help" id="h_buy">Если не покупала — оставь пустым.</div>
         </div>
 
         <div class="field">
-          <label>Средняя цена рынка</label>
+          <label id="l_market">Средняя цена рынка</label>
           <input id="f_market" type="number" min="0" step="1" placeholder="Напр: 1200" />
-          <div class="help">Можно заполнять позже.</div>
+          <div class="help" id="h_market">Можно заполнять позже.</div>
         </div>
 
         <div class="field full">
-          <label>Заметки</label>
+          <label id="l_notes">Заметки</label>
           <textarea id="f_notes" placeholder="Состояние, дефекты, что докупить..."></textarea>
         </div>
 
         <div class="field full">
-          <label>Теги (через запятую)</label>
+          <label id="l_tags">Теги (через запятую)</label>
           <input id="f_tags" placeholder="Напр: g1, core, box" />
         </div>
 
-        <div class="field full" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
+        <div class="field full" style="display:flex; gap:10px; flex-direction:row; flex-wrap:wrap; margin-top:4px;">
           <button class="btn" id="saveBtn">Сохранить</button>
           <button class="btnGhost" id="cancelBtn">Отмена</button>
           <button class="btnDanger" id="deleteBtn" style="display:none;">Удалить</button>
@@ -546,44 +583,164 @@
 </div>
 
 <script>
-  const LS_KEY = "collector_catalog_mobilefix_v1";
-  const $ = (s)=>document.querySelector(s);
+  // ====== LANGUAGE ======
+  const LS_LANG = "collector_lang_v4";
+  let lang = localStorage.getItem(LS_LANG) || "ru";
 
-  // минимальная база, чтобы файл был самодостаточный
+  // ====== CURRENCY ======
+  const LS_CUR = "collector_currency_v4";
+  let currency = localStorage.getItem(LS_CUR) || "CZK";
+  const allowedCurrencies = ["USD","UAH","RUB","CZK","EUR"];
+  if(!allowedCurrencies.includes(currency)) currency = "CZK";
+
+  const currencyName = {
+    USD: { ru: "доллары", en: "USD" },
+    UAH: { ru: "гривны", en: "UAH" },
+    RUB: { ru: "рубли",  en: "RUB" },
+    CZK: { ru: "кроны",  en: "CZK" },
+    EUR: { ru: "евро",   en: "EUR" }
+  };
+
+  function localeForLang(){ return (lang === "ru") ? "ru-RU" : "en-US"; }
+  function formatMoney(n){
+    if(n == null || n === "" || Number.isNaN(Number(n))) return "—";
+    try{
+      return new Intl.NumberFormat(localeForLang(), {
+        style: "currency",
+        currency,
+        currencyDisplay: "symbol",
+        maximumFractionDigits: 0
+      }).format(Number(n));
+    }catch{
+      return String(Number(n)) + " " + currency;
+    }
+  }
+
+  // ====== STORAGE ======
+  const LS_KEY = "collector_catalog_v5";
   function uid(){ return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
+
+  // ====== PREBUILT CATALOG (укорочено для примера) ======
+  function prebuiltCatalog(){
+    const brand = "Monster High";
+    const mk = (id, line, year, char, en, ru) => ({
+      id, createdAt: 0, isPrebuilt: true, type: "doll",
+      name_en: en, name_ru: ru, brand, line, character: char, year,
+      condition: "ok", complete: "unknown", status: "none",
+      buyPrice: null, marketPrice: null, notes: "", tags: ["monster high"],
+      photoDataUrl: null
+    });
+    return [
+      mk("mh_g1_core_draculaura", "G1 базовая", 2010, "Draculaura", "Draculaura (Core, G1)", "Дракулаура (базовая, G1)"),
+      mk("mh_creep_draculaura", "Creeproduction (G1)", 2022, "Draculaura", "Draculaura (Creeproduction)", "Дракулаура (репродукция)"),
+    ];
+  }
+  function ensurePrebuilt(db){
+    const base = prebuiltCatalog();
+    const existing = new Set(db.map(x => x.id));
+    const merged = db.slice();
+    for(const item of base){
+      if(!existing.has(item.id)) merged.push(item);
+      else{
+        const idx = merged.findIndex(x=>x.id===item.id);
+        const keep = merged[idx];
+        merged[idx] = {
+          ...item,
+          status: keep.status ?? "none",
+          buyPrice: keep.buyPrice ?? null,
+          marketPrice: keep.marketPrice ?? null,
+          notes: keep.notes ?? "",
+          condition: keep.condition ?? "ok",
+          complete: keep.complete ?? "unknown",
+          photoDataUrl: keep.photoDataUrl || null,
+          tags: Array.isArray(keep.tags) ? keep.tags : item.tags
+        };
+      }
+    }
+    return merged;
+  }
   function loadDB(){
     try{
       const raw = localStorage.getItem(LS_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      if(!Array.isArray(arr)) return [];
-      return arr;
-    }catch{ return []; }
+      if(!raw){
+        const init = ensurePrebuilt([]);
+        localStorage.setItem(LS_KEY, JSON.stringify(init));
+        return init;
+      }
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) throw new Error("bad db");
+      const merged = ensurePrebuilt(arr);
+      localStorage.setItem(LS_KEY, JSON.stringify(merged));
+      return merged;
+    }catch{
+      const init = ensurePrebuilt([]);
+      localStorage.setItem(LS_KEY, JSON.stringify(init));
+      return init;
+    }
   }
   function saveDB(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
 
-  let db = loadDB();
-  let view = "all";
-  let editingId = null;
-  let pendingPhotoDataUrl = null;
+  // ====== popup near input ======
+  let errorPopEl = null;
+  let errorPopTimer = null;
+  function showErrorNear(el, message){
+    if(!el) return;
+    if(!errorPopEl){
+      errorPopEl = document.createElement("div");
+      errorPopEl.className = "errorPop";
+      document.body.appendChild(errorPopEl);
+    }
+    errorPopEl.textContent = message;
 
+    const r = el.getBoundingClientRect();
+    const top = r.bottom + 10;
+    let left = r.left;
+    const maxW = 320;
+    const vw = window.innerWidth;
+    if(left + maxW > vw - 12) left = Math.max(12, vw - maxW - 12);
+    if(left < 12) left = 12;
+
+    errorPopEl.style.top = top + "px";
+    errorPopEl.style.left = left + "px";
+
+    requestAnimationFrame(()=> errorPopEl.classList.add("show"));
+    clearTimeout(errorPopTimer);
+    errorPopTimer = setTimeout(()=> errorPopEl.classList.remove("show"), 2200);
+  }
+
+  // ====== DOM ======
+  const $ = (s)=>document.querySelector(s);
   const listEl = $("#list");
   const emptyEl = $("#empty");
   const statsEl = $("#stats");
 
+  const qEl = $("#q");
+  const brandEl = $("#brand");
+  const typeFilterEl = $("#typeFilter");
+  const conditionEl = $("#condition");
+  const sortEl = $("#sort");
+
+  const addBtn = $("#addBtn");
+  const exportBtn = $("#exportBtn");
+  const importBtn = $("#importBtn");
+  const importFile = $("#importFile");
+  const langBtn = $("#langBtn");
+  const currencyEl = $("#currency");
+  const tabs = [...document.querySelectorAll(".tab")];
+
   const modal = $("#modal");
   const mTitle = $("#mTitle");
   const mClose = $("#mClose");
-
-  const addBtn = $("#addBtn");
   const saveBtn = $("#saveBtn");
   const cancelBtn = $("#cancelBtn");
-
-  const qEl = $("#q");
-  const brandEl = $("#brand");
+  const deleteBtn = $("#deleteBtn");
 
   const yearDec = $("#yearDec");
   const yearInc = $("#yearInc");
+  const lockedHint = $("#lockedHint");
+  const fieldChar = $("#fieldChar");
 
+  // photo UI
   const photoBlock = $("#photoBlock");
   const photoInput = $("#f_photo");
   const photoPreview = $("#photoPreview");
@@ -603,42 +760,53 @@
     buy: $("#f_buy"),
     market: $("#f_market"),
     notes: $("#f_notes"),
-    tags: $("#f_tags")
+    tags: $("#f_tags"),
   };
 
-  function formatMoney(n){
-    if(n == null || n === "" || Number.isNaN(Number(n))) return "—";
-    return String(Number(n));
-  }
+  // ====== STATE ======
+  let db = loadDB();
+  let view = "all";
+  let editingId = null;
+  let pendingPhotoDataUrl = null;
 
-  function setPhotoPreview(dataUrl){
-    photoPreview.style.backgroundImage = dataUrl ? `url('${dataUrl}')` : "";
-  }
-  function fileToDataUrl(file){
-    return new Promise((resolve, reject)=>{
-      const reader = new FileReader();
-      reader.onload = ()=> resolve(String(reader.result || ""));
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  function displayName(item){
+    if(lang === "ru") return item.name_ru || item.name || "";
+    return item.name_en || item.name || "";
   }
 
   function rebuildBrandFilter(){
-    const brands = ["all", ...Array.from(new Set(db.map(x=>x.brand).filter(Boolean)))].sort((a,b)=>a.localeCompare(b,'ru'));
+    const brands = ["all", ...Array.from(new Set(db.map(x => x.brand).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ru'))];
     const current = brandEl.value || "all";
     brandEl.innerHTML = "";
     for(const b of brands){
       const opt = document.createElement("option");
       opt.value = b;
-      opt.textContent = (b==="all") ? "Все бренды" : b;
+      opt.textContent = (b === "all") ? "Все бренды" : b;
       brandEl.appendChild(opt);
     }
     brandEl.value = brands.includes(current) ? current : "all";
   }
 
+  function toggleControlsForView(){
+    const showExtra = (view !== "all");
+    typeFilterEl.classList.toggle("hide", !showExtra);
+    conditionEl.classList.toggle("hide", !showExtra);
+    if(!showExtra){
+      typeFilterEl.value = "all";
+      conditionEl.value = "all";
+    }
+  }
+
   function matchesQuery(item, q){
     if(!q) return true;
-    const hay = [item.name, item.brand, item.line, item.character, item.notes, (item.tags||[]).join(" ")].join(" ").toLowerCase();
+    const hay = [
+      displayName(item),
+      item.name || "", item.name_ru || "", item.name_en || "",
+      item.brand, item.line, item.character,
+      item.notes, (item.tags||[]).join(" "),
+      String(item.year ?? ""),
+      item.type
+    ].join(" ").toLowerCase();
     return hay.includes(q.toLowerCase().trim());
   }
 
@@ -647,33 +815,38 @@
     const b = brandEl.value;
     let arr = db.slice();
 
-    if(view === "wish") arr = arr.filter(x=>x.status==="wish");
-    else if(view === "owned") arr = arr.filter(x=>x.status==="owned");
+    if(view === "all") arr = arr.filter(x => (x.type || "doll") === "doll");
+    else if(view === "wish") arr = arr.filter(x => x.status === "wish");
+    else arr = arr.filter(x => x.status === "owned");
 
-    arr = arr.filter(x=>matchesQuery(x,q));
-    if(b!=="all") arr = arr.filter(x=>x.brand===b);
+    arr = arr.filter(x => matchesQuery(x, q));
+    if(b !== "all") arr = arr.filter(x => x.brand === b);
     return arr;
   }
 
   function render(){
     rebuildBrandFilter();
+    toggleControlsForView();
     const arr = getFiltered();
-    statsEl.textContent = `${view}: ${arr.length}/${db.length}`;
+
     listEl.innerHTML = "";
     emptyEl.style.display = arr.length ? "none" : "block";
+    statsEl.textContent = `${view}: ${arr.length}/${db.length}`;
 
     for(const it of arr){
       const card = document.createElement("article");
       card.className = "card";
-      const thumbClass = it.photoDataUrl ? "thumb hasPhoto" : "thumb";
-      const thumbStyle = it.photoDataUrl ? `style="background-image:url('${it.photoDataUrl.replaceAll("'","\\'")}')"` : "";
+      const photo = it.photoDataUrl || null;
+      const thumbClass = photo ? "thumb hasPhoto" : "thumb";
+      const thumbStyle = photo ? `style="background-image:url('${photo.replaceAll("'","\\'")}')"` : "";
+
       card.innerHTML = `
         <div class="${thumbClass}" ${thumbStyle}>
-          <span class="badge">${it.condition || "—"}</span>
+          <span class="badge">—</span>
           <span class="badge">${it.status || "none"}</span>
         </div>
         <div class="body">
-          <h3 class="title">${(it.name || "(без названия)").replaceAll("<","&lt;")}</h3>
+          <h3 class="title">${(displayName(it) || "(без названия)").replaceAll("<","&lt;")}</h3>
           <div class="money">
             <span>Покупка: <b>${formatMoney(it.buyPrice)}</b></span>
             <span>Рынок: <b>${formatMoney(it.marketPrice)}</b></span>
@@ -687,20 +860,133 @@
     }
   }
 
+  // ====== Lock rules ======
+  function setLock(el, locked){
+    if(!el) return;
+    el.disabled = locked;
+    el.classList.toggle("isLocked", !!locked);
+  }
+
+  function lockForPrebuilt(){
+    setLock(f.type, true);
+    setLock(f.name, true);
+    setLock(f.brand, true);
+    setLock(f.line, true);
+    setLock(f.char, true);
+    setLock(f.year, true);
+    setLock(yearDec, true);
+    setLock(yearInc, true);
+    setLock(f.tags, true);
+
+    setLock(f.status, false);
+    setLock(f.condition, false);
+    setLock(f.complete, false);
+    setLock(f.buy, false);
+    setLock(f.market, false);
+    setLock(f.notes, false);
+
+    photoBlock.classList.add("hide");
+    pendingPhotoDataUrl = null;
+    setPhotoPreview(null);
+    photoInput.value = "";
+
+    lockedHint.style.display = "block";
+    lockedHint.textContent = "Это запись из каталога. Фото — только у своих записей.";
+  }
+
+  function unlockForCustom(){
+    [
+      f.type,f.name,f.brand,f.line,f.char,f.year,yearDec,yearInc,f.tags,
+      f.status,f.condition,f.complete,f.buy,f.market,f.notes
+    ].forEach(el => setLock(el, false));
+
+    photoBlock.classList.remove("hide");
+    lockedHint.style.display = "none";
+  }
+
+  function applyTypeUI(){
+    const isAccessory = (f.type.value === "accessory");
+    fieldChar.classList.toggle("hide", isAccessory);
+  }
+
+  // ====== Photo handling ======
+  function setPhotoPreview(dataUrl){
+    if(!dataUrl){
+      photoPreview.style.backgroundImage = "";
+      return;
+    }
+    photoPreview.style.backgroundImage = `url('${dataUrl}')`;
+  }
+
+  function fileToDataUrl(file){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = ()=> resolve(String(reader.result || ""));
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ====== Modal ======
   function fillForm(item){
     f.type.value = item.type || "doll";
-    f.name.value = item.name || "";
-    f.brand.value = item.brand || "Monster High";
-    f.line.value = item.line || "";
-    f.char.value = item.character || "";
+    f.name.value = displayName(item) || item.name || "";
+    f.brand.value = item.brand ?? "Другие";
+    f.line.value = item.line ?? "";
+    f.char.value = item.character ?? "";
     f.year.value = item.year ?? "";
-    f.condition.value = item.condition || "good";
-    f.complete.value = item.complete || "unknown";
-    f.status.value = item.status || "none";
+    f.condition.value = item.condition ?? "good";
+    f.complete.value = item.complete ?? "unknown";
+    f.status.value = item.status ?? "none";
     f.buy.value = item.buyPrice ?? "";
     f.market.value = item.marketPrice ?? "";
-    f.notes.value = item.notes || "";
+    f.notes.value = item.notes ?? "";
     f.tags.value = (item.tags || []).join(", ");
+  }
+
+  function openModal(mode, item){
+    modal.setAttribute("aria-hidden","false");
+    document.body.style.overflow = "hidden";
+
+    pendingPhotoDataUrl = null;
+    photoInput.value = "";
+    setPhotoPreview(null);
+
+    if(mode === "add"){
+      editingId = null;
+      mTitle.textContent = "Добавить";
+      deleteBtn.style.display = "none";
+      fillForm({
+        type:"doll", name:"", brand:"Monster High", line:"", character:"", year:"",
+        condition:"good", complete:"full", status:"none",
+        buyPrice:"", marketPrice:"", notes:"", tags:[], photoDataUrl:null
+      });
+      unlockForCustom();
+      applyTypeUI();
+    }else{
+      editingId = item.id;
+      mTitle.textContent = "Редактировать";
+      deleteBtn.style.display = item.isPrebuilt ? "none" : "inline-block";
+      fillForm(item);
+
+      if(item.isPrebuilt){
+        lockForPrebuilt();
+      }else{
+        unlockForCustom();
+        pendingPhotoDataUrl = item.photoDataUrl || null;
+        setPhotoPreview(pendingPhotoDataUrl);
+      }
+      applyTypeUI();
+    }
+
+    // ✅ после выбора фото/действий можно пролистывать модалку (она теперь скроллится внутри)
+  }
+
+  function closeModal(){
+    modal.setAttribute("aria-hidden","true");
+    document.body.style.overflow = "";
+    editingId = null;
+    pendingPhotoDataUrl = null;
   }
 
   function readForm(){
@@ -727,59 +1013,95 @@
     };
   }
 
-  function openModal(mode, item){
-    modal.setAttribute("aria-hidden","false");
-    document.body.style.overflow = "hidden";
-
-    pendingPhotoDataUrl = null;
-    photoInput.value = "";
-    setPhotoPreview(null);
-
-    if(mode==="add"){
-      editingId = null;
-      mTitle.textContent = "Добавить";
-      fillForm({});
-      photoBlock.classList.remove("hide");
-    }else{
-      editingId = item.id;
-      mTitle.textContent = "Редактировать";
-      fillForm(item);
-      pendingPhotoDataUrl = item.photoDataUrl || null;
-      setPhotoPreview(pendingPhotoDataUrl);
-      photoBlock.classList.remove("hide");
-    }
-  }
-
-  function closeModal(){
-    modal.setAttribute("aria-hidden","true");
-    document.body.style.overflow = "";
-    editingId = null;
-    pendingPhotoDataUrl = null;
-  }
-
   function saveItem(){
     const data = readForm();
-    if(!data.name) return;
 
     if(editingId){
       const idx = db.findIndex(x=>x.id===editingId);
-      if(idx>=0) db[idx] = { ...db[idx], ...data };
-    }else{
-      db.unshift({ id: uid(), createdAt: Date.now(), ...data });
+      if(idx === -1) return;
+      const current = db[idx];
+
+      if(current.isPrebuilt){
+        db[idx] = { ...current,
+          status: data.status,
+          condition: data.condition,
+          complete: data.complete,
+          buyPrice: data.buyPrice,
+          marketPrice: data.marketPrice,
+          notes: data.notes
+        };
+      }else{
+        if(!data.name){
+          showErrorNear(f.name, "Название пустое.");
+          f.name.focus();
+          return;
+        }
+        db[idx] = { ...current,
+          type: data.type,
+          name: data.name,
+          brand: data.brand,
+          line: data.line,
+          character: data.character,
+          year: data.year,
+          condition: data.condition,
+          complete: data.complete,
+          status: data.status,
+          buyPrice: data.buyPrice,
+          marketPrice: data.marketPrice,
+          notes: data.notes,
+          tags: data.tags,
+          photoDataUrl: data.photoDataUrl
+        };
+      }
+    } else {
+      if(!data.name){
+        showErrorNear(f.name, "Название пустое.");
+        f.name.focus();
+        return;
+      }
+      db.unshift({
+        id: uid(),
+        createdAt: Date.now(),
+        isPrebuilt: false,
+        type: data.type,
+        name: data.name,
+        brand: data.brand,
+        line: data.line,
+        character: data.character,
+        year: data.year,
+        condition: data.condition,
+        complete: data.complete,
+        status: data.status,
+        buyPrice: data.buyPrice,
+        marketPrice: data.marketPrice,
+        notes: data.notes,
+        tags: data.tags,
+        photoDataUrl: data.photoDataUrl
+      });
     }
+
     saveDB(db);
     closeModal();
     render();
   }
 
+  // ====== Year stepper ======
+  function clampYear(y){
+    const min = Number(f.year.min || 1950);
+    const max = Number(f.year.max || 2100);
+    if(Number.isNaN(y)) return null;
+    return Math.min(max, Math.max(min, y));
+  }
   function stepYear(delta){
+    if(f.year.disabled) return;
     const cur = (f.year.value === "" ? new Date().getFullYear() : Number(f.year.value));
-    const next = cur + delta;
+    const next = clampYear(cur + delta);
+    if(next == null) return;
     f.year.value = String(next);
   }
 
-  // события
-  addBtn.addEventListener("click", ()=>openModal("add", null));
+  // ====== EVENTS ======
+  addBtn.addEventListener("click", ()=> openModal("add", null));
   mClose.addEventListener("click", closeModal);
   cancelBtn.addEventListener("click", closeModal);
   saveBtn.addEventListener("click", saveItem);
@@ -793,43 +1115,68 @@
     const btn = e.target.closest("[data-action]");
     if(!btn) return;
     const id = btn.dataset.id;
-    const item = db.find(x=>x.id===id);
-    if(item) openModal("edit", item);
+    if(btn.dataset.action === "edit"){
+      const item = db.find(x=>x.id===id);
+      if(item) openModal("edit", item);
+    }
   });
 
   qEl.addEventListener("input", render);
   brandEl.addEventListener("change", render);
 
-  yearDec.addEventListener("click", ()=>stepYear(-1));
-  yearInc.addEventListener("click", ()=>stepYear(+1));
+  yearDec.addEventListener("click", ()=> stepYear(-1));
+  yearInc.addEventListener("click", ()=> stepYear(+1));
+  f.type.addEventListener("change", applyTypeUI);
 
-  pickPhotoBtn.addEventListener("click", ()=>photoInput.click());
+  // ✅ новый поток выбора фото
+  pickPhotoBtn.addEventListener("click", ()=> photoInput.click());
+
   photoInput.addEventListener("change", async ()=>{
     const file = photoInput.files && photoInput.files[0];
     if(!file) return;
+
     if(file.size > 2.5 * 1024 * 1024){
+      showErrorNear(pickPhotoBtn, "Фото слишком большое. Возьми поменьше (до ~1–2 МБ).");
       photoInput.value = "";
       return;
     }
-    const dataUrl = await fileToDataUrl(file);
-    pendingPhotoDataUrl = dataUrl;
-    setPhotoPreview(dataUrl);
+    try{
+      const dataUrl = await fileToDataUrl(file);
+      pendingPhotoDataUrl = dataUrl;
+      setPhotoPreview(dataUrl);
+    }catch{}
   });
+
   clearPhotoBtn.addEventListener("click", ()=>{
     pendingPhotoDataUrl = null;
     photoInput.value = "";
     setPhotoPreview(null);
   });
 
-  // табы
-  const tabs = [...document.querySelectorAll(".tab")];
+  // Tabs (минимально)
   tabs.forEach(tbtn => tbtn.addEventListener("click", ()=>{
     view = tbtn.dataset.view;
     tabs.forEach(x=>x.setAttribute("aria-selected", x===tbtn ? "true":"false"));
     render();
   }));
 
-  // init
+  currencyEl.value = currency;
+  currencyEl.addEventListener("change", ()=>{
+    const v = currencyEl.value;
+    if(allowedCurrencies.includes(v)){
+      currency = v;
+      localStorage.setItem(LS_CUR, currency);
+      render();
+    }
+  });
+
+  langBtn.addEventListener("click", ()=>{
+    lang = (lang === "ru") ? "en" : "ru";
+    localStorage.setItem(LS_LANG, lang);
+    render();
+  });
+
+  // Init
   render();
 </script>
 </body>
