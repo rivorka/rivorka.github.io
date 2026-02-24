@@ -2,7 +2,6 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <!-- phone-safe viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Каталог коллекционера</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -63,6 +62,7 @@
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(18,26,42,.55);
+      width: fit-content;
     }
     .tab{
       border: none;
@@ -105,6 +105,7 @@
       font-weight: 900;
       cursor:pointer;
     }
+
     .pill{
       display:inline-flex; gap:8px; align-items:center;
       padding: 6px 10px;
@@ -232,7 +233,6 @@
       position: relative;
     }
 
-    /* drag handle (shows on mobile) */
     .handle{
       position:absolute;
       left: 50%;
@@ -278,7 +278,6 @@
     label{color: var(--muted); font-size: 12px}
     .help{color: rgba(159,176,208,.75); font-size: 12px}
 
-    /* photo UI */
     .photoCard{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
@@ -316,8 +315,9 @@
       white-space: nowrap;
     }
     .fileHidden{display:none;}
+    .hide{display:none !important;}
 
-    /* ===== Mobile bottom-sheet mode ===== */
+    /* Mobile bottom-sheet mode */
     @media (max-width: 560px){
       .modalBackdrop{
         align-items:flex-end;
@@ -334,8 +334,6 @@
       .handle{display:block;}
       .modalTop strong{padding-top: 12px;}
     }
-
-    .hide{display:none !important;}
   </style>
 </head>
 
@@ -478,573 +476,592 @@
 </div>
 
 <script>
-  const LS_KEY = "collector_global_offline_v2";
-  const $ = (s)=>document.querySelector(s);
-
-  function uid(){ return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
-
-  // ===== Prebuilt catalog: 50 dolls =====
-  function prebuiltCatalog50(){
-    const B = "Monster High";
-    const mk = (id, name, line, year, character) => ({
-      id,
-      createdAt: 0,
-      isPrebuilt: true,
-      type: "doll",
-      name,
-      brand: B,
-      line,
-      character,
-      year,
-      status: "none",        // none | wish | owned
-      notes: "",
-      tags: ["monster high"],
-      photoDataUrl: null
-    });
-
-    // Years are approximate (safe defaults). You can корректировать позже.
-    return [
-      // G1 Core / Wave 1-ish
-      mk("mh_g1_core_draculaura", "Draculaura (Core G1)", "G1 базовая", 2010, "Draculaura"),
-      mk("mh_g1_core_frankie", "Frankie Stein (Core G1)", "G1 базовая", 2010, "Frankie Stein"),
-      mk("mh_g1_core_clawdeen", "Clawdeen Wolf (Core G1)", "G1 базовая", 2010, "Clawdeen Wolf"),
-      mk("mh_g1_core_lagoona", "Lagoona Blue (Core G1)", "G1 базовая", 2010, "Lagoona Blue"),
-      mk("mh_g1_core_cleo", "Cleo de Nile (Core G1)", "G1 базовая", 2010, "Cleo de Nile"),
-      mk("mh_g1_core_deuce", "Deuce Gorgon (Core G1)", "G1 базовая", 2010, "Deuce Gorgon"),
-      mk("mh_g1_core_ghoulia", "Ghoulia Yelps (Core G1)", "G1 базовая", 2011, "Ghoulia Yelps"),
-      mk("mh_g1_core_abbey", "Abbey Bominable (Core G1)", "G1 базовая", 2012, "Abbey Bominable"),
-      mk("mh_g1_core_spectra", "Spectra Vondergeist (Core G1)", "G1 базовая", 2011, "Spectra Vondergeist"),
-      mk("mh_g1_core_toralei", "Toralei Stripe (Core G1)", "G1 базовая", 2011, "Toralei Stripe"),
-      mk("mh_g1_core_rochelle", "Rochelle Goyle (Core G1)", "G1 базовая", 2012, "Rochelle Goyle"),
-      mk("mh_g1_core_venus", "Venus McFlytrap (Core G1)", "G1 базовая", 2012, "Venus McFlytrap"),
-      mk("mh_g1_core_robecca", "Robecca Steam (Core G1)", "G1 базовая", 2011, "Robecca Steam"),
-      mk("mh_g1_core_nefera", "Nefera de Nile", "G1", 2012, "Nefera de Nile"),
-      mk("mh_g1_core_howleen", "Howleen Wolf", "G1", 2012, "Howleen Wolf"),
-      mk("mh_g1_core_catty", "Catty Noir", "G1", 2013, "Catty Noir"),
-      mk("mh_g1_core_twyla", "Twyla", "G1", 2013, "Twyla"),
-      mk("mh_g1_core_cupid", "C.A. Cupid", "G1", 2011, "C.A. Cupid"),
-      mk("mh_g1_core_honey", "Honey Swamp", "G1", 2013, "Honey Swamp"),
-      mk("mh_g1_core_viperine", "Viperine Gorgon", "G1", 2013, "Viperine Gorgon"),
-      mk("mh_g1_core_jinafire", "Jinafire Long", "G1", 2012, "Jinafire Long"),
-      mk("mh_g1_core_skelita", "Skelita Calaveras", "G1", 2013, "Skelita Calaveras"),
-      mk("mh_g1_core_catrine", "Catrine DeMew", "G1", 2013, "Catrine DeMew"),
-      mk("mh_g1_core_jane", "Jane Boolittle", "G1", 2014, "Jane Boolittle"),
-      mk("mh_g1_core_gigi", "Gigi Grant", "G1", 2014, "Gigi Grant"),
-      mk("mh_g1_core_vandala", "Vandala Doubloons", "G1", 2015, "Vandala Doubloons"),
-      mk("mh_g1_core_kiyomi", "Kiyomi Haunterly", "G1", 2015, "Kiyomi Haunterly"),
-      mk("mh_g1_core_river", "River Styxx", "G1", 2015, "River Styxx"),
-      mk("mh_g1_core_porter", "Porter Geiss", "G1", 2015, "Porter Geiss"),
-      mk("mh_g1_core_isi", "Isi Dawndancer", "G1", 2014, "Isi Dawndancer"),
-      mk("mh_g1_core_marisol", "Marisol Coxi", "G1", 2014, "Marisol Coxi"),
-      mk("mh_g1_core_kala", "Kala Mer'ri", "G1", 2015, "Kala Mer'ri"),
-      mk("mh_g1_core_lorna", "Lorna McNessie", "G1", 2013, "Lorna McNessie"),
-      mk("mh_g1_core_sirena", "Sirena Von Boo", "G1", 2014, "Sirena Von Boo"),
-      mk("mh_g1_core_iris", "Iris Clops", "G1", 2012, "Iris Clops"),
-      mk("mh_g1_core_manny", "Manny Taur", "G1", 2011, "Manny Taur"),
-      mk("mh_g1_core_operetta", "Operetta", "G1", 2012, "Operetta"),
-      mk("mh_g1_core_mouscedes", "Mousecedes King", "G1", 2015, "Mousecedes King"),
-      mk("mh_g1_core_astra", "Astranova", "G1", 2015, "Astranova"),
-      mk("mh_g1_core_batsy", "Batsy Claro", "G1", 2015, "Batsy Claro"),
-      mk("mh_g1_core_clawdia", "Clawdia Wolf", "G1", 2014, "Clawdia Wolf"),
-      mk("mh_g1_core_elissabat", "Elissabat", "G1", 2014, "Elissabat"),
-
-      // Creeproduction
-      mk("mh_creep_draculaura", "Draculaura (Creeproduction)", "Creeproduction (G1)", 2022, "Draculaura"),
-      mk("mh_creep_frankie", "Frankie Stein (Creeproduction)", "Creeproduction (G1)", 2022, "Frankie Stein"),
-      mk("mh_creep_clawdeen", "Clawdeen Wolf (Creeproduction)", "Creeproduction (G1)", 2022, "Clawdeen Wolf"),
-      mk("mh_creep_lagoona", "Lagoona Blue (Creeproduction)", "Creeproduction (G1)", 2022, "Lagoona Blue"),
-
-      // G3 Core
-      mk("mh_g3_core_draculaura", "Draculaura (Core G3)", "G3 базовая", 2022, "Draculaura"),
-      mk("mh_g3_core_frankie", "Frankie Stein (Core G3)", "G3 базовая", 2022, "Frankie Stein"),
-      mk("mh_g3_core_clawdeen", "Clawdeen Wolf (Core G3)", "G3 базовая", 2022, "Clawdeen Wolf"),
-      mk("mh_g3_core_lagoona", "Lagoona Blue (Core G3)", "G3 базовая", 2022, "Lagoona Blue"),
-      mk("mh_g3_core_cleo", "Cleo de Nile (Core G3)", "G3 базовая", 2022, "Cleo de Nile"),
-      mk("mh_g3_core_deuce", "Deuce Gorgon (Core G3)", "G3 базовая", 2022, "Deuce Gorgon"),
-    ].slice(0, 50);
-  }
-
-  function ensurePrebuilt(arr){
-    const base = prebuiltCatalog50();
-    const map = new Map(arr.map(x => [x.id, x]));
-    for(const item of base){
-      if(!map.has(item.id)){
-        map.set(item.id, item);
-      }else{
-        // preserve user fields if already exists
-        const keep = map.get(item.id);
-        map.set(item.id, {
-          ...item,
-          status: keep.status ?? item.status,
-          notes: keep.notes ?? "",
-          tags: Array.isArray(keep.tags) ? keep.tags : item.tags,
-          photoDataUrl: keep.photoDataUrl || null
-        });
-      }
-    }
-    // keep user-created items too
-    return Array.from(map.values());
-  }
-
-  function loadDB(){
-    try{
-      const raw = localStorage.getItem(LS_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      const safe = Array.isArray(arr) ? arr : [];
-      const merged = ensurePrebuilt(safe);
-      localStorage.setItem(LS_KEY, JSON.stringify(merged));
-      return merged;
-    }catch{
-      const merged = ensurePrebuilt([]);
-      localStorage.setItem(LS_KEY, JSON.stringify(merged));
-      return merged;
-    }
-  }
-  function saveDB(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
-
-  let db = loadDB();
-  let view = "all";
-  let editingId = null;
-  let pendingPhotoDataUrl = null;
-
-  const listEl = $("#list");
-  const emptyEl = $("#empty");
-  const statsEl = $("#stats");
-
-  const modal = $("#modal");
-  const sheet = $("#sheet");
-  const sheetTop = $("#sheetTop");
-  const mTitle = $("#mTitle");
-  const mClose = $("#mClose");
-
-  const addBtn = $("#addBtn");
-  const saveBtn = $("#saveBtn");
-  const cancelBtn = $("#cancelBtn");
-
-  const qEl = $("#q");
-  const brandEl = $("#brand");
-  const sortEl = $("#sort");
-
-  const yearDec = $("#yearDec");
-  const yearInc = $("#yearInc");
-
-  const photoInput = $("#f_photo");
-  const photoPreview = $("#photoPreview");
-  const pickPhotoBtn = $("#pickPhotoBtn");
-  const clearPhotoBtn = $("#clearPhotoBtn");
-
-  const f = {
-    type: $("#f_type"),
-    name: $("#f_name"),
-    brand: $("#f_brand"),
-    line: $("#f_line"),
-    char: $("#f_char"),
-    year: $("#f_year"),
-    notes: $("#f_notes"),
-    tags: $("#f_tags")
+/* =========================
+   Compatibility fixes
+   ========================= */
+// ✅ polyfill replaceAll (старые телефоны/браузеры)
+if (!String.prototype.replaceAll) {
+  // eslint-disable-next-line no-extend-native
+  String.prototype.replaceAll = function (search, replacement) {
+    return this.split(search).join(replacement);
   };
+}
 
-  function esc(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
+const LS_KEY = "collector_global_offline_v3";
+const $ = (s)=>document.querySelector(s);
+
+function uid(){ return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
+
+/* =========================
+   Prebuilt catalog (50 dolls)
+   ========================= */
+function prebuiltCatalog50(){
+  const B = "Monster High";
+  const mk = (id, name, line, year, character) => ({
+    id,
+    createdAt: 0,
+    isPrebuilt: true,
+    type: "doll",
+    name,
+    brand: B,
+    line,
+    character,
+    year,
+    status: "none",        // none | wish | owned
+    notes: "",
+    tags: ["monster high"],
+    photoDataUrl: null
+  });
+
+  return [
+    // G1 core / main cast
+    mk("mh_g1_core_draculaura", "Draculaura (Core G1)", "G1 базовая", 2010, "Draculaura"),
+    mk("mh_g1_core_frankie", "Frankie Stein (Core G1)", "G1 базовая", 2010, "Frankie Stein"),
+    mk("mh_g1_core_clawdeen", "Clawdeen Wolf (Core G1)", "G1 базовая", 2010, "Clawdeen Wolf"),
+    mk("mh_g1_core_lagoona", "Lagoona Blue (Core G1)", "G1 базовая", 2010, "Lagoona Blue"),
+    mk("mh_g1_core_cleo", "Cleo de Nile (Core G1)", "G1 базовая", 2010, "Cleo de Nile"),
+    mk("mh_g1_core_deuce", "Deuce Gorgon (Core G1)", "G1 базовая", 2010, "Deuce Gorgon"),
+    mk("mh_g1_core_ghoulia", "Ghoulia Yelps (Core G1)", "G1 базовая", 2011, "Ghoulia Yelps"),
+    mk("mh_g1_core_abbey", "Abbey Bominable (Core G1)", "G1 базовая", 2012, "Abbey Bominable"),
+    mk("mh_g1_core_spectra", "Spectra Vondergeist (Core G1)", "G1 базовая", 2011, "Spectra Vondergeist"),
+    mk("mh_g1_core_toralei", "Toralei Stripe (Core G1)", "G1 базовая", 2011, "Toralei Stripe"),
+    mk("mh_g1_core_rochelle", "Rochelle Goyle (Core G1)", "G1 базовая", 2012, "Rochelle Goyle"),
+    mk("mh_g1_core_venus", "Venus McFlytrap (Core G1)", "G1 базовая", 2012, "Venus McFlytrap"),
+    mk("mh_g1_core_robecca", "Robecca Steam (Core G1)", "G1 базовая", 2011, "Robecca Steam"),
+    mk("mh_g1_nefera", "Nefera de Nile", "G1", 2012, "Nefera de Nile"),
+    mk("mh_g1_howleen", "Howleen Wolf", "G1", 2012, "Howleen Wolf"),
+    mk("mh_g1_catty", "Catty Noir", "G1", 2013, "Catty Noir"),
+    mk("mh_g1_twyla", "Twyla", "G1", 2013, "Twyla"),
+    mk("mh_g1_cupid", "C.A. Cupid", "G1", 2011, "C.A. Cupid"),
+    mk("mh_g1_honey", "Honey Swamp", "G1", 2013, "Honey Swamp"),
+    mk("mh_g1_viperine", "Viperine Gorgon", "G1", 2013, "Viperine Gorgon"),
+    mk("mh_g1_jinafire", "Jinafire Long", "G1", 2012, "Jinafire Long"),
+    mk("mh_g1_skelita", "Skelita Calaveras", "G1", 2013, "Skelita Calaveras"),
+    mk("mh_g1_catrine", "Catrine DeMew", "G1", 2013, "Catrine DeMew"),
+    mk("mh_g1_jane", "Jane Boolittle", "G1", 2014, "Jane Boolittle"),
+    mk("mh_g1_gigi", "Gigi Grant", "G1", 2014, "Gigi Grant"),
+    mk("mh_g1_vandala", "Vandala Doubloons", "G1", 2015, "Vandala Doubloons"),
+    mk("mh_g1_kiyomi", "Kiyomi Haunterly", "G1", 2015, "Kiyomi Haunterly"),
+    mk("mh_g1_river", "River Styxx", "G1", 2015, "River Styxx"),
+    mk("mh_g1_porter", "Porter Geiss", "G1", 2015, "Porter Geiss"),
+    mk("mh_g1_isi", "Isi Dawndancer", "G1", 2014, "Isi Dawndancer"),
+    mk("mh_g1_marisol", "Marisol Coxi", "G1", 2014, "Marisol Coxi"),
+    mk("mh_g1_kala", "Kala Mer'ri", "G1", 2015, "Kala Mer'ri"),
+    mk("mh_g1_lorna", "Lorna McNessie", "G1", 2013, "Lorna McNessie"),
+    mk("mh_g1_sirena", "Sirena Von Boo", "G1", 2014, "Sirena Von Boo"),
+    mk("mh_g1_iris", "Iris Clops", "G1", 2012, "Iris Clops"),
+    mk("mh_g1_manny", "Manny Taur", "G1", 2011, "Manny Taur"),
+    mk("mh_g1_operetta", "Operetta", "G1", 2012, "Operetta"),
+    mk("mh_g1_mousecedes", "Mousecedes King", "G1", 2015, "Mousecedes King"),
+    mk("mh_g1_astranova", "Astranova", "G1", 2015, "Astranova"),
+    mk("mh_g1_batsy", "Batsy Claro", "G1", 2015, "Batsy Claro"),
+    mk("mh_g1_clawdia", "Clawdia Wolf", "G1", 2014, "Clawdia Wolf"),
+    mk("mh_g1_elissabat", "Elissabat", "G1", 2014, "Elissabat"),
+
+    // Creeproduction
+    mk("mh_creep_draculaura", "Draculaura (Creeproduction)", "Creeproduction (G1)", 2022, "Draculaura"),
+    mk("mh_creep_frankie", "Frankie Stein (Creeproduction)", "Creeproduction (G1)", 2022, "Frankie Stein"),
+    mk("mh_creep_clawdeen", "Clawdeen Wolf (Creeproduction)", "Creeproduction (G1)", 2022, "Clawdeen Wolf"),
+    mk("mh_creep_lagoona", "Lagoona Blue (Creeproduction)", "Creeproduction (G1)", 2022, "Lagoona Blue"),
+
+    // G3 core
+    mk("mh_g3_core_draculaura", "Draculaura (Core G3)", "G3 базовая", 2022, "Draculaura"),
+    mk("mh_g3_core_frankie", "Frankie Stein (Core G3)", "G3 базовая", 2022, "Frankie Stein"),
+    mk("mh_g3_core_clawdeen", "Clawdeen Wolf (Core G3)", "G3 базовая", 2022, "Clawdeen Wolf"),
+    mk("mh_g3_core_lagoona", "Lagoona Blue (Core G3)", "G3 базовая", 2022, "Lagoona Blue"),
+    mk("mh_g3_core_cleo", "Cleo de Nile (Core G3)", "G3 базовая", 2022, "Cleo de Nile"),
+    mk("mh_g3_core_deuce", "Deuce Gorgon (Core G3)", "G3 базовая", 2022, "Deuce Gorgon"),
+  ].slice(0, 50);
+}
+
+function ensurePrebuilt(arr){
+  const base = prebuiltCatalog50();
+  const map = new Map();
+  // keep existing
+  for (const x of (Array.isArray(arr) ? arr : [])) {
+    if (x && x.id) map.set(x.id, x);
   }
-
-  function rebuildBrandFilter(){
-    const brands = ["all", ...Array.from(new Set(db.map(x=>x.brand).filter(Boolean)))].sort((a,b)=>a.localeCompare(b,'ru'));
-    const current = brandEl.value || "all";
-    brandEl.innerHTML = "";
-    for(const b of brands){
-      const opt = document.createElement("option");
-      opt.value = b;
-      opt.textContent = (b==="all") ? "Все бренды" : b;
-      brandEl.appendChild(opt);
-    }
-    brandEl.value = brands.includes(current) ? current : "all";
-  }
-
-  function matchesQuery(item, q){
-    if(!q) return true;
-    const hay = [item.name, item.brand, item.line, item.character, item.notes, (item.tags||[]).join(" ")].join(" ").toLowerCase();
-    return hay.includes(q.toLowerCase().trim());
-  }
-
-  function getFiltered(){
-    const q = qEl.value.trim();
-    const b = brandEl.value;
-
-    let arr = db.slice();
-
-    if(view === "all") arr = arr.filter(x => (x.type||"doll") === "doll"); // catalog only dolls
-    else if(view === "wish") arr = arr.filter(x=>x.status==="wish");
-    else if(view === "owned") arr = arr.filter(x=>x.status==="owned");
-
-    arr = arr.filter(x=>matchesQuery(x,q));
-    if(b!=="all") arr = arr.filter(x=>x.brand===b);
-
-    const s = sortEl.value;
-    if(s==="recent") arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    if(s==="name_asc") arr.sort((a,b)=>(a.name||"").localeCompare(b.name||"","ru"));
-    if(s==="name_desc") arr.sort((a,b)=>(b.name||"").localeCompare(a.name||"","ru"));
-
-    return arr;
-  }
-
-  function render(){
-    rebuildBrandFilter();
-    const arr = getFiltered();
-    statsEl.textContent = `${view}: ${arr.length}/${db.length}`;
-    listEl.innerHTML = "";
-    emptyEl.style.display = arr.length ? "none" : "block";
-
-    for(const it of arr){
-      const card = document.createElement("article");
-      card.className = "card";
-      const thumbClass = it.photoDataUrl ? "thumb hasPhoto" : "thumb";
-      const bg = it.photoDataUrl ? `style="background-image:url('${it.photoDataUrl.replaceAll("'","\\'")}')"` : "";
-
-      card.innerHTML = `
-        <div class="${thumbClass}" ${bg}>
-          <span class="badge">${esc(it.line || "—")}</span>
-          <span class="badge">${esc(it.year ?? "—")}</span>
-        </div>
-        <div class="body">
-          <h3 class="title">${esc(it.name || "(без названия)")}</h3>
-          <div class="meta">${esc(it.brand || "—")} • ${esc(it.character || "—")}</div>
-          <div class="actions">
-            <button class="btnGhost" data-action="wish" data-id="${it.id}">
-              ${it.status==="wish" ? "Убрать из wish" : "В wish"}
-            </button>
-            <button class="btnGhost" data-action="owned" data-id="${it.id}">
-              ${it.status==="owned" ? "Убрать из колл." : "В коллекцию"}
-            </button>
-            <button class="btn" data-action="edit" data-id="${it.id}">Редактировать</button>
-          </div>
-        </div>
-      `;
-      listEl.appendChild(card);
-    }
-  }
-
-  // ===== Modal open/close =====
-  function setPhotoPreview(dataUrl){
-    photoPreview.style.backgroundImage = dataUrl ? `url('${dataUrl}')` : "";
-  }
-  function fileToDataUrl(file){
-    return new Promise((resolve, reject)=>{
-      const reader = new FileReader();
-      reader.onload = ()=> resolve(String(reader.result || ""));
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  function fillForm(item){
-    f.type.value = item.type || "doll";
-    f.name.value = item.name || "";
-    f.brand.value = item.brand || "Monster High";
-    f.line.value = item.line || "";
-    f.char.value = item.character || "";
-    f.year.value = item.year ?? "";
-    f.notes.value = item.notes || "";
-    f.tags.value = (item.tags || []).join(", ");
-  }
-
-  function readForm(){
-    const year = f.year.value === "" ? null : Number(f.year.value);
-    const tags = f.tags.value.split(",").map(x=>x.trim()).filter(Boolean);
-    return {
-      type: f.type.value,
-      name: f.name.value.trim(),
-      brand: f.brand.value,
-      line: f.line.value.trim(),
-      character: f.char.value.trim(),
-      year: (year != null && !Number.isNaN(year)) ? year : null,
-      notes: f.notes.value.trim(),
-      tags,
-      photoDataUrl: pendingPhotoDataUrl || null
-    };
-  }
-
-  function openModal(mode, item){
-    modal.setAttribute("aria-hidden","false");
-    document.body.style.overflow = "hidden";
-    resetSheetPosition();
-
-    pendingPhotoDataUrl = null;
-    photoInput.value = "";
-    setPhotoPreview(null);
-
-    if(mode==="add"){
-      editingId = null;
-      mTitle.textContent = "Добавить";
-      fillForm({});
+  // merge base
+  for(const item of base){
+    if(!map.has(item.id)){
+      map.set(item.id, item);
     }else{
-      editingId = item.id;
-      mTitle.textContent = "Редактировать";
-      fillForm(item);
-      pendingPhotoDataUrl = item.photoDataUrl || null;
-      setPhotoPreview(pendingPhotoDataUrl);
-    }
-  }
-
-  function closeModal(){
-    modal.setAttribute("aria-hidden","true");
-    document.body.style.overflow = "";
-    editingId = null;
-    pendingPhotoDataUrl = null;
-    resetSheetPosition(true);
-  }
-
-  function saveItem(){
-    const data = readForm();
-    if(!data.name) return;
-
-    if(editingId){
-      const idx = db.findIndex(x=>x.id===editingId);
-      if(idx>=0){
-        const current = db[idx];
-
-        // If prebuilt: allow updating notes/photo/tags only + keep catalog identity
-        if(current.isPrebuilt){
-          db[idx] = {
-            ...current,
-            notes: data.notes,
-            tags: data.tags,
-            photoDataUrl: data.photoDataUrl
-          };
-        }else{
-          db[idx] = { ...current, ...data };
-        }
-      }
-    }else{
-      db.unshift({
-        id: uid(),
-        createdAt: Date.now(),
-        isPrebuilt: false,
-        status: "none",
-        ...data
+      const keep = map.get(item.id);
+      map.set(item.id, {
+        ...item,
+        status: keep.status ?? item.status,
+        notes: keep.notes ?? "",
+        tags: Array.isArray(keep.tags) ? keep.tags : item.tags,
+        photoDataUrl: keep.photoDataUrl || null
       });
     }
-
-    saveDB(db);
-    closeModal();
-    render();
   }
+  return Array.from(map.values());
+}
 
-  function stepYear(delta){
-    const cur = (f.year.value === "" ? new Date().getFullYear() : Number(f.year.value));
-    f.year.value = String(cur + delta);
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    const merged = ensurePrebuilt(arr);
+    localStorage.setItem(LS_KEY, JSON.stringify(merged));
+    return merged;
+  }catch{
+    const merged = ensurePrebuilt([]);
+    localStorage.setItem(LS_KEY, JSON.stringify(merged));
+    return merged;
   }
+}
+function saveDB(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
 
-  // ===== Bottom sheet swipe-to-close (mobile) =====
-  let dragging = false;
-  let startY = 0;
-  let lastY = 0;
-  let startT = 0;
-  let currentTranslate = 0;
+/* =========================
+   App State + DOM
+   ========================= */
+let db = loadDB();
+let view = "all";
+let editingId = null;
+let pendingPhotoDataUrl = null;
 
-  function isMobileSheet(){
-    return window.matchMedia("(max-width: 560px)").matches;
+const listEl = $("#list");
+const emptyEl = $("#empty");
+const statsEl = $("#stats");
+
+const modal = $("#modal");
+const sheet = $("#sheet");
+const sheetTop = $("#sheetTop");
+const mTitle = $("#mTitle");
+
+const addBtn = $("#addBtn");
+const saveBtn = $("#saveBtn");
+const cancelBtn = $("#cancelBtn");
+const mClose = $("#mClose");
+
+const qEl = $("#q");
+const brandEl = $("#brand");
+const sortEl = $("#sort");
+
+const yearDec = $("#yearDec");
+const yearInc = $("#yearInc");
+
+const photoInput = $("#f_photo");
+const photoPreview = $("#photoPreview");
+const pickPhotoBtn = $("#pickPhotoBtn");
+const clearPhotoBtn = $("#clearPhotoBtn");
+
+const f = {
+  type: $("#f_type"),
+  name: $("#f_name"),
+  brand: $("#f_brand"),
+  line: $("#f_line"),
+  char: $("#f_char"),
+  year: $("#f_year"),
+  notes: $("#f_notes"),
+  tags: $("#f_tags")
+};
+
+function esc(s){
+  const str = String(s ?? "");
+  return str
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function rebuildBrandFilter(){
+  const brands = ["all"].concat(
+    Array.from(new Set(db.map(x=>x.brand).filter(Boolean)))
+      .sort((a,b)=>a.localeCompare(b,"ru"))
+  );
+  const current = brandEl.value || "all";
+  brandEl.innerHTML = "";
+  for(const b of brands){
+    const opt = document.createElement("option");
+    opt.value = b;
+    opt.textContent = (b==="all") ? "Все бренды" : b;
+    brandEl.appendChild(opt);
   }
+  brandEl.value = brands.includes(current) ? current : "all";
+}
 
-  function setSheetTranslate(y){
-    currentTranslate = Math.max(0, y);
-    sheet.style.transform = `translateY(${currentTranslate}px)`;
+function matchesQuery(item, q){
+  if(!q) return true;
+  const hay = [
+    item.name, item.brand, item.line, item.character,
+    item.notes, (item.tags||[]).join(" "), String(item.year ?? "")
+  ].join(" ").toLowerCase();
+  return hay.indexOf(q.toLowerCase().trim()) !== -1;
+}
+
+function getFiltered(){
+  const q = qEl.value.trim();
+  const b = brandEl.value;
+
+  let arr = db.slice();
+
+  if(view === "all") arr = arr.filter(x => (x.type||"doll")==="doll");
+  else if(view === "wish") arr = arr.filter(x => x.status==="wish");
+  else if(view === "owned") arr = arr.filter(x => x.status==="owned");
+
+  arr = arr.filter(x => matchesQuery(x,q));
+  if(b !== "all") arr = arr.filter(x => x.brand === b);
+
+  const s = sortEl.value;
+  if(s==="recent") arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(s==="name_asc") arr.sort((a,b)=>(a.name||"").localeCompare(b.name||"","ru"));
+  if(s==="name_desc") arr.sort((a,b)=>(b.name||"").localeCompare(a.name||"","ru"));
+
+  return arr;
+}
+
+function render(){
+  rebuildBrandFilter();
+  const arr = getFiltered();
+
+  statsEl.textContent = `${view}: ${arr.length}/${db.length}`;
+  listEl.innerHTML = "";
+  emptyEl.style.display = arr.length ? "none" : "block";
+
+  for(const it of arr){
+    const card = document.createElement("article");
+    card.className = "card";
+
+    const thumbClass = it.photoDataUrl ? "thumb hasPhoto" : "thumb";
+    const safeBg = it.photoDataUrl
+      ? String(it.photoDataUrl).replace(/'/g, "\\'")
+      : "";
+    const bg = it.photoDataUrl ? `style="background-image:url('${safeBg}')"` : "";
+
+    card.innerHTML = `
+      <div class="${thumbClass}" ${bg}>
+        <span class="badge">${esc(it.line || "—")}</span>
+        <span class="badge">${esc(it.year ?? "—")}</span>
+      </div>
+      <div class="body">
+        <h3 class="title">${esc(it.name || "(без названия)")}</h3>
+        <div class="meta">${esc(it.brand || "—")} • ${esc(it.character || "—")}</div>
+        <div class="actions">
+          <button class="btnGhost" data-action="wish" data-id="${esc(it.id)}">
+            ${it.status==="wish" ? "Убрать из wish" : "В wish"}
+          </button>
+          <button class="btnGhost" data-action="owned" data-id="${esc(it.id)}">
+            ${it.status==="owned" ? "Убрать из колл." : "В коллекцию"}
+          </button>
+          <button class="btn" data-action="edit" data-id="${esc(it.id)}">Редактировать</button>
+        </div>
+      </div>
+    `;
+    listEl.appendChild(card);
   }
+}
 
-  function resetSheetPosition(forceZero=false){
-    sheet.style.transition = forceZero ? "" : "transform .18s ease";
-    setSheetTranslate(0);
-    if(!forceZero){
-      setTimeout(()=>{ sheet.style.transition = ""; }, 220);
-    }
-  }
-
-  function closeWithAnimation(){
-    if(!isMobileSheet()){
-      closeModal();
-      return;
-    }
-    const h = sheet.getBoundingClientRect().height;
-    sheet.style.transition = "transform .18s ease";
-    setSheetTranslate(h);
-    setTimeout(()=> closeModal(), 180);
-  }
-
-  function onTouchStart(e){
-    if(!isMobileSheet()) return;
-    // only when modal open
-    if(modal.getAttribute("aria-hidden") !== "false") return;
-
-    // avoid starting drag when user scrolls inside content
-    // start only from header/top area
-    dragging = true;
-    startY = e.touches[0].clientY;
-    lastY = startY;
-    startT = performance.now();
-    sheet.style.transition = "";
-  }
-
-  function onTouchMove(e){
-    if(!dragging || !isMobileSheet()) return;
-    const y = e.touches[0].clientY;
-    const dy = y - startY;
-    lastY = y;
-
-    if(dy > 0){
-      // prevent page scroll while dragging sheet down
-      e.preventDefault();
-      setSheetTranslate(dy);
-    }
-  }
-
-  function onTouchEnd(){
-    if(!dragging || !isMobileSheet()) return;
-    dragging = false;
-
-    const dy = lastY - startY;
-    const dt = Math.max(1, performance.now() - startT);
-    const velocity = dy / dt; // px/ms
-
-    const h = sheet.getBoundingClientRect().height;
-    const closeThreshold = Math.min(180, h * 0.25);
-
-    if(dy > closeThreshold || velocity > 0.8){
-      closeWithAnimation();
-    }else{
-      resetSheetPosition();
-    }
-  }
-
-  // Also allow mouse drag on desktop? (optional) — keep only mobile behavior.
-
-  // ===== Status toggles =====
-  function toggleStatus(id, target){
-    const idx = db.findIndex(x=>x.id===id);
-    if(idx<0) return;
-    const cur = db[idx].status || "none";
-    db[idx].status = (cur === target) ? "none" : target;
-    saveDB(db);
-    render();
-  }
-
-  // ===== Import/Export =====
-  const exportBtn = $("#exportBtn");
-  const importBtn = $("#importBtn");
-  const importFile = $("#importFile");
-
-  function exportJSON(){
-    const payload = { version: 1, exportedAt: new Date().toISOString(), items: db };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "collector_export.json";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function importJSONFile(file){
+/* =========================
+   Modal + form
+   ========================= */
+function setPhotoPreview(dataUrl){
+  photoPreview.style.backgroundImage = dataUrl ? `url('${dataUrl}')` : "";
+}
+function fileToDataUrl(file){
+  return new Promise((resolve, reject)=>{
     const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const parsed = JSON.parse(String(reader.result || ""));
-        const arr = Array.isArray(parsed) ? parsed : parsed.items;
-        if(!Array.isArray(arr)) throw new Error("bad");
-        // merge with prebuilt
-        db = ensurePrebuilt(arr);
-        saveDB(db);
-        render();
-      }catch{}
-    };
-    reader.readAsText(file);
+    reader.onload = ()=> resolve(String(reader.result || ""));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function fillForm(item){
+  f.type.value = item.type || "doll";
+  f.name.value = item.name || "";
+  f.brand.value = item.brand || "Monster High";
+  f.line.value = item.line || "";
+  f.char.value = item.character || "";
+  f.year.value = (item.year == null) ? "" : String(item.year);
+  f.notes.value = item.notes || "";
+  f.tags.value = (item.tags || []).join(", ");
+}
+
+function readForm(){
+  const year = f.year.value === "" ? null : Number(f.year.value);
+  const tags = f.tags.value.split(",").map(x=>x.trim()).filter(Boolean);
+  return {
+    type: f.type.value,
+    name: f.name.value.trim(),
+    brand: f.brand.value,
+    line: f.line.value.trim(),
+    character: f.char.value.trim(),
+    year: (year != null && !Number.isNaN(year)) ? year : null,
+    notes: f.notes.value.trim(),
+    tags,
+    photoDataUrl: pendingPhotoDataUrl || null
+  };
+}
+
+function openModal(mode, item){
+  modal.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+  resetSheetPosition();
+
+  pendingPhotoDataUrl = null;
+  photoInput.value = "";
+  setPhotoPreview(null);
+
+  if(mode==="add"){
+    editingId = null;
+    mTitle.textContent = "Добавить";
+    fillForm({});
+  }else{
+    editingId = item.id;
+    mTitle.textContent = "Редактировать";
+    fillForm(item);
+    pendingPhotoDataUrl = item.photoDataUrl || null;
+    setPhotoPreview(pendingPhotoDataUrl);
   }
+}
 
-  // ===== Events =====
-  $("#addBtn").addEventListener("click", ()=>openModal("add", null));
-  $("#mClose").addEventListener("click", closeModal);
-  $("#cancelBtn").addEventListener("click", closeModal);
-  $("#saveBtn").addEventListener("click", saveItem);
+function closeModal(){
+  modal.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+  editingId = null;
+  pendingPhotoDataUrl = null;
+  resetSheetPosition(true);
+}
 
-  modal.addEventListener("click", (e)=>{ if(e.target === modal) closeModal(); });
-  document.addEventListener("keydown", (e)=>{
-    if(e.key === "Escape" && modal.getAttribute("aria-hidden")==="false") closeModal();
-  });
+function saveItem(){
+  const data = readForm();
+  if(!data.name) return;
 
-  listEl.addEventListener("click", (e)=>{
-    const btn = e.target.closest("[data-action]");
-    if(!btn) return;
-    const id = btn.dataset.id;
-    const action = btn.dataset.action;
-
-    if(action==="wish") toggleStatus(id, "wish");
-    if(action==="owned") toggleStatus(id, "owned");
-    if(action==="edit"){
-      const item = db.find(x=>x.id===id);
-      if(item) openModal("edit", item);
+  if(editingId){
+    const idx = db.findIndex(x=>x.id===editingId);
+    if(idx>=0){
+      const current = db[idx];
+      // prebuilt: allow notes/tags/photo only
+      if(current.isPrebuilt){
+        db[idx] = {
+          ...current,
+          notes: data.notes,
+          tags: data.tags,
+          photoDataUrl: data.photoDataUrl
+        };
+      }else{
+        db[idx] = { ...current, ...data };
+      }
     }
-  });
-
-  qEl.addEventListener("input", render);
-  brandEl.addEventListener("change", render);
-  sortEl.addEventListener("change", render);
-
-  yearDec.addEventListener("click", ()=>stepYear(-1));
-  yearInc.addEventListener("click", ()=>stepYear(+1));
-
-  pickPhotoBtn.addEventListener("click", ()=>photoInput.click());
-  photoInput.addEventListener("change", async ()=>{
-    const file = photoInput.files && photoInput.files[0];
-    if(!file) return;
-    if(file.size > 2.5 * 1024 * 1024){
-      photoInput.value = "";
-      return;
-    }
-    const dataUrl = await fileToDataUrl(file);
-    pendingPhotoDataUrl = dataUrl;
-    setPhotoPreview(dataUrl);
-  });
-  clearPhotoBtn.addEventListener("click", ()=>{
-    pendingPhotoDataUrl = null;
-    photoInput.value = "";
-    setPhotoPreview(null);
-  });
-
-  exportBtn.addEventListener("click", exportJSON);
-  importBtn.addEventListener("click", ()=>importFile.click());
-  importFile.addEventListener("change", (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(file) importJSONFile(file);
-    importFile.value = "";
-  });
-
-  // tabs
-  const tabs = [...document.querySelectorAll(".tab")];
-  tabs.forEach(tbtn => tbtn.addEventListener("click", ()=>{
-    view = tbtn.dataset.view;
-    tabs.forEach(x=>x.setAttribute("aria-selected", x===tbtn ? "true":"false"));
-    render();
-  }));
-
-  // bottom sheet gesture listeners (only header/top)
-  sheetTop.addEventListener("touchstart", onTouchStart, {passive:false});
-  sheetTop.addEventListener("touchmove", onTouchMove, {passive:false});
-  sheetTop.addEventListener("touchend", onTouchEnd);
-  sheetTop.addEventListener("touchcancel", onTouchEnd);
-
-  // if screen rotates while open, reset translate
-  window.addEventListener("resize", ()=>{
-    if(modal.getAttribute("aria-hidden")==="false") resetSheetPosition();
-  });
-
-  // init
+  }else{
+    db.unshift({
+      id: uid(),
+      createdAt: Date.now(),
+      isPrebuilt: false,
+      status: "none",
+      ...data
+    });
+  }
+  saveDB(db);
+  closeModal();
   render();
+}
+
+function stepYear(delta){
+  const cur = (f.year.value === "" ? new Date().getFullYear() : Number(f.year.value));
+  f.year.value = String(cur + delta);
+}
+
+/* =========================
+   Bottom sheet swipe-to-close (mobile)
+   ========================= */
+let dragging = false;
+let startY = 0;
+let lastY = 0;
+let startT = 0;
+let currentTranslate = 0;
+
+function isMobileSheet(){
+  return window.matchMedia("(max-width: 560px)").matches;
+}
+function setSheetTranslate(y){
+  currentTranslate = Math.max(0, y);
+  sheet.style.transform = `translateY(${currentTranslate}px)`;
+}
+function resetSheetPosition(forceZero=false){
+  sheet.style.transition = forceZero ? "" : "transform .18s ease";
+  setSheetTranslate(0);
+  if(!forceZero){
+    setTimeout(()=>{ sheet.style.transition = ""; }, 220);
+  }
+}
+function closeWithAnimation(){
+  if(!isMobileSheet()){
+    closeModal();
+    return;
+  }
+  const h = sheet.getBoundingClientRect().height;
+  sheet.style.transition = "transform .18s ease";
+  setSheetTranslate(h);
+  setTimeout(()=> closeModal(), 180);
+}
+function onTouchStart(e){
+  if(!isMobileSheet()) return;
+  if(modal.getAttribute("aria-hidden") !== "false") return;
+  dragging = true;
+  startY = e.touches[0].clientY;
+  lastY = startY;
+  startT = performance.now();
+  sheet.style.transition = "";
+}
+function onTouchMove(e){
+  if(!dragging || !isMobileSheet()) return;
+  const y = e.touches[0].clientY;
+  const dy = y - startY;
+  lastY = y;
+  if(dy > 0){
+    e.preventDefault();
+    setSheetTranslate(dy);
+  }
+}
+function onTouchEnd(){
+  if(!dragging || !isMobileSheet()) return;
+  dragging = false;
+
+  const dy = lastY - startY;
+  const dt = Math.max(1, performance.now() - startT);
+  const velocity = dy / dt;
+
+  const h = sheet.getBoundingClientRect().height;
+  const closeThreshold = Math.min(180, h * 0.25);
+
+  if(dy > closeThreshold || velocity > 0.8){
+    closeWithAnimation();
+  }else{
+    resetSheetPosition();
+  }
+}
+
+/* =========================
+   Status toggles + Import/Export
+   ========================= */
+function toggleStatus(id, target){
+  const idx = db.findIndex(x=>x.id===id);
+  if(idx<0) return;
+  const cur = db[idx].status || "none";
+  db[idx].status = (cur === target) ? "none" : target;
+  saveDB(db);
+  render();
+}
+
+const exportBtn = $("#exportBtn");
+const importBtn = $("#importBtn");
+const importFile = $("#importFile");
+
+function exportJSON(){
+  const payload = { version: 1, exportedAt: new Date().toISOString(), items: db };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "collector_export.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function importJSONFile(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(String(reader.result || ""));
+      const arr = Array.isArray(parsed) ? parsed : parsed.items;
+      if(!Array.isArray(arr)) throw new Error("bad");
+      db = ensurePrebuilt(arr);
+      saveDB(db);
+      render();
+    }catch{}
+  };
+  reader.readAsText(file);
+}
+
+/* =========================
+   Event wiring
+   ========================= */
+addBtn.addEventListener("click", ()=>openModal("add", null));
+mClose.addEventListener("click", closeModal);
+cancelBtn.addEventListener("click", closeModal);
+saveBtn.addEventListener("click", saveItem);
+
+modal.addEventListener("click", (e)=>{ if(e.target === modal) closeModal(); });
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape" && modal.getAttribute("aria-hidden")==="false") closeModal();
+});
+
+listEl.addEventListener("click", (e)=>{
+  const btn = e.target.closest("[data-action]");
+  if(!btn) return;
+  const id = btn.getAttribute("data-id");
+  const action = btn.getAttribute("data-action");
+  if(!id || !action) return;
+
+  if(action==="wish") toggleStatus(id, "wish");
+  if(action==="owned") toggleStatus(id, "owned");
+  if(action==="edit"){
+    const item = db.find(x=>x.id===id);
+    if(item) openModal("edit", item);
+  }
+});
+
+qEl.addEventListener("input", render);
+brandEl.addEventListener("change", render);
+sortEl.addEventListener("change", render);
+
+yearDec.addEventListener("click", ()=>stepYear(-1));
+yearInc.addEventListener("click", ()=>stepYear(+1));
+
+pickPhotoBtn.addEventListener("click", ()=>photoInput.click());
+photoInput.addEventListener("change", async ()=>{
+  const file = photoInput.files && photoInput.files[0];
+  if(!file) return;
+  if(file.size > 2.5 * 1024 * 1024){
+    photoInput.value = "";
+    return;
+  }
+  const dataUrl = await fileToDataUrl(file);
+  pendingPhotoDataUrl = dataUrl;
+  setPhotoPreview(dataUrl);
+});
+clearPhotoBtn.addEventListener("click", ()=>{
+  pendingPhotoDataUrl = null;
+  photoInput.value = "";
+  setPhotoPreview(null);
+});
+
+exportBtn.addEventListener("click", exportJSON);
+importBtn.addEventListener("click", ()=>importFile.click());
+importFile.addEventListener("change", (e)=>{
+  const file = e.target.files && e.target.files[0];
+  if(file) importJSONFile(file);
+  importFile.value = "";
+});
+
+// tabs
+const tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+tabs.forEach(tbtn => tbtn.addEventListener("click", ()=>{
+  view = tbtn.getAttribute("data-view");
+  tabs.forEach(x=>x.setAttribute("aria-selected", x===tbtn ? "true":"false"));
+  render();
+}));
+
+// bottom sheet gestures (header only)
+sheetTop.addEventListener("touchstart", onTouchStart, {passive:false});
+sheetTop.addEventListener("touchmove", onTouchMove, {passive:false});
+sheetTop.addEventListener("touchend", onTouchEnd);
+sheetTop.addEventListener("touchcancel", onTouchEnd);
+
+window.addEventListener("resize", ()=>{
+  if(modal.getAttribute("aria-hidden")==="false") resetSheetPosition();
+});
+
+// init
+render();
 </script>
 </body>
 </html>
