@@ -1,0 +1,115 @@
+diff --git a/index.html b/index.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..747d69046e28e8b49aa9e36526972c3449afc568
+--- /dev/null
++++ b/index.html
+@@ -0,0 +1,109 @@
++<!DOCTYPE html>
++<html lang="ru">
++<head>
++  <meta charset="UTF-8" />
++  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++  <title>Collion — Каталог коллекционера</title>
++  <link rel="stylesheet" href="styles.css" />
++</head>
++<body>
++  <header class="hero">
++    <div class="hero__content">
++      <h1>Collion</h1>
++      <p>Каталог для коллекционеров: храните свою коллекцию и формируйте вишлист.</p>
++    </div>
++  </header>
++
++  <main class="layout">
++    <section class="panel">
++      <h2>Добавить предмет</h2>
++      <form id="item-form" class="form">
++        <label>
++          Название
++          <input id="name" name="name" type="text" required placeholder="Например, Barbie Silkstone" />
++        </label>
++        <label>
++          Категория
++          <input id="category" name="category" type="text" placeholder="Кукла, фигурка, открытка..." />
++        </label>
++        <label>
++          Год
++          <input id="year" name="year" type="number" min="0" max="2100" placeholder="1998" />
++        </label>
++        <label>
++          Редкость
++          <select id="rarity" name="rarity">
++            <option value="">Не указана</option>
++            <option>Обычная</option>
++            <option>Редкая</option>
++            <option>Очень редкая</option>
++            <option>Лимитированная</option>
++          </select>
++        </label>
++        <label>
++          Состояние
++          <select id="condition" name="condition">
++            <option>Новая</option>
++            <option>Отличная</option>
++            <option>Хорошая</option>
++            <option>Требует реставрации</option>
++          </select>
++        </label>
++        <label>
++          Фото (URL)
++          <input id="image" name="image" type="url" placeholder="https://..." />
++        </label>
++        <label>
++          Заметки
++          <textarea id="notes" name="notes" rows="3" placeholder="Где куплено, цена, история..."></textarea>
++        </label>
++        <label>
++          Раздел
++          <select id="listType" name="listType">
++            <option value="collection">Моя коллекция</option>
++            <option value="wishlist">Вишлист</option>
++          </select>
++        </label>
++        <button type="submit">Сохранить</button>
++      </form>
++    </section>
++
++    <section class="panel panel--wide">
++      <div class="toolbar">
++        <h2>Каталог</h2>
++        <input id="search" type="search" placeholder="Поиск по названию, категории, заметкам" />
++      </div>
++
++      <div class="stats" id="stats"></div>
++
++      <div class="lists">
++        <article>
++          <h3>Моя коллекция</h3>
++          <div id="collection-list" class="cards"></div>
++        </article>
++        <article>
++          <h3>Вишлист</h3>
++          <div id="wishlist-list" class="cards"></div>
++        </article>
++      </div>
++    </section>
++  </main>
++
++  <template id="item-template">
++    <article class="card">
++      <img class="card__image" alt="Фото предмета" />
++      <div class="card__content">
++        <h4 class="card__title"></h4>
++        <p class="card__meta"></p>
++        <p class="card__notes"></p>
++        <div class="card__actions">
++          <button data-action="toggle"></button>
++          <button data-action="remove" class="danger">Удалить</button>
++        </div>
++      </div>
++    </article>
++  </template>
++
++  <script src="script.js"></script>
++</body>
++</html>
