@@ -74,6 +74,7 @@
       color: var(--text);
       padding: 11px 12px;
       outline:none;
+      box-shadow: none;
     }
     textarea{min-height:90px; resize: vertical}
     input::placeholder{color:rgba(159,176,208,.75)}
@@ -221,7 +222,7 @@
       display:grid; gap:12px;
       grid-template-columns: repeat(12, 1fr);
     }
-    .field{grid-column: span 6; display:flex; flex-direction:column; gap:6px; position:relative}
+    .field{grid-column: span 6; display:flex; flex-direction:column; gap:6px}
     .field.full{grid-column: span 12}
     @media (max-width: 760px){ .field{grid-column: span 12} }
     label{color: var(--muted); font-size: 12px}
@@ -229,7 +230,7 @@
     footer{color: rgba(159,176,208,.75); font-size: 12px; padding: 10px 0 40px}
     a{color:inherit}
 
-    /* Small popup error near input */
+    /* small popup near input (for validation/import messages) */
     .errorPop{
       position: fixed;
       z-index: 9999;
@@ -283,7 +284,9 @@
           <button class="tab" id="tab_wish" role="tab" aria-selected="false" data-view="wish">Вишлист</button>
           <button class="tab" id="tab_owned" role="tab" aria-selected="false" data-view="owned">Коллекция</button>
         </div>
+        <!-- новая функция, но стиль тот же -->
         <button class="btnGhost" id="langBtn" title="Switch language">RU / EN</button>
+
         <button class="btn" id="addBtn">＋ Добавить</button>
       </div>
     </div>
@@ -341,7 +344,7 @@
     </div>
     <div class="modalContent">
       <div class="formGrid">
-        <div class="field" id="field_name">
+        <div class="field">
           <label id="l_name">Название (как хочешь)</label>
           <input id="f_name" placeholder="Напр: Draculaura базовая" />
         </div>
@@ -428,7 +431,7 @@
 </div>
 
 <script>
-  // ====== I18N ======
+  // ====== I18N (новая функция, внешний вид RU как раньше) ======
   const LS_LANG = "collector_lang_v1";
   let lang = localStorage.getItem(LS_LANG) || "ru";
 
@@ -459,7 +462,7 @@
       offline: "Всё офлайн. Данные хранятся в браузере (localStorage).",
       empty: "Пусто. Добавь запись или измени фильтры.",
       footer: "Если захочешь: можно легко подключить API/бд и фотки вместо заглушки.",
-      // modal
+
       m_add: "Добавить",
       m_edit: "Редактировать",
       l_name: "Название (как хочешь)",
@@ -494,17 +497,23 @@
       save: "Сохранить",
       cancel: "Отмена",
       del: "Удалить",
-      // cards / misc
+
+      // card
+      year: "Год",
+      complete: "Комплект",
+      status: "Статус",
       buy: "Покупка",
       market: "Рынок",
       dash: "—",
+      status_catalog: "Каталог",
       btn_to_wish: "В вишлист",
       btn_from_wish: "Убрать из вишлиста",
       btn_to_owned: "В коллекцию",
       btn_from_owned: "Убрать из коллекции",
       btn_edit: "Редактировать",
+
       confirm_delete: "Удалить запись? Это действие нельзя отменить.",
-      err_name_required: "Название пустое. Впиши хоть что-то.",
+      err_name_required: "Название пустое. Впиши хоть что-то 🙂",
       err_import: "Не смог импортировать JSON. Проверь файл/формат.",
       ok_import: "Импорт готов."
     },
@@ -533,8 +542,8 @@
       import: "Import JSON",
       offline: "Offline. Data is stored in the browser (localStorage).",
       empty: "No items. Add one or change filters.",
-      footer: "Next step: easy to plug in API/DB and real photos instead of placeholders.",
-      // modal
+      footer: "If you want: easy to plug in API/DB and real photos later.",
+
       m_add: "Add",
       m_edit: "Edit",
       l_name: "Title (anything)",
@@ -569,15 +578,20 @@
       save: "Save",
       cancel: "Cancel",
       del: "Delete",
-      // cards / misc
+
+      year: "Year",
+      complete: "Complete",
+      status: "Status",
       buy: "Buy",
       market: "Market",
       dash: "—",
+      status_catalog: "Catalog",
       btn_to_wish: "Add to wishlist",
       btn_from_wish: "Remove from wishlist",
       btn_to_owned: "Add to collection",
       btn_from_owned: "Remove from collection",
       btn_edit: "Edit",
+
       confirm_delete: "Delete this item? This cannot be undone.",
       err_name_required: "Title is empty. Enter something.",
       err_import: "Could not import JSON. Check file/format.",
@@ -589,6 +603,7 @@
 
   function applyLang(){
     document.documentElement.lang = lang;
+    document.title = t("title");
 
     // header
     document.getElementById("ui_title").textContent = t("title");
@@ -603,11 +618,10 @@
     document.getElementById("ui_offline").textContent = t("offline");
     document.getElementById("empty").textContent = t("empty");
     document.getElementById("ui_footer").textContent = t("footer");
-    document.title = t("title");
 
-    // filter selects (text only)
+    // filters text
     const brandSelect = document.getElementById("brand");
-    if(brandSelect && brandSelect.options.length){
+    if(brandSelect){
       const allOpt = [...brandSelect.options].find(o => o.value === "all");
       if(allOpt) allOpt.textContent = t("brand_all");
     }
@@ -639,6 +653,7 @@
     }
 
     // modal labels + placeholders
+    document.getElementById("mTitle").textContent = (editingId ? t("m_edit") : t("m_add"));
     document.getElementById("l_name").textContent = t("l_name");
     document.getElementById("f_name").placeholder = t("name_ph");
     document.getElementById("l_brand").textContent = t("l_brand");
@@ -695,12 +710,7 @@
   // ====== STORAGE ======
   const LS_KEY = "collector_catalog_v1";
 
-  // ====== UTIL ======
-  function uid(){
-    return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
-  }
-
-  // Example seed if empty
+  // Пример стартовых данных (если в localStorage пусто)
   const seed = [
     {
       id: uid(),
@@ -771,7 +781,7 @@
     localStorage.setItem(LS_KEY, JSON.stringify(arr));
   }
 
-  // ====== ERROR POPUP NEAR INPUT ======
+  // ====== small popup near input (replaces alert) ======
   let errorPopEl = null;
   let errorPopTimer = null;
 
@@ -784,13 +794,10 @@
     }
     errorPopEl.textContent = message;
 
-    // position under the input
     const r = el.getBoundingClientRect();
     const top = r.bottom + 10;
     let left = r.left;
     const maxW = 320;
-
-    // clamp within viewport
     const vw = window.innerWidth;
     if(left + maxW > vw - 12) left = Math.max(12, vw - maxW - 12);
     if(left < 12) left = 12;
@@ -798,7 +805,6 @@
     errorPopEl.style.top = top + "px";
     errorPopEl.style.left = left + "px";
 
-    // animate
     requestAnimationFrame(()=> errorPopEl.classList.add("show"));
 
     clearTimeout(errorPopTimer);
@@ -857,7 +863,7 @@
     tags: $("#f_tags"),
   };
 
-  // ====== FILTER INIT ======
+  // ====== INIT FILTERS ======
   function rebuildBrandFilter(){
     const brands = ["all", ...Array.from(new Set(db.map(x => x.brand).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ru'))];
     const current = brandEl.value || "all";
@@ -872,6 +878,10 @@
   }
 
   // ====== HELPERS ======
+  function uid(){
+    return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+  }
+
   const fmtKc = (n) => (n == null || n === "" || Number.isNaN(Number(n)))
     ? t("dash")
     : new Intl.NumberFormat("ru-RU").format(Number(n)) + " Kč";
@@ -911,8 +921,8 @@
   function statusLabel(s){
     if(s==="wish") return t("st_wish");
     if(s==="owned") return t("st_owned");
-    if(s==="none") return (lang==="ru" ? "Каталог" : "Catalog");
-    return (lang==="ru" ? "Каталог" : "Catalog");
+    if(s==="none") return t("status_catalog");
+    return t("status_catalog");
   }
 
   function matchesQuery(item, q){
@@ -932,14 +942,20 @@
 
     let arr = db.slice();
 
+    // view filter
     if(view === "wish") arr = arr.filter(x => x.status === "wish");
     if(view === "owned") arr = arr.filter(x => x.status === "owned");
 
+    // search
     arr = arr.filter(x => matchesQuery(x, q));
 
+    // brand
     if(b !== "all") arr = arr.filter(x => x.brand === b);
+
+    // condition
     if(c !== "all") arr = arr.filter(x => x.condition === c);
 
+    // sort
     const s = sortEl.value;
     const byName = (a,b)=> (a.name||"").localeCompare(b.name||"",'ru');
 
@@ -964,10 +980,7 @@
       view === "wish" ? t("tab_wish") :
       t("tab_owned");
 
-    const wishLabel = lang==="ru" ? "wish" : "wish";
-    const ownedLabel = lang==="ru" ? "owned" : "owned";
-
-    statsEl.textContent = `${mode}: ${visible}/${total} • ${wishLabel}: ${wish} • ${ownedLabel}: ${owned}`;
+    statsEl.textContent = `${mode}: ${visible}/${total} • wish: ${wish} • owned: ${owned}`;
   }
 
   // ====== RENDER ======
@@ -976,6 +989,7 @@
 
     const arr = getFiltered();
     listEl.innerHTML = "";
+
     emptyEl.style.display = arr.length ? "none" : "block";
     setStats(arr.length);
 
@@ -988,11 +1002,11 @@
 
       const title = it.name || (lang==="ru" ? "(без названия)" : "(no title)");
       const meta1 = `${it.brand || t("dash")} • ${it.line || t("dash")} • ${it.character || t("dash")}`;
+
       const meta2 =
-        (lang==="ru"
-          ? `Год: ${it.year ?? t("dash")} • Комплект: ${completeLabel(it.complete)} • Статус: ${statusLabel(it.status)}`
-          : `Year: ${it.year ?? t("dash")} • Complete: ${completeLabel(it.complete)} • Status: ${statusLabel(it.status)}`
-        );
+        lang === "ru"
+          ? `${t("year")}: ${it.year ?? t("dash")} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`
+          : `${t("year")}: ${it.year ?? t("dash")} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`;
 
       card.innerHTML = `
         <div class="thumb">
@@ -1022,6 +1036,7 @@
           </div>
         </div>
       `;
+
       listEl.appendChild(card);
     }
   }
@@ -1109,7 +1124,6 @@
   // ====== CRUD ======
   function addItem(){
     openModal("add", null);
-    // фокус на поле названия
     setTimeout(()=> f.name.focus(), 0);
   }
 
@@ -1123,6 +1137,7 @@
   function saveItem(){
     const data = readForm();
 
+    // валидация — попап возле поля, вместо alert()
     if(!data.name){
       showErrorNear(f.name, t("err_name_required"));
       f.name.focus();
@@ -1200,6 +1215,7 @@
         const arr = Array.isArray(parsed) ? parsed : parsed.items;
         if(!Array.isArray(arr)) throw new Error("bad format");
 
+        // мягкая нормализация
         const norm = arr.map(x => ({
           id: x.id || uid(),
           createdAt: x.createdAt || Date.now(),
@@ -1220,10 +1236,9 @@
         db = norm;
         saveDB(db);
         closeModal();
-        rebuildBrandFilter();
         render();
 
-        // маленький попап рядом с поиском как "ok"
+        // сообщение так же попапом (возле поиска)
         showErrorNear(qEl, t("ok_import"));
       }catch(e){
         showErrorNear(qEl, t("err_import"));
@@ -1234,6 +1249,7 @@
 
   // ====== EVENTS ======
   addBtn.addEventListener("click", addItem);
+
   exportBtn.addEventListener("click", exportJSON);
 
   importBtn.addEventListener("click", () => importFile.click());
@@ -1251,6 +1267,7 @@
   listEl.addEventListener("click", (e)=>{
     const btn = e.target.closest("[data-action]");
     if(!btn) return;
+
     const action = btn.dataset.action;
     const id = btn.dataset.id;
 
@@ -1279,7 +1296,7 @@
     }
   });
 
-  // Language toggle
+  // language toggle
   langBtn.addEventListener("click", ()=>{
     lang = (lang === "ru") ? "en" : "ru";
     localStorage.setItem(LS_LANG, lang);
@@ -1287,8 +1304,8 @@
   });
 
   // ====== START ======
-  // init filters text + UI
-  applyLang();
+  rebuildBrandFilter();
+  applyLang(); // ставит тексты и вызывает render()
 </script>
 </body>
 </html>
