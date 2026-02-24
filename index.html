@@ -584,7 +584,8 @@
 
 <script>
   // ====== LANGUAGE ======
-  const I18N = {
+  const LS_LANG = "collector_lang_v4";
+    const I18N = {
   ru: {
     title: "Каталог коллекционера",
     subtitle: "каталог • вишлист • коллекция • заметки • import/export JSON",
@@ -628,8 +629,8 @@
     offline: "Offline mode. Data stored in browser (localStorage)."
   }
 };
-  const LS_LANG = "collector_lang_v4";
   let lang = localStorage.getItem(LS_LANG) || "ru";
+  
 
   // ====== CURRENCY ======
   const LS_CUR = "collector_currency_v4";
