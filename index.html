@@ -230,7 +230,7 @@
     footer{color: rgba(159,176,208,.75); font-size: 12px; padding: 10px 0 40px}
     a{color:inherit}
 
-    /* small popup near input (for validation/import messages) */
+    /* small popup near input (replaces alert) */
     .errorPop{
       position: fixed;
       z-index: 9999;
@@ -248,10 +248,7 @@
       pointer-events: none;
       transition: opacity .12s ease, transform .12s ease;
     }
-    .errorPop.show{
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .errorPop.show{ opacity: 1; transform: translateY(0); }
     .errorPop:after{
       content:"";
       position:absolute;
@@ -264,8 +261,48 @@
       border-top: 1px solid rgba(255,77,109,.38);
       transform: rotate(45deg);
     }
+
+    /* Year "redesign": stepper-style control (same palette, new UX) */
+    .yearPicker{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(18,26,42,.70);
+    }
+    .yearBtn{
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      color: var(--text);
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      font-weight: 950;
+      padding: 0;
+    }
+    .yearBtn:active{ transform: scale(.98); }
+    .yearInput{
+      width: 100%;
+      text-align: center;
+      font-weight: 950;
+      letter-spacing: .3px;
+      background: rgba(18,26,42,.85);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    /* remove native spinners where possible */
+    input.yearInput::-webkit-outer-spin-button,
+    input.yearInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input.yearInput[type=number]{ -moz-appearance: textfield; }
   </style>
 </head>
+
 <body>
 <header>
   <div class="wrap">
@@ -284,7 +321,17 @@
           <button class="tab" id="tab_wish" role="tab" aria-selected="false" data-view="wish">Вишлист</button>
           <button class="tab" id="tab_owned" role="tab" aria-selected="false" data-view="owned">Коллекция</button>
         </div>
-        <!-- новая функция, но стиль тот же -->
+
+        <!-- валюта (новая функция) -->
+        <select class="btnGhost" id="currency" title="Currency" style="padding: 11px 12px;">
+          <option value="CZK">CZK</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="UAH">UAH</option>
+          <option value="RUB">RUB</option>
+        </select>
+
+        <!-- язык -->
         <button class="btnGhost" id="langBtn" title="Switch language">RU / EN</button>
 
         <button class="btn" id="addBtn">＋ Добавить</button>
@@ -369,8 +416,15 @@
 
         <div class="field">
           <label id="l_year">Год</label>
-          <input id="f_year" type="number" min="1950" max="2100" placeholder="Напр: 2012" />
+
+          <!-- редизайн года: stepper -->
+          <div class="yearPicker">
+            <button class="yearBtn" id="yearDec" type="button" aria-label="Year minus">−</button>
+            <input id="f_year" class="yearInput" type="number" min="1950" max="2100" placeholder="Напр: 2012" />
+            <button class="yearBtn" id="yearInc" type="button" aria-label="Year plus">+</button>
+          </div>
         </div>
+
         <div class="field">
           <label id="l_condition">Состояние</label>
           <select id="f_condition">
@@ -400,12 +454,12 @@
         </div>
 
         <div class="field">
-          <label id="l_buy">Цена покупки (Kč)</label>
+          <label id="l_buy">Цена покупки</label>
           <input id="f_buy" type="number" min="0" step="1" placeholder="Напр: 950" />
           <div class="help" id="h_buy">Если не покупала — оставь пустым.</div>
         </div>
         <div class="field">
-          <label id="l_market">Средняя цена рынка (Kč)</label>
+          <label id="l_market">Средняя цена рынка</label>
           <input id="f_market" type="number" min="0" step="1" placeholder="Напр: 1200" />
           <div class="help" id="h_market">Сюда позже можно подключить авто-расчёт.</div>
         </div>
@@ -431,9 +485,43 @@
 </div>
 
 <script>
-  // ====== I18N (новая функция, внешний вид RU как раньше) ======
+  // ====== LANGUAGE ======
   const LS_LANG = "collector_lang_v1";
   let lang = localStorage.getItem(LS_LANG) || "ru";
+
+  // ====== CURRENCY (новая функция) ======
+  const LS_CUR = "collector_currency_v1";
+  let currency = localStorage.getItem(LS_CUR) || "CZK";
+
+  const allowedCurrencies = ["USD","UAH","RUB","CZK","EUR"];
+  if(!allowedCurrencies.includes(currency)) currency = "CZK";
+
+  const currencyName = {
+    USD: { ru: "доллары", en: "USD" },
+    UAH: { ru: "гривны", en: "UAH" },
+    RUB: { ru: "рубли",  en: "RUB" },
+    CZK: { ru: "кроны",  en: "CZK" },
+    EUR: { ru: "евро",   en: "EUR" }
+  };
+
+  function localeForLang(){
+    return (lang === "ru") ? "ru-RU" : "en-US";
+  }
+
+  function formatMoney(n){
+    if(n == null || n === "" || Number.isNaN(Number(n))) return t("dash");
+    try{
+      return new Intl.NumberFormat(localeForLang(), {
+        style: "currency",
+        currency,
+        currencyDisplay: "symbol",
+        maximumFractionDigits: 0
+      }).format(Number(n));
+    }catch{
+      // fallback
+      return String(Number(n)) + " " + currency;
+    }
+  }
 
   const i18n = {
     ru: {
@@ -484,10 +572,10 @@
       st_none: "Просто в каталоге",
       st_wish: "Вишлист",
       st_owned: "В коллекции",
-      l_buy: "Цена покупки (Kč)",
+      l_buy: "Цена покупки",
       buy_ph: "Напр: 950",
       h_buy: "Если не покупала — оставь пустым.",
-      l_market: "Средняя цена рынка (Kč)",
+      l_market: "Средняя цена рынка",
       market_ph: "Напр: 1200",
       h_market: "Сюда позже можно подключить авто-расчёт.",
       l_notes: "Заметки",
@@ -498,7 +586,6 @@
       cancel: "Отмена",
       del: "Удалить",
 
-      // card
       year: "Год",
       complete: "Комплект",
       status: "Статус",
@@ -565,10 +652,10 @@
       st_none: "Just catalog",
       st_wish: "Wishlist",
       st_owned: "Owned",
-      l_buy: "Buy price (CZK)",
+      l_buy: "Buy price",
       buy_ph: "e.g. 950",
       h_buy: "Leave empty if not bought.",
-      l_market: "Market average (CZK)",
+      l_market: "Market average",
       market_ph: "e.g. 1200",
       h_market: "You can plug auto-calculation later.",
       l_notes: "Notes",
@@ -605,7 +692,6 @@
     document.documentElement.lang = lang;
     document.title = t("title");
 
-    // header
     document.getElementById("ui_title").textContent = t("title");
     document.getElementById("ui_sub").textContent = t("sub");
     document.getElementById("tab_all").textContent = t("tab_all");
@@ -628,13 +714,7 @@
 
     const cond = document.getElementById("condition");
     if(cond){
-      const map = {
-        all: t("condition_all"),
-        new: t("c_new"),
-        good: t("c_good"),
-        ok: t("c_ok"),
-        bad: t("c_bad")
-      };
+      const map = { all: t("condition_all"), new: t("c_new"), good: t("c_good"), ok: t("c_ok"), bad: t("c_bad") };
       [...cond.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
     }
 
@@ -666,10 +746,14 @@
     document.getElementById("l_condition").textContent = t("l_condition");
     document.getElementById("l_complete").textContent = t("l_complete");
     document.getElementById("l_status").textContent = t("l_status");
-    document.getElementById("l_buy").textContent = t("l_buy");
+
+    // currency-aware labels inside modal
+    const curLabel = currencyName[currency] ? currencyName[currency][lang] : currency;
+    document.getElementById("l_buy").textContent = `${t("l_buy")} (${curLabel})`;
+    document.getElementById("l_market").textContent = `${t("l_market")} (${curLabel})`;
+
     document.getElementById("f_buy").placeholder = t("buy_ph");
     document.getElementById("h_buy").textContent = t("h_buy");
-    document.getElementById("l_market").textContent = t("l_market");
     document.getElementById("f_market").placeholder = t("market_ph");
     document.getElementById("h_market").textContent = t("h_market");
     document.getElementById("l_notes").textContent = t("l_notes");
@@ -689,12 +773,7 @@
     // modal selects: complete
     const fcomp = document.getElementById("f_complete");
     if(fcomp){
-      const map = {
-        full: t("comp_full"),
-        partial: t("comp_partial"),
-        nude: t("comp_nude"),
-        unknown: t("comp_unknown")
-      };
+      const map = { full: t("comp_full"), partial: t("comp_partial"), nude: t("comp_nude"), unknown: t("comp_unknown") };
       [...fcomp.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
     }
     // modal selects: status
@@ -710,7 +789,11 @@
   // ====== STORAGE ======
   const LS_KEY = "collector_catalog_v1";
 
-  // Пример стартовых данных (если в localStorage пусто)
+  // Example seed if empty
+  function uid(){
+    return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+  }
+
   const seed = [
     {
       id: uid(),
@@ -772,7 +855,7 @@
       const arr = JSON.parse(raw);
       if(!Array.isArray(arr)) throw new Error("bad db");
       return arr;
-    }catch(e){
+    }catch{
       localStorage.setItem(LS_KEY, JSON.stringify(seed));
       return seed.slice();
     }
@@ -781,7 +864,7 @@
     localStorage.setItem(LS_KEY, JSON.stringify(arr));
   }
 
-  // ====== small popup near input (replaces alert) ======
+  // ====== small popup near input ======
   let errorPopEl = null;
   let errorPopTimer = null;
 
@@ -808,9 +891,7 @@
     requestAnimationFrame(()=> errorPopEl.classList.add("show"));
 
     clearTimeout(errorPopTimer);
-    errorPopTimer = setTimeout(()=>{
-      errorPopEl.classList.remove("show");
-    }, 2200);
+    errorPopTimer = setTimeout(()=> errorPopEl.classList.remove("show"), 2200);
   }
 
   // ====== STATE ======
@@ -836,6 +917,8 @@
   const importFile = $("#importFile");
   const langBtn = $("#langBtn");
 
+  const currencyEl = $("#currency");
+
   // tabs
   const tabs = [...document.querySelectorAll(".tab")];
 
@@ -846,6 +929,10 @@
   const saveBtn = $("#saveBtn");
   const cancelBtn = $("#cancelBtn");
   const deleteBtn = $("#deleteBtn");
+
+  // year stepper buttons
+  const yearDec = $("#yearDec");
+  const yearInc = $("#yearInc");
 
   // form fields
   const f = {
@@ -878,14 +965,6 @@
   }
 
   // ====== HELPERS ======
-  function uid(){
-    return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
-  }
-
-  const fmtKc = (n) => (n == null || n === "" || Number.isNaN(Number(n)))
-    ? t("dash")
-    : new Intl.NumberFormat("ru-RU").format(Number(n)) + " Kč";
-
   function esc(s){
     return String(s ?? "")
       .replaceAll("&","&amp;")
@@ -921,7 +1000,6 @@
   function statusLabel(s){
     if(s==="wish") return t("st_wish");
     if(s==="owned") return t("st_owned");
-    if(s==="none") return t("status_catalog");
     return t("status_catalog");
   }
 
@@ -942,20 +1020,13 @@
 
     let arr = db.slice();
 
-    // view filter
     if(view === "wish") arr = arr.filter(x => x.status === "wish");
     if(view === "owned") arr = arr.filter(x => x.status === "owned");
 
-    // search
     arr = arr.filter(x => matchesQuery(x, q));
-
-    // brand
     if(b !== "all") arr = arr.filter(x => x.brand === b);
-
-    // condition
     if(c !== "all") arr = arr.filter(x => x.condition === c);
 
-    // sort
     const s = sortEl.value;
     const byName = (a,b)=> (a.name||"").localeCompare(b.name||"",'ru');
 
@@ -1004,9 +1075,7 @@
       const meta1 = `${it.brand || t("dash")} • ${it.line || t("dash")} • ${it.character || t("dash")}`;
 
       const meta2 =
-        lang === "ru"
-          ? `${t("year")}: ${it.year ?? t("dash")} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`
-          : `${t("year")}: ${it.year ?? t("dash")} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`;
+        `${t("year")}: ${it.year ?? t("dash")} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`;
 
       card.innerHTML = `
         <div class="thumb">
@@ -1021,8 +1090,8 @@
           <div class="metaLine">${esc(meta2)}</div>
 
           <div class="money">
-            <span>${esc(t("buy"))}: <b>${esc(fmtKc(it.buyPrice))}</b></span>
-            <span>${esc(t("market"))}: <b>${esc(fmtKc(it.marketPrice))}</b></span>
+            <span>${esc(t("buy"))}: <b>${esc(formatMoney(it.buyPrice))}</b></span>
+            <span>${esc(t("market"))}: <b>${esc(formatMoney(it.marketPrice))}</b></span>
           </div>
 
           <div class="actions">
@@ -1072,6 +1141,9 @@
       deleteBtn.style.display = "inline-block";
       fillForm(item);
     }
+
+    // обновить валютные подписи в модалке
+    applyLang();
   }
 
   function closeModal(){
@@ -1137,7 +1209,6 @@
   function saveItem(){
     const data = readForm();
 
-    // валидация — попап возле поля, вместо alert()
     if(!data.name){
       showErrorNear(f.name, t("err_name_required"));
       f.name.focus();
@@ -1193,6 +1264,7 @@
     const payload = {
       version: 1,
       lang,
+      currency,
       exportedAt: new Date().toISOString(),
       items: db
     };
@@ -1215,7 +1287,15 @@
         const arr = Array.isArray(parsed) ? parsed : parsed.items;
         if(!Array.isArray(arr)) throw new Error("bad format");
 
-        // мягкая нормализация
+        // optional: import currency/lang if present
+        if(parsed && typeof parsed === "object"){
+          if(typeof parsed.lang === "string") lang = (parsed.lang === "en" ? "en" : "ru");
+          if(typeof parsed.currency === "string" && allowedCurrencies.includes(parsed.currency)) currency = parsed.currency;
+          localStorage.setItem(LS_LANG, lang);
+          localStorage.setItem(LS_CUR, currency);
+          currencyEl.value = currency;
+        }
+
         const norm = arr.map(x => ({
           id: x.id || uid(),
           createdAt: x.createdAt || Date.now(),
@@ -1236,20 +1316,33 @@
         db = norm;
         saveDB(db);
         closeModal();
-        render();
+        applyLang();
 
-        // сообщение так же попапом (возле поиска)
         showErrorNear(qEl, t("ok_import"));
-      }catch(e){
+      }catch{
         showErrorNear(qEl, t("err_import"));
       }
     };
     reader.readAsText(file);
   }
 
+  // ====== YEAR STEPPER (новая UX для года) ======
+  function clampYear(y){
+    const min = Number(f.year.min || 1950);
+    const max = Number(f.year.max || 2100);
+    if(Number.isNaN(y)) return null;
+    return Math.min(max, Math.max(min, y));
+  }
+  function stepYear(delta){
+    const cur = (f.year.value === "" ? new Date().getFullYear() : Number(f.year.value));
+    const next = clampYear(cur + delta);
+    if(next == null) return;
+    f.year.value = String(next);
+    f.year.dispatchEvent(new Event("input"));
+  }
+
   // ====== EVENTS ======
   addBtn.addEventListener("click", addItem);
-
   exportBtn.addEventListener("click", exportJSON);
 
   importBtn.addEventListener("click", () => importFile.click());
@@ -1303,9 +1396,28 @@
     applyLang();
   });
 
+  // currency selection
+  currencyEl.value = currency;
+  currencyEl.addEventListener("change", ()=>{
+    const v = currencyEl.value;
+    if(allowedCurrencies.includes(v)){
+      currency = v;
+      localStorage.setItem(LS_CUR, currency);
+      applyLang(); // re-render + relabel modal fields
+    }
+  });
+
+  // year stepper buttons + keyboard support
+  yearDec.addEventListener("click", ()=> stepYear(-1));
+  yearInc.addEventListener("click", ()=> stepYear(+1));
+  f.year.addEventListener("keydown", (e)=>{
+    if(e.key === "ArrowUp"){ e.preventDefault(); stepYear(+1); }
+    if(e.key === "ArrowDown"){ e.preventDefault(); stepYear(-1); }
+  });
+
   // ====== START ======
   rebuildBrandFilter();
-  applyLang(); // ставит тексты и вызывает render()
+  applyLang();
 </script>
 </body>
 </html>
