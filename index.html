@@ -4,6 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Каталог коллекционера</title>
+
+  <!-- FAVICON (иконка вкладки). Заменишь файл favicon.svg рядом с html -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
   <style>
     :root{
       --bg:#0b0f1a;
@@ -17,14 +21,16 @@
       --ok:#22c55e;
       --shadow: 0 10px 30px rgba(0,0,0,.35);
       --radius: 18px;
+
+      /* можно заменить на url("your-image.jpg") */
+      --site-hero: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,.25), transparent 60%),
+                   radial-gradient(900px 500px at 90% 10%, rgba(0,212,255,.18), transparent 55%);
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
-      background: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,.25), transparent 60%),
-                  radial-gradient(900px 500px at 90% 10%, rgba(0,212,255,.18), transparent 55%),
-                  var(--bg);
+      background: var(--site-hero), var(--bg);
       color:var(--text);
     }
     header{
@@ -137,13 +143,26 @@
     }
     @media (max-width: 980px){ .card{grid-column: span 6;} }
     @media (max-width: 620px){ .card{grid-column: span 12;} }
+
     .thumb{
-      height: 120px;
+      height: 130px;
       background: linear-gradient(135deg, rgba(124,92,255,.25), rgba(0,212,255,.18));
       display:flex; align-items:flex-end; justify-content:space-between;
       padding: 12px;
       gap:10px;
+      position:relative;
     }
+    .thumb.hasPhoto{
+      background-size: cover;
+      background-position: center;
+    }
+    .thumb.hasPhoto::before{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.55));
+    }
+    .thumb > *{position:relative; z-index:1;}
+
     .badge{
       font-size: 12px;
       padding: 6px 10px;
@@ -228,6 +247,21 @@
     label{color: var(--muted); font-size: 12px}
     .help{color: rgba(159,176,208,.75); font-size: 12px}
 
+    /* photo preview */
+    .photoRow{
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    }
+    .photoPreview{
+      width: 120px; height: 120px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      background-size: cover;
+      background-position:center;
+      box-shadow: var(--shadow);
+      flex: 0 0 auto;
+    }
+
     /* small popup near input */
     .errorPop{
       position: fixed;
@@ -294,19 +328,13 @@
       border-radius: 14px;
       padding: 10px 12px;
     }
-    input.yearInput::-webkit-outer-spin-button,
-    input.yearInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    input.yearInput[type=number]{ -moz-appearance: textfield; }
 
     .lockedHint{
       margin-top: 6px;
       font-size: 12px;
       color: rgba(159,176,208,.80);
     }
-    .isLocked{
-      opacity: .55;
-      cursor: not-allowed;
-    }
+    .isLocked{ opacity:.55; cursor:not-allowed; }
     .hide{display:none !important;}
   </style>
 </head>
@@ -434,7 +462,7 @@
 
         <div class="field">
           <label id="l_line">Линейка / серия</label>
-          <input id="f_line" placeholder="Напр: G1 базовая / Signature..." />
+          <input id="f_line" placeholder="Напр: G1 базовая / Creeproduction..." />
         </div>
 
         <div class="field" id="fieldChar">
@@ -480,6 +508,19 @@
           </select>
         </div>
 
+        <!-- Фото: только для своих записей -->
+        <div class="field full" id="photoBlock">
+          <label id="l_photo">Фотография</label>
+          <div class="photoRow">
+            <div class="photoPreview" id="photoPreview" aria-label="Photo preview"></div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <input id="f_photo" type="file" accept="image/*" />
+              <button class="btnGhost" id="clearPhotoBtn" type="button">Убрать фото</button>
+            </div>
+          </div>
+          <div class="help" id="h_photo">Фото хранится локально (в браузере). Для больших фото может закончиться место в localStorage.</div>
+        </div>
+
         <div class="field">
           <label id="l_buy">Цена покупки</label>
           <input id="f_buy" type="number" min="0" step="1" placeholder="Напр: 950" />
@@ -515,11 +556,11 @@
 
 <script>
   // ====== LANGUAGE ======
-  const LS_LANG = "collector_lang_v3";
+  const LS_LANG = "collector_lang_v4";
   let lang = localStorage.getItem(LS_LANG) || "ru";
 
   // ====== CURRENCY ======
-  const LS_CUR = "collector_currency_v3";
+  const LS_CUR = "collector_currency_v4";
   let currency = localStorage.getItem(LS_CUR) || "CZK";
   const allowedCurrencies = ["USD","UAH","RUB","CZK","EUR"];
   if(!allowedCurrencies.includes(currency)) currency = "CZK";
@@ -601,6 +642,10 @@
       comp_nude: "Nude / без одежды",
       comp_unknown: "Не знаю",
 
+      l_photo: "Фотография",
+      clear_photo: "Убрать фото",
+      h_photo: "Фото хранится локально (в браузере). Для больших фото может закончиться место в localStorage.",
+
       l_buy: "Цена покупки",
       l_market: "Средняя цена рынка",
       h_buy: "Если не покупала — оставь пустым.",
@@ -626,10 +671,11 @@
       btn_from_owned: "Убрать из коллекции",
       btn_edit: "Редактировать",
 
-      lockedHint: "Это запись из каталога. Тут можно менять только: статус, состояние, комплектность, цену покупки/рынок и заметки.",
+      lockedHint: "Это запись из каталога. Можно менять только: статус, состояние, комплектность, цены и заметки. Фото — только у своих записей.",
       confirm_delete: "Удалить запись? Это действие нельзя отменить.",
       err_name_required: "Название пустое. Впиши хоть что-то.",
       err_accessory_in_catalog: "Аксессуары не живут в каталоге — добавляй их в вишлист или коллекцию.",
+      err_photo_too_big: "Фото слишком большое. Возьми поменьше (лучше до ~1–2 МБ).",
       err_import: "Не смог импортировать JSON. Проверь файл/формат.",
       ok_import: "Импорт готов."
     },
@@ -684,6 +730,10 @@
       comp_nude: "Nude / no outfit",
       comp_unknown: "Not sure",
 
+      l_photo: "Photo",
+      clear_photo: "Remove photo",
+      h_photo: "Photo is stored locally in your browser. Large images may exceed localStorage limits.",
+
       l_buy: "Buy price",
       l_market: "Market average",
       h_buy: "Leave empty if not bought.",
@@ -709,10 +759,11 @@
       btn_from_owned: "Remove from collection",
       btn_edit: "Edit",
 
-      lockedHint: "This is a catalog item. You can only change: status, condition, completeness, prices and notes.",
+      lockedHint: "This is a catalog item. You can only change: status, condition, completeness, prices and notes. Photo is for custom items only.",
       confirm_delete: "Delete this item? This cannot be undone.",
       err_name_required: "Title is empty. Enter something.",
       err_accessory_in_catalog: "Accessories are not shown in the catalog — add them to wishlist or collection.",
+      err_photo_too_big: "Photo is too large. Use a smaller file (ideally ~1–2 MB).",
       err_import: "Could not import JSON. Check file/format.",
       ok_import: "Import done."
     }
@@ -720,17 +771,18 @@
   function t(key){ return (i18n[lang] && i18n[lang][key]) ? i18n[lang][key] : key; }
 
   // ====== STORAGE ======
-  const LS_KEY = "collector_catalog_v4";
+  const LS_KEY = "collector_catalog_v5";
 
   function uid(){
     return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
   }
 
-  // ====== PREBUILT CATALOG (MH core G1+G3) ======
+  // ====== PREBUILT CATALOG (MH Core G1 + G3 + Creeproduction) ======
   function prebuiltCatalog(){
     const brand = "Monster High";
-    const tags = ["monster high","base","core"];
-    const mk = (id, line, year, char_en, name_en, name_ru) => ({
+    const baseTags = ["monster high"];
+
+    const mk = (id, line, year, char_en, name_en, name_ru, tags=[]) => ({
       id,
       createdAt: 0,
       isPrebuilt: true,
@@ -747,27 +799,46 @@
       buyPrice: null,
       marketPrice: null,
       notes: "",
-      tags: [...tags, line.startsWith("G1") ? "g1" : "g3"]
+      tags: [...baseTags, ...tags]
     });
 
-    const g1line = "G1 базовая";
-    const g3line = "G3 базовая";
+    const g1core = "G1 базовая";
+    const g3core = "G3 базовая";
+    const creep = "Creeproduction (G1)";
 
-    return [
-      mk("mh_g1_core_draculaura", g1line, 2010, "Draculaura", "Draculaura (Core, G1)", "Дракулаура (базовая, G1)"),
-      mk("mh_g1_core_frankie",    g1line, 2010, "Frankie Stein", "Frankie Stein (Core, G1)", "Фрэнки Штейн (базовая, G1)"),
-      mk("mh_g1_core_clawdeen",   g1line, 2010, "Clawdeen Wolf", "Clawdeen Wolf (Core, G1)", "Клодин Вульф (базовая, G1)"),
-      mk("mh_g1_core_lagoona",    g1line, 2010, "Lagoona Blue", "Lagoona Blue (Core, G1)", "Лагуна Блю (базовая, G1)"),
-      mk("mh_g1_core_cleo",       g1line, 2010, "Cleo de Nile", "Cleo de Nile (Core, G1)", "Клео де Нил (базовая, G1)"),
-      mk("mh_g1_core_deuce",      g1line, 2010, "Deuce Gorgon", "Deuce Gorgon (Core, G1)", "Дьюс Горгон (базовая, G1)"),
+    const coreG1 = [
+      ["mh_g1_core_draculaura", "Draculaura", "Draculaura (Core, G1)", "Дракулаура (базовая, G1)"],
+      ["mh_g1_core_frankie", "Frankie Stein", "Frankie Stein (Core, G1)", "Фрэнки Штейн (базовая, G1)"],
+      ["mh_g1_core_clawdeen", "Clawdeen Wolf", "Clawdeen Wolf (Core, G1)", "Клодин Вульф (базовая, G1)"],
+      ["mh_g1_core_lagoona", "Lagoona Blue", "Lagoona Blue (Core, G1)", "Лагуна Блю (базовая, G1)"],
+      ["mh_g1_core_cleo", "Cleo de Nile", "Cleo de Nile (Core, G1)", "Клео де Нил (базовая, G1)"],
+      ["mh_g1_core_deuce", "Deuce Gorgon", "Deuce Gorgon (Core, G1)", "Дьюс Горгон (базовая, G1)"]
+    ].map(([id,ch,en,ru]) => mk(id, g1core, 2010, ch, en, ru, ["core","g1"]));
 
-      mk("mh_g3_core_draculaura", g3line, 2022, "Draculaura", "Draculaura (Core, G3)", "Дракулаура (базовая, G3)"),
-      mk("mh_g3_core_frankie",    g3line, 2022, "Frankie Stein", "Frankie Stein (Core, G3)", "Фрэнки Штейн (базовая, G3)"),
-      mk("mh_g3_core_clawdeen",   g3line, 2022, "Clawdeen Wolf", "Clawdeen Wolf (Core, G3)", "Клодин Вульф (базовая, G3)"),
-      mk("mh_g3_core_lagoona",    g3line, 2022, "Lagoona Blue", "Lagoona Blue (Core, G3)", "Лагуна Блю (базовая, G3)"),
-      mk("mh_g3_core_cleo",       g3line, 2022, "Cleo de Nile", "Cleo de Nile (Core, G3)", "Клео де Нил (базовая, G3)"),
-      mk("mh_g3_core_deuce",      g3line, 2022, "Deuce Gorgon", "Deuce Gorgon (Core, G3)", "Дьюс Горгон (базовая, G3)")
-    ];
+    const coreG3 = [
+      ["mh_g3_core_draculaura", "Draculaura", "Draculaura (Core, G3)", "Дракулаура (базовая, G3)"],
+      ["mh_g3_core_frankie", "Frankie Stein", "Frankie Stein (Core, G3)", "Фрэнки Штейн (базовая, G3)"],
+      ["mh_g3_core_clawdeen", "Clawdeen Wolf", "Clawdeen Wolf (Core, G3)", "Клодин Вульф (базовая, G3)"],
+      ["mh_g3_core_lagoona", "Lagoona Blue", "Lagoona Blue (Core, G3)", "Лагуна Блю (базовая, G3)"],
+      ["mh_g3_core_cleo", "Cleo de Nile", "Cleo de Nile (Core, G3)", "Клео де Нил (базовая, G3)"],
+      ["mh_g3_core_deuce", "Deuce Gorgon", "Deuce Gorgon (Core, G3)", "Дьюс Горгон (базовая, G3)"]
+    ].map(([id,ch,en,ru]) => mk(id, g3core, 2022, ch, en, ru, ["core","g3"]));
+
+    // Репродукции баз G1 (Creeproduction). Год поставлен 2022 как самый частый для этих релизов,
+    // но ты можешь править позже по конкретным волнам.
+    const creepro = [
+      ["mh_creep_draculaura", "Draculaura", "Draculaura (Creeproduction)", "Дракулаура (репродукция)"],
+      ["mh_creep_frankie", "Frankie Stein", "Frankie Stein (Creeproduction)", "Фрэнки Штейн (репродукция)"],
+      ["mh_creep_clawdeen", "Clawdeen Wolf", "Clawdeen Wolf (Creeproduction)", "Клодин Вульф (репродукция)"],
+      ["mh_creep_lagoona", "Lagoona Blue", "Lagoona Blue (Creeproduction)", "Лагуна Блю (репродукция)"],
+      ["mh_creep_cleo", "Cleo de Nile", "Cleo de Nile (Creeproduction)", "Клео де Нил (репродукция)"],
+      ["mh_creep_deuce", "Deuce Gorgon", "Deuce Gorgon (Creeproduction)", "Дьюс Горгон (репродукция)"],
+      ["mh_creep_ghoulia", "Ghoulia Yelps", "Ghoulia Yelps (Creeproduction)", "Гулия Йелпс (репродукция)"],
+      ["mh_creep_abbey", "Abbey Bominable", "Abbey Bominable (Creeproduction)", "Эбби Боминейбл (репродукция)"],
+      ["mh_creep_spectra", "Spectra Vondergeist", "Spectra Vondergeist (Creeproduction)", "Спектра Вондергейст (репродукция)"]
+    ].map(([id,ch,en,ru]) => mk(id, creep, 2022, ch, en, ru, ["creproduction","g1"]));
+
+    return [...coreG1, ...coreG3, ...creepro];
   }
 
   function ensurePrebuilt(db){
@@ -783,12 +854,15 @@
           const keep = merged[idx];
           merged[idx] = {
             ...item,
+            // user fields preserved
             status: keep.status ?? "none",
             buyPrice: keep.buyPrice ?? null,
             marketPrice: keep.marketPrice ?? null,
             notes: keep.notes ?? "",
             condition: keep.condition ?? "ok",
             complete: keep.complete ?? "unknown",
+            // photo only for custom items; but keep if exists (in case you imported it)
+            photoDataUrl: keep.photoDataUrl || null,
             tags: Array.isArray(keep.tags) ? keep.tags : item.tags
           };
         }
@@ -808,7 +882,7 @@
       const arr = JSON.parse(raw);
       if(!Array.isArray(arr)) throw new Error("bad db");
       const merged = ensurePrebuilt(arr);
-      if(merged.length !== arr.length) localStorage.setItem(LS_KEY, JSON.stringify(merged));
+      localStorage.setItem(LS_KEY, JSON.stringify(merged));
       return merged;
     }catch{
       const init = ensurePrebuilt([]);
@@ -818,7 +892,7 @@
   }
   function saveDB(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
 
-  // ====== small popup near input ======
+  // ====== popup ======
   let errorPopEl = null;
   let errorPopTimer = null;
   function showErrorNear(el, message){
@@ -850,6 +924,7 @@
   let db = loadDB();
   let view = "all";
   let editingId = null;
+  let pendingPhotoDataUrl = null; // фото из модалки (для custom)
 
   // ====== DOM ======
   const $ = (s) => document.querySelector(s);
@@ -884,6 +959,12 @@
   const yearInc = $("#yearInc");
   const lockedHint = $("#lockedHint");
   const fieldChar = $("#fieldChar");
+
+  // photo
+  const photoBlock = $("#photoBlock");
+  const photoInput = $("#f_photo");
+  const photoPreview = $("#photoPreview");
+  const clearPhotoBtn = $("#clearPhotoBtn");
 
   const f = {
     type: $("#f_type"),
@@ -989,7 +1070,7 @@
     let arr = db.slice();
 
     if(view === "all"){
-      arr = arr.filter(x => (x.type || "doll") === "doll");
+      arr = arr.filter(x => (x.type || "doll") === "doll"); // аксессуары не в каталоге
     } else if(view === "wish"){
       arr = arr.filter(x => x.status === "wish");
     } else {
@@ -1063,8 +1144,13 @@
         ? ""
         : ((it.type || "doll") === "accessory" ? t("type_accessory") : t("type_doll"));
 
+      // photo: показываем если есть (custom)
+      const photo = it.photoDataUrl || null;
+      const thumbClass = photo ? "thumb hasPhoto" : "thumb";
+      const thumbStyle = photo ? `style="background-image:url('${esc(photo)}')"` : "";
+
       card.innerHTML = `
-        <div class="thumb">
+        <div class="${thumbClass}" ${thumbStyle}>
           <span class="badge ${condCls}">${esc(cond)}</span>
           <span class="badge">${esc(typeBadge || statusLabel(it.status))}</span>
         </div>
@@ -1140,45 +1226,19 @@
     };
     [...sortEl.options].forEach(o=>{ if(sortMap[o.value]) o.textContent = sortMap[o.value]; });
 
-    $("#l_type").textContent = t("l_type");
-    $("#l_name").textContent = t("l_name");
-    $("#l_brand").textContent = t("l_brand");
-    $("#l_line").textContent = t("l_line");
-    $("#l_char").textContent = t("l_char");
-    $("#l_year").textContent = t("l_year");
-    $("#l_condition").textContent = t("l_condition");
-    $("#l_complete").textContent = t("l_complete");
-    $("#l_status").textContent = t("l_status");
+    // modal labels
+    $("#l_photo").textContent = t("l_photo");
+    $("#clearPhotoBtn").textContent = t("clear_photo");
+    $("#h_photo").textContent = t("h_photo");
+
     $("#h_buy").textContent = t("h_buy");
     $("#h_market").textContent = t("h_market");
-    $("#l_notes").textContent = t("l_notes");
-    $("#l_tags").textContent = t("l_tags");
-    $("#saveBtn").textContent = t("save");
-    $("#cancelBtn").textContent = t("cancel");
-    $("#deleteBtn").textContent = t("del");
-    lockedHint.textContent = t("lockedHint");
-
-    // modal type options
-    f.type.options[0].textContent = (lang==="ru") ? "Кукла" : "Doll";
-    f.type.options[1].textContent = (lang==="ru") ? "Аксессуар" : "Accessory";
-
-    // modal condition options
-    [...f.condition.options].forEach(o=>{
-      if(o.value==="new") o.textContent = t("c_new");
-      if(o.value==="good") o.textContent = t("c_good");
-      if(o.value==="ok") o.textContent = t("c_ok");
-      if(o.value==="bad") o.textContent = t("c_bad");
-    });
-
-    const compMap = { full: t("comp_full"), partial: t("comp_partial"), nude: t("comp_nude"), unknown: t("comp_unknown") };
-    [...f.complete.options].forEach(o=>{ if(compMap[o.value]) o.textContent = compMap[o.value]; });
-
-    const stMap = { none: t("st_none"), wish: t("st_wish"), owned: t("st_owned") };
-    [...f.status.options].forEach(o=>{ if(stMap[o.value]) o.textContent = stMap[o.value]; });
 
     const curLabel = currencyName[currency] ? currencyName[currency][lang] : currency;
     $("#l_buy").textContent = `${t("l_buy")} (${curLabel})`;
     $("#l_market").textContent = `${t("l_market")} (${curLabel})`;
+
+    lockedHint.textContent = t("lockedHint");
 
     render();
   }
@@ -1201,11 +1261,8 @@
     el.classList.toggle("isLocked", !!locked);
   }
 
-  // ✅ ВАЖНОЕ ИЗ ТВОЕГО СООБЩЕНИЯ:
-  // "менять название и все опции" — ТОЛЬКО для своих записей.
-  // Для каталога (isPrebuilt) — блокируем ВСЕ “каталожные” поля, оставляем только пользовательские.
   function lockForPrebuilt(){
-    // каталогные поля (нельзя менять)
+    // catalog fields locked
     setLock(f.type, true);
     setLock(f.name, true);
     setLock(f.brand, true);
@@ -1216,7 +1273,7 @@
     setLock(yearInc, true);
     setLock(f.tags, true);
 
-    // пользовательские поля (можно менять)
+    // user fields unlocked
     setLock(f.status, false);
     setLock(f.condition, false);
     setLock(f.complete, false);
@@ -1224,15 +1281,24 @@
     setLock(f.market, false);
     setLock(f.notes, false);
 
+    // фото: запрещено для каталога
+    photoBlock.classList.add("hide");
+    pendingPhotoDataUrl = null;
+    photoPreview.style.backgroundImage = "";
+    photoInput.value = "";
+
     lockedHint.style.display = "block";
   }
 
   function unlockForCustom(){
-    // для своих записей — всё редактируется
     [
       f.type,f.name,f.brand,f.line,f.char,f.year,yearDec,yearInc,f.tags,
       f.status,f.condition,f.complete,f.buy,f.market,f.notes
     ].forEach(el => setLock(el, false));
+
+    // фото: доступно для custom
+    photoBlock.classList.remove("hide");
+
     lockedHint.style.display = "none";
   }
 
@@ -1241,10 +1307,32 @@
     fieldChar.classList.toggle("hide", isAccessory);
   }
 
+  // ====== Photo handling ======
+  function setPhotoPreview(dataUrl){
+    if(!dataUrl){
+      photoPreview.style.backgroundImage = "";
+      return;
+    }
+    photoPreview.style.backgroundImage = `url('${dataUrl}')`;
+  }
+
+  function fileToDataUrl(file){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = ()=> resolve(String(reader.result || ""));
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
   // ====== Modal ======
   function openModal(mode, item){
     modal.setAttribute("aria-hidden","false");
     document.body.style.overflow = "hidden";
+
+    pendingPhotoDataUrl = null;
+    photoInput.value = "";
+    setPhotoPreview(null);
 
     if(mode === "add"){
       editingId = null;
@@ -1255,10 +1343,10 @@
         type: "doll",
         name:"", brand:"Monster High", line:"", character:"", year:"",
         condition:"good", complete:"full", status:"none",
-        buyPrice:"", marketPrice:"", notes:"", tags:[]
+        buyPrice:"", marketPrice:"", notes:"", tags:[],
+        photoDataUrl: null
       });
 
-      // ✅ добавляешь своё — редактируем ВСЁ
       unlockForCustom();
       applyTypeUI();
 
@@ -1270,11 +1358,12 @@
       fillForm(item);
 
       if(item.isPrebuilt){
-        // ✅ редактируешь запись каталога — менять можно только “свои” поля
         lockForPrebuilt();
       }else{
-        // ✅ редактируешь свою запись — можно менять всё
         unlockForCustom();
+        // подставляем текущее фото (если есть)
+        pendingPhotoDataUrl = item.photoDataUrl || null;
+        setPhotoPreview(pendingPhotoDataUrl);
       }
 
       applyTypeUI();
@@ -1287,6 +1376,7 @@
     modal.setAttribute("aria-hidden","true");
     document.body.style.overflow = "";
     editingId = null;
+    pendingPhotoDataUrl = null;
   }
 
   function fillForm(item){
@@ -1303,6 +1393,12 @@
     f.market.value = item.marketPrice ?? "";
     f.notes.value = item.notes ?? "";
     f.tags.value = (item.tags || []).join(", ");
+
+    // photo only custom
+    if(!item.isPrebuilt && item.photoDataUrl){
+      pendingPhotoDataUrl = item.photoDataUrl;
+      setPhotoPreview(pendingPhotoDataUrl);
+    }
   }
 
   function readForm(){
@@ -1328,7 +1424,8 @@
       buyPrice: (buy != null && !Number.isNaN(buy)) ? buy : null,
       marketPrice: (market != null && !Number.isNaN(market)) ? market : null,
       notes: f.notes.value.trim(),
-      tags
+      tags,
+      photoDataUrl: pendingPhotoDataUrl || null
     };
   }
 
@@ -1364,7 +1461,6 @@
       const current = db[idx];
 
       if(current.isPrebuilt){
-        // ✅ prebuilt: сохраняем ТОЛЬКО пользовательские поля
         db[idx] = {
           ...current,
           status: data.status,
@@ -1375,7 +1471,6 @@
           notes: data.notes
         };
       } else {
-        // ✅ custom: сохраняем всё
         if(!data.name){
           showErrorNear(f.name, t("err_name_required"));
           f.name.focus();
@@ -1395,7 +1490,8 @@
           buyPrice: data.buyPrice,
           marketPrice: data.marketPrice,
           notes: data.notes,
-          tags: data.tags
+          tags: data.tags,
+          photoDataUrl: data.photoDataUrl
         };
       }
     } else {
@@ -1420,7 +1516,8 @@
         buyPrice: data.buyPrice,
         marketPrice: data.marketPrice,
         notes: data.notes,
-        tags: data.tags
+        tags: data.tags,
+        photoDataUrl: data.photoDataUrl
       });
     }
 
@@ -1449,7 +1546,6 @@
 
     if((item.type||"doll")==="accessory" && item.status==="none") item.status = "wish";
     else item.status = (item.status === "wish") ? "none" : "wish";
-
     if((item.type||"doll")==="accessory" && item.status==="none") item.status = "wish";
 
     saveDB(db);
@@ -1470,7 +1566,7 @@
   // ====== Export/Import ======
   function exportJSON(){
     const payload = {
-      version: 4,
+      version: 5,
       lang,
       currency,
       exportedAt: new Date().toISOString(),
@@ -1521,7 +1617,8 @@
           buyPrice: (x.buyPrice == null) ? null : Number(x.buyPrice),
           marketPrice: (x.marketPrice == null) ? null : Number(x.marketPrice),
           notes: x.notes || "",
-          tags: Array.isArray(x.tags) ? x.tags : []
+          tags: Array.isArray(x.tags) ? x.tags : [],
+          photoDataUrl: x.photoDataUrl || null
         }));
 
         db = ensurePrebuilt(norm);
@@ -1588,19 +1685,14 @@
     if(e.key === "Escape" && modal.getAttribute("aria-hidden")==="false") closeModal();
   });
 
-  modal.addEventListener("keydown", (e)=>{
-    if(e.key === "Enter" && (e.target.tagName === "INPUT")){
-      e.preventDefault();
-      saveItem();
-    }
-  });
-
+  // language toggle (also switches catalog doll names RU/EN)
   langBtn.addEventListener("click", ()=>{
     lang = (lang === "ru") ? "en" : "ru";
     localStorage.setItem(LS_LANG, lang);
     applyLang();
   });
 
+  // currency
   currencyEl.value = currency;
   currencyEl.addEventListener("change", ()=>{
     const v = currencyEl.value;
@@ -1611,15 +1703,38 @@
     }
   });
 
+  // year stepper
   yearDec.addEventListener("click", ()=> stepYear(-1));
   yearInc.addEventListener("click", ()=> stepYear(+1));
-  f.year.addEventListener("keydown", (e)=>{
-    if(f.year.disabled) return;
-    if(e.key === "ArrowUp"){ e.preventDefault(); stepYear(+1); }
-    if(e.key === "ArrowDown"){ e.preventDefault(); stepYear(-1); }
+
+  // type ui
+  f.type.addEventListener("change", applyTypeUI);
+
+  // photo input (custom only)
+  photoInput.addEventListener("change", async ()=>{
+    const file = photoInput.files && photoInput.files[0];
+    if(!file) return;
+
+    // простая защита по размеру (можно править)
+    if(file.size > 2.5 * 1024 * 1024){
+      showErrorNear(photoInput, t("err_photo_too_big"));
+      photoInput.value = "";
+      return;
+    }
+    try{
+      const dataUrl = await fileToDataUrl(file);
+      pendingPhotoDataUrl = dataUrl;
+      setPhotoPreview(dataUrl);
+    }catch{
+      // молча
+    }
   });
 
-  f.type.addEventListener("change", applyTypeUI);
+  clearPhotoBtn.addEventListener("click", ()=>{
+    pendingPhotoDataUrl = null;
+    photoInput.value = "";
+    setPhotoPreview(null);
+  });
 
   // ====== START ======
   applyLang();
