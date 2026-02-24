@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Каталог коллекционера</title>
-
-  <!-- FAVICON (иконка вкладки). Заменишь файл favicon.svg рядом с html -->
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
   <style>
@@ -22,7 +20,6 @@
       --shadow: 0 10px 30px rgba(0,0,0,.35);
       --radius: 18px;
 
-      /* можно заменить на url("your-image.jpg") */
       --site-hero: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,.25), transparent 60%),
                    radial-gradient(900px 500px at 90% 10%, rgba(0,212,255,.18), transparent 55%);
     }
@@ -73,6 +70,7 @@
       color: var(--text);
       background: linear-gradient(135deg, rgba(124,92,255,.85), rgba(0,212,255,.55));
     }
+
     input, select, button, textarea{
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.10);
@@ -81,6 +79,7 @@
       padding: 11px 12px;
       outline:none;
       box-shadow: none;
+      min-width: 0; /* <-- важно, чтобы элементы не выталкивали контейнер */
     }
     textarea{min-height:90px; resize: vertical}
     input::placeholder{color:rgba(159,176,208,.75)}
@@ -140,6 +139,7 @@
       overflow:hidden;
       box-shadow: var(--shadow);
       position:relative;
+      min-width: 0;
     }
     @media (max-width: 980px){ .card{grid-column: span 6;} }
     @media (max-width: 620px){ .card{grid-column: span 12;} }
@@ -210,21 +210,29 @@
       align-items:center; justify-content:center;
       padding: 18px;
       z-index:100;
+      overscroll-behavior: contain;
     }
     .modalBackdrop[aria-hidden="false"]{display:flex;}
+
+    /* ✅ главное: модалка не вылезает, внутри прокрутка */
     .modal{
       width: min(980px, 100%);
+      max-height: calc(100vh - 36px);
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(18,26,42,.92);
       box-shadow: var(--shadow);
-      overflow:hidden;
+      overflow: hidden; /* чтобы скроллилась modalContent, а не вся карточка */
+      display:flex;
+      flex-direction: column;
+      min-width: 0;
     }
     .modalTop{
       padding: 14px 14px;
       display:flex; align-items:center; justify-content:space-between; gap:12px;
       border-bottom: 1px solid rgba(255,255,255,.08);
       background: rgba(255,255,255,.03);
+      flex: 0 0 auto;
     }
     .modalTop strong{font-size: 14px}
     .x{
@@ -235,24 +243,46 @@
       cursor:pointer;
       display:grid; place-items:center;
       font-weight:900;
+      flex: 0 0 auto;
     }
-    .modalContent{padding: 14px}
+
+    /* ✅ прокрутка внутри модалки */
+    .modalContent{
+      padding: 14px;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
     .formGrid{
       display:grid; gap:12px;
       grid-template-columns: repeat(12, 1fr);
+      min-width: 0;
     }
-    .field{grid-column: span 6; display:flex; flex-direction:column; gap:6px}
+    .field{grid-column: span 6; display:flex; flex-direction:column; gap:6px; min-width:0}
     .field.full{grid-column: span 12}
     @media (max-width: 760px){ .field{grid-column: span 12} }
     label{color: var(--muted); font-size: 12px}
     .help{color: rgba(159,176,208,.75); font-size: 12px}
 
-    /* photo preview */
-    .photoRow{
-      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    /* ✅ новый UI фото: компактный + не ломает ширину */
+    .photoCard{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+      padding: 12px;
+      display:grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px;
+      align-items: start;
+      min-width: 0;
+    }
+    @media (max-width: 560px){
+      .photoCard{grid-template-columns: 1fr;}
     }
     .photoPreview{
-      width: 120px; height: 120px;
+      width: 140px; height: 140px;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(0,0,0,.18);
@@ -261,6 +291,20 @@
       box-shadow: var(--shadow);
       flex: 0 0 auto;
     }
+    @media (max-width: 560px){
+      .photoPreview{width: 100%; height: 180px;}
+    }
+    .photoActions{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      min-width:0;
+    }
+    .photoActions button{
+      flex: 1 1 160px;
+      white-space: nowrap;
+    }
+    .fileHidden{display:none;}
 
     /* small popup near input */
     .errorPop{
@@ -281,43 +325,28 @@
       transition: opacity .12s ease, transform .12s ease;
     }
     .errorPop.show{ opacity: 1; transform: translateY(0); }
-    .errorPop:after{
-      content:"";
-      position:absolute;
-      left: 16px;
-      top: -7px;
-      width: 12px;
-      height: 12px;
-      background: rgba(255,77,109,.16);
-      border-left: 1px solid rgba(255,77,109,.38);
-      border-top: 1px solid rgba(255,77,109,.38);
-      transform: rotate(45deg);
-    }
 
     /* Year stepper */
     .yearPicker{
-      display:flex;
-      align-items:center;
-      gap:8px;
+      display:flex; align-items:center; gap:8px;
       padding: 8px;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(18,26,42,.70);
+      min-width: 0;
     }
     .yearBtn{
-      width: 38px;
-      height: 38px;
+      width: 38px; height: 38px;
       border-radius: 14px;
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.14);
       color: var(--text);
       cursor:pointer;
-      display:grid;
-      place-items:center;
+      display:grid; place-items:center;
       font-weight: 950;
       padding: 0;
+      flex: 0 0 auto;
     }
-    .yearBtn:active{ transform: scale(.98); }
     .yearInput{
       width: 100%;
       text-align: center;
@@ -327,13 +356,10 @@
       border: 1px solid rgba(255,255,255,.10);
       border-radius: 14px;
       padding: 10px 12px;
+      min-width: 0;
     }
 
-    .lockedHint{
-      margin-top: 6px;
-      font-size: 12px;
-      color: rgba(159,176,208,.80);
-    }
+    .lockedHint{ margin-top:6px; font-size:12px; color: rgba(159,176,208,.80); }
     .isLocked{ opacity:.55; cursor:not-allowed; }
     .hide{display:none !important;}
   </style>
@@ -367,17 +393,13 @@
         </select>
 
         <button class="btnGhost" id="langBtn" title="Switch language">RU / EN</button>
-
         <button class="btn" id="addBtn">＋ Добавить</button>
       </div>
     </div>
 
     <div style="margin-top:12px;" class="controls" role="search">
       <input id="q" placeholder="Поиск: имя / персонаж / заметки / теги…" autocomplete="off"/>
-
-      <select id="brand">
-        <option value="all">Все бренды</option>
-      </select>
+      <select id="brand"><option value="all">Все бренды</option></select>
 
       <select id="typeFilter" class="hide">
         <option value="all">Все типы</option>
@@ -417,14 +439,10 @@
 
 <main class="wrap">
   <section id="list" class="grid" aria-live="polite"></section>
-  <div id="empty" class="empty" style="display:none; margin-top:14px;">
-    Пусто. Добавь запись или измени фильтры.
-  </div>
+  <div id="empty" class="empty" style="display:none; margin-top:14px;">Пусто. Добавь запись или измени фильтры.</div>
 </main>
 
-<footer class="wrap" id="ui_footer">
-  Дальше можно расширить каталог и подключить фото.
-</footer>
+<footer class="wrap" id="ui_footer">Дальше можно расширить каталог и подключить фото.</footer>
 
 <!-- Modal -->
 <div class="modalBackdrop" id="modal" aria-hidden="true">
@@ -433,6 +451,7 @@
       <strong id="mTitle">Редактировать</strong>
       <button class="x" id="mClose" aria-label="Закрыть">×</button>
     </div>
+
     <div class="modalContent">
       <div class="formGrid">
 
@@ -508,17 +527,26 @@
           </select>
         </div>
 
-        <!-- Фото: только для своих записей -->
+        <!-- ✅ Фото: новый интерфейс + без вылезаний -->
         <div class="field full" id="photoBlock">
           <label id="l_photo">Фотография</label>
-          <div class="photoRow">
+
+          <div class="photoCard">
             <div class="photoPreview" id="photoPreview" aria-label="Photo preview"></div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <input id="f_photo" type="file" accept="image/*" />
-              <button class="btnGhost" id="clearPhotoBtn" type="button">Убрать фото</button>
+
+            <div style="min-width:0;">
+              <div class="photoActions">
+                <button class="btnGhost" id="pickPhotoBtn" type="button">Выбрать фото</button>
+                <button class="btnGhost" id="clearPhotoBtn" type="button">Убрать фото</button>
+              </div>
+
+              <div class="help" id="h_photo" style="margin-top:8px;">
+                Фото хранится локально (в браузере). Лучше до ~1–2 МБ.
+              </div>
+
+              <input id="f_photo" class="fileHidden" type="file" accept="image/*" />
             </div>
           </div>
-          <div class="help" id="h_photo">Фото хранится локально (в браузере). Для больших фото может закончиться место в localStorage.</div>
         </div>
 
         <div class="field">
@@ -574,9 +602,8 @@
   };
 
   function localeForLang(){ return (lang === "ru") ? "ru-RU" : "en-US"; }
-
   function formatMoney(n){
-    if(n == null || n === "" || Number.isNaN(Number(n))) return t("dash");
+    if(n == null || n === "" || Number.isNaN(Number(n))) return "—";
     try{
       return new Intl.NumberFormat(localeForLang(), {
         style: "currency",
@@ -589,288 +616,49 @@
     }
   }
 
-  // ====== I18N ======
-  const i18n = {
-    ru: {
-      title: "Каталог коллекционера",
-      sub: "каталог • вишлист • коллекция • заметки • import/export JSON",
-      tab_all: "Каталог",
-      tab_wish: "Вишлист",
-      tab_owned: "Коллекция",
-      add: "＋ Добавить",
-      q_ph: "Поиск: имя / персонаж / заметки / теги…",
-      brand_all: "Все бренды",
-      type_all: "Все типы",
-      type_doll: "Куклы",
-      type_accessory: "Аксессуары",
-      condition_all: "Любое состояние",
-      c_new: "Новое",
-      c_good: "Хорошее",
-      c_ok: "Ок",
-      c_bad: "Плохое",
-      sort_recent: "Сорт: недавние",
-      sort_market_desc: "Средняя цена: ↓",
-      sort_market_asc: "Средняя цена: ↑",
-      sort_buy_desc: "Покупка: ↓",
-      sort_buy_asc: "Покупка: ↑",
-      sort_name_asc: "Имя: A→Я",
-      sort_name_desc: "Имя: Я→A",
-      export: "Экспорт JSON",
-      import: "Импорт JSON",
-      offline: "Всё офлайн. Данные хранятся в браузере (localStorage).",
-      empty: "Пусто. Добавь запись или измени фильтры.",
-      footer: "Дальше можно расширить каталог и подключить фото.",
-
-      m_add: "Добавить",
-      m_edit: "Редактировать",
-
-      l_type: "Тип",
-      l_name: "Название",
-      l_brand: "Бренд",
-      l_line: "Линейка / серия",
-      l_char: "Персонаж",
-      l_year: "Год",
-      l_condition: "Состояние",
-      l_complete: "Комплектность",
-      l_status: "Статус",
-      st_none: "Просто в каталоге",
-      st_wish: "Вишлист",
-      st_owned: "В коллекции",
-
-      comp_full: "Полная",
-      comp_partial: "Частичная",
-      comp_nude: "Nude / без одежды",
-      comp_unknown: "Не знаю",
-
-      l_photo: "Фотография",
-      clear_photo: "Убрать фото",
-      h_photo: "Фото хранится локально (в браузере). Для больших фото может закончиться место в localStorage.",
-
-      l_buy: "Цена покупки",
-      l_market: "Средняя цена рынка",
-      h_buy: "Если не покупала — оставь пустым.",
-      h_market: "Можно заполнять позже.",
-      l_notes: "Заметки",
-      l_tags: "Теги (через запятую)",
-
-      save: "Сохранить",
-      cancel: "Отмена",
-      del: "Удалить",
-
-      year: "Год",
-      status: "Статус",
-      complete: "Комплект",
-      buy: "Покупка",
-      market: "Рынок",
-      dash: "—",
-      status_catalog: "Каталог",
-
-      btn_to_wish: "В вишлист",
-      btn_from_wish: "Убрать из вишлиста",
-      btn_to_owned: "В коллекцию",
-      btn_from_owned: "Убрать из коллекции",
-      btn_edit: "Редактировать",
-
-      lockedHint: "Это запись из каталога. Можно менять только: статус, состояние, комплектность, цены и заметки. Фото — только у своих записей.",
-      confirm_delete: "Удалить запись? Это действие нельзя отменить.",
-      err_name_required: "Название пустое. Впиши хоть что-то.",
-      err_accessory_in_catalog: "Аксессуары не живут в каталоге — добавляй их в вишлист или коллекцию.",
-      err_photo_too_big: "Фото слишком большое. Возьми поменьше (лучше до ~1–2 МБ).",
-      err_import: "Не смог импортировать JSON. Проверь файл/формат.",
-      ok_import: "Импорт готов."
-    },
-    en: {
-      title: "Collector Catalog",
-      sub: "catalog • wishlist • collection • notes • import/export JSON",
-      tab_all: "Catalog",
-      tab_wish: "Wishlist",
-      tab_owned: "Collection",
-      add: "＋ Add",
-      q_ph: "Search: name / character / notes / tags…",
-      brand_all: "All brands",
-      type_all: "All types",
-      type_doll: "Dolls",
-      type_accessory: "Accessories",
-      condition_all: "Any condition",
-      c_new: "New",
-      c_good: "Good",
-      c_ok: "OK",
-      c_bad: "Bad",
-      sort_recent: "Sort: recent",
-      sort_market_desc: "Market avg: ↓",
-      sort_market_asc: "Market avg: ↑",
-      sort_buy_desc: "Buy price: ↓",
-      sort_buy_asc: "Buy price: ↑",
-      sort_name_asc: "Name: A→Z",
-      sort_name_desc: "Name: Z→A",
-      export: "Export JSON",
-      import: "Import JSON",
-      offline: "Offline. Data is stored in the browser (localStorage).",
-      empty: "No items. Add one or change filters.",
-      footer: "Next: expand the catalog and plug in photos.",
-
-      m_add: "Add",
-      m_edit: "Edit",
-
-      l_type: "Type",
-      l_name: "Title",
-      l_brand: "Brand",
-      l_line: "Line / series",
-      l_char: "Character",
-      l_year: "Year",
-      l_condition: "Condition",
-      l_complete: "Completeness",
-      l_status: "Status",
-      st_none: "Just catalog",
-      st_wish: "Wishlist",
-      st_owned: "Owned",
-
-      comp_full: "Full",
-      comp_partial: "Partial",
-      comp_nude: "Nude / no outfit",
-      comp_unknown: "Not sure",
-
-      l_photo: "Photo",
-      clear_photo: "Remove photo",
-      h_photo: "Photo is stored locally in your browser. Large images may exceed localStorage limits.",
-
-      l_buy: "Buy price",
-      l_market: "Market average",
-      h_buy: "Leave empty if not bought.",
-      h_market: "Fill later if you want.",
-      l_notes: "Notes",
-      l_tags: "Tags (comma-separated)",
-
-      save: "Save",
-      cancel: "Cancel",
-      del: "Delete",
-
-      year: "Year",
-      status: "Status",
-      complete: "Complete",
-      buy: "Buy",
-      market: "Market",
-      dash: "—",
-      status_catalog: "Catalog",
-
-      btn_to_wish: "Add to wishlist",
-      btn_from_wish: "Remove from wishlist",
-      btn_to_owned: "Add to collection",
-      btn_from_owned: "Remove from collection",
-      btn_edit: "Edit",
-
-      lockedHint: "This is a catalog item. You can only change: status, condition, completeness, prices and notes. Photo is for custom items only.",
-      confirm_delete: "Delete this item? This cannot be undone.",
-      err_name_required: "Title is empty. Enter something.",
-      err_accessory_in_catalog: "Accessories are not shown in the catalog — add them to wishlist or collection.",
-      err_photo_too_big: "Photo is too large. Use a smaller file (ideally ~1–2 MB).",
-      err_import: "Could not import JSON. Check file/format.",
-      ok_import: "Import done."
-    }
-  };
-  function t(key){ return (i18n[lang] && i18n[lang][key]) ? i18n[lang][key] : key; }
-
   // ====== STORAGE ======
   const LS_KEY = "collector_catalog_v5";
+  function uid(){ return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
 
-  function uid(){
-    return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
-  }
-
-  // ====== PREBUILT CATALOG (MH Core G1 + G3 + Creeproduction) ======
+  // ====== PREBUILT CATALOG (укорочено для примера) ======
   function prebuiltCatalog(){
     const brand = "Monster High";
-    const baseTags = ["monster high"];
-
-    const mk = (id, line, year, char_en, name_en, name_ru, tags=[]) => ({
-      id,
-      createdAt: 0,
-      isPrebuilt: true,
-      type: "doll",
-      name_en,
-      name_ru,
-      brand,
-      line,
-      character: char_en,
-      year,
-      condition: "ok",
-      complete: "unknown",
-      status: "none",
-      buyPrice: null,
-      marketPrice: null,
-      notes: "",
-      tags: [...baseTags, ...tags]
+    const mk = (id, line, year, char, en, ru) => ({
+      id, createdAt: 0, isPrebuilt: true, type: "doll",
+      name_en: en, name_ru: ru, brand, line, character: char, year,
+      condition: "ok", complete: "unknown", status: "none",
+      buyPrice: null, marketPrice: null, notes: "", tags: ["monster high"],
+      photoDataUrl: null
     });
-
-    const g1core = "G1 базовая";
-    const g3core = "G3 базовая";
-    const creep = "Creeproduction (G1)";
-
-    const coreG1 = [
-      ["mh_g1_core_draculaura", "Draculaura", "Draculaura (Core, G1)", "Дракулаура (базовая, G1)"],
-      ["mh_g1_core_frankie", "Frankie Stein", "Frankie Stein (Core, G1)", "Фрэнки Штейн (базовая, G1)"],
-      ["mh_g1_core_clawdeen", "Clawdeen Wolf", "Clawdeen Wolf (Core, G1)", "Клодин Вульф (базовая, G1)"],
-      ["mh_g1_core_lagoona", "Lagoona Blue", "Lagoona Blue (Core, G1)", "Лагуна Блю (базовая, G1)"],
-      ["mh_g1_core_cleo", "Cleo de Nile", "Cleo de Nile (Core, G1)", "Клео де Нил (базовая, G1)"],
-      ["mh_g1_core_deuce", "Deuce Gorgon", "Deuce Gorgon (Core, G1)", "Дьюс Горгон (базовая, G1)"]
-    ].map(([id,ch,en,ru]) => mk(id, g1core, 2010, ch, en, ru, ["core","g1"]));
-
-    const coreG3 = [
-      ["mh_g3_core_draculaura", "Draculaura", "Draculaura (Core, G3)", "Дракулаура (базовая, G3)"],
-      ["mh_g3_core_frankie", "Frankie Stein", "Frankie Stein (Core, G3)", "Фрэнки Штейн (базовая, G3)"],
-      ["mh_g3_core_clawdeen", "Clawdeen Wolf", "Clawdeen Wolf (Core, G3)", "Клодин Вульф (базовая, G3)"],
-      ["mh_g3_core_lagoona", "Lagoona Blue", "Lagoona Blue (Core, G3)", "Лагуна Блю (базовая, G3)"],
-      ["mh_g3_core_cleo", "Cleo de Nile", "Cleo de Nile (Core, G3)", "Клео де Нил (базовая, G3)"],
-      ["mh_g3_core_deuce", "Deuce Gorgon", "Deuce Gorgon (Core, G3)", "Дьюс Горгон (базовая, G3)"]
-    ].map(([id,ch,en,ru]) => mk(id, g3core, 2022, ch, en, ru, ["core","g3"]));
-
-    // Репродукции баз G1 (Creeproduction). Год поставлен 2022 как самый частый для этих релизов,
-    // но ты можешь править позже по конкретным волнам.
-    const creepro = [
-      ["mh_creep_draculaura", "Draculaura", "Draculaura (Creeproduction)", "Дракулаура (репродукция)"],
-      ["mh_creep_frankie", "Frankie Stein", "Frankie Stein (Creeproduction)", "Фрэнки Штейн (репродукция)"],
-      ["mh_creep_clawdeen", "Clawdeen Wolf", "Clawdeen Wolf (Creeproduction)", "Клодин Вульф (репродукция)"],
-      ["mh_creep_lagoona", "Lagoona Blue", "Lagoona Blue (Creeproduction)", "Лагуна Блю (репродукция)"],
-      ["mh_creep_cleo", "Cleo de Nile", "Cleo de Nile (Creeproduction)", "Клео де Нил (репродукция)"],
-      ["mh_creep_deuce", "Deuce Gorgon", "Deuce Gorgon (Creeproduction)", "Дьюс Горгон (репродукция)"],
-      ["mh_creep_ghoulia", "Ghoulia Yelps", "Ghoulia Yelps (Creeproduction)", "Гулия Йелпс (репродукция)"],
-      ["mh_creep_abbey", "Abbey Bominable", "Abbey Bominable (Creeproduction)", "Эбби Боминейбл (репродукция)"],
-      ["mh_creep_spectra", "Spectra Vondergeist", "Spectra Vondergeist (Creeproduction)", "Спектра Вондергейст (репродукция)"]
-    ].map(([id,ch,en,ru]) => mk(id, creep, 2022, ch, en, ru, ["creproduction","g1"]));
-
-    return [...coreG1, ...coreG3, ...creepro];
+    return [
+      mk("mh_g1_core_draculaura", "G1 базовая", 2010, "Draculaura", "Draculaura (Core, G1)", "Дракулаура (базовая, G1)"),
+      mk("mh_creep_draculaura", "Creeproduction (G1)", 2022, "Draculaura", "Draculaura (Creeproduction)", "Дракулаура (репродукция)"),
+    ];
   }
-
   function ensurePrebuilt(db){
     const base = prebuiltCatalog();
     const existing = new Set(db.map(x => x.id));
     const merged = db.slice();
-
     for(const item of base){
       if(!existing.has(item.id)) merged.push(item);
       else{
         const idx = merged.findIndex(x=>x.id===item.id);
-        if(idx >= 0){
-          const keep = merged[idx];
-          merged[idx] = {
-            ...item,
-            // user fields preserved
-            status: keep.status ?? "none",
-            buyPrice: keep.buyPrice ?? null,
-            marketPrice: keep.marketPrice ?? null,
-            notes: keep.notes ?? "",
-            condition: keep.condition ?? "ok",
-            complete: keep.complete ?? "unknown",
-            // photo only for custom items; but keep if exists (in case you imported it)
-            photoDataUrl: keep.photoDataUrl || null,
-            tags: Array.isArray(keep.tags) ? keep.tags : item.tags
-          };
-        }
+        const keep = merged[idx];
+        merged[idx] = {
+          ...item,
+          status: keep.status ?? "none",
+          buyPrice: keep.buyPrice ?? null,
+          marketPrice: keep.marketPrice ?? null,
+          notes: keep.notes ?? "",
+          condition: keep.condition ?? "ok",
+          complete: keep.complete ?? "unknown",
+          photoDataUrl: keep.photoDataUrl || null,
+          tags: Array.isArray(keep.tags) ? keep.tags : item.tags
+        };
       }
     }
     return merged;
   }
-
   function loadDB(){
     try{
       const raw = localStorage.getItem(LS_KEY);
@@ -892,7 +680,7 @@
   }
   function saveDB(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
 
-  // ====== popup ======
+  // ====== popup near input ======
   let errorPopEl = null;
   let errorPopTimer = null;
   function showErrorNear(el, message){
@@ -920,15 +708,8 @@
     errorPopTimer = setTimeout(()=> errorPopEl.classList.remove("show"), 2200);
   }
 
-  // ====== STATE ======
-  let db = loadDB();
-  let view = "all";
-  let editingId = null;
-  let pendingPhotoDataUrl = null; // фото из модалки (для custom)
-
   // ====== DOM ======
-  const $ = (s) => document.querySelector(s);
-
+  const $ = (s)=>document.querySelector(s);
   const listEl = $("#list");
   const emptyEl = $("#empty");
   const statsEl = $("#stats");
@@ -945,7 +726,6 @@
   const importFile = $("#importFile");
   const langBtn = $("#langBtn");
   const currencyEl = $("#currency");
-
   const tabs = [...document.querySelectorAll(".tab")];
 
   const modal = $("#modal");
@@ -960,10 +740,11 @@
   const lockedHint = $("#lockedHint");
   const fieldChar = $("#fieldChar");
 
-  // photo
+  // photo UI
   const photoBlock = $("#photoBlock");
   const photoInput = $("#f_photo");
   const photoPreview = $("#photoPreview");
+  const pickPhotoBtn = $("#pickPhotoBtn");
   const clearPhotoBtn = $("#clearPhotoBtn");
 
   const f = {
@@ -982,59 +763,15 @@
     tags: $("#f_tags"),
   };
 
-  function esc(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+  // ====== STATE ======
+  let db = loadDB();
+  let view = "all";
+  let editingId = null;
+  let pendingPhotoDataUrl = null;
 
   function displayName(item){
     if(lang === "ru") return item.name_ru || item.name || "";
     return item.name_en || item.name || "";
-  }
-
-  function condLabel(c){
-    if(c==="new") return t("c_new");
-    if(c==="good") return t("c_good");
-    if(c==="ok") return t("c_ok");
-    if(c==="bad") return t("c_bad");
-    return t("dash");
-  }
-  function condClass(c){
-    if(c==="new" || c==="good") return "ok";
-    if(c==="ok") return "warn";
-    if(c==="bad") return "bad";
-    return "";
-  }
-  function completeLabel(v){
-    if(v==="full") return t("comp_full");
-    if(v==="partial") return t("comp_partial");
-    if(v==="nude") return t("comp_nude");
-    if(v==="unknown") return t("comp_unknown");
-    return t("dash");
-  }
-  function statusLabel(s){
-    if(s==="wish") return t("st_wish");
-    if(s==="owned") return t("st_owned");
-    return t("status_catalog");
-  }
-
-  function matchesQuery(item, q){
-    if(!q) return true;
-    const hay = [
-      displayName(item),
-      item.name || "",
-      item.name_ru || "",
-      item.name_en || "",
-      item.brand, item.line, item.character,
-      item.notes, (item.tags||[]).join(" "),
-      String(item.year ?? ""),
-      item.type
-    ].join(" ").toLowerCase();
-    return hay.includes(q.toLowerCase().trim());
   }
 
   function rebuildBrandFilter(){
@@ -1044,7 +781,7 @@
     for(const b of brands){
       const opt = document.createElement("option");
       opt.value = b;
-      opt.textContent = (b === "all") ? t("brand_all") : b;
+      opt.textContent = (b === "all") ? "Все бренды" : b;
       brandEl.appendChild(opt);
     }
     brandEl.value = brands.includes(current) ? current : "all";
@@ -1054,205 +791,74 @@
     const showExtra = (view !== "all");
     typeFilterEl.classList.toggle("hide", !showExtra);
     conditionEl.classList.toggle("hide", !showExtra);
-
     if(!showExtra){
       typeFilterEl.value = "all";
       conditionEl.value = "all";
     }
   }
 
+  function matchesQuery(item, q){
+    if(!q) return true;
+    const hay = [
+      displayName(item),
+      item.name || "", item.name_ru || "", item.name_en || "",
+      item.brand, item.line, item.character,
+      item.notes, (item.tags||[]).join(" "),
+      String(item.year ?? ""),
+      item.type
+    ].join(" ").toLowerCase();
+    return hay.includes(q.toLowerCase().trim());
+  }
+
   function getFiltered(){
     const q = qEl.value.trim();
     const b = brandEl.value;
-    const typeF = typeFilterEl.value;
-    const c = conditionEl.value;
-
     let arr = db.slice();
 
-    if(view === "all"){
-      arr = arr.filter(x => (x.type || "doll") === "doll"); // аксессуары не в каталоге
-    } else if(view === "wish"){
-      arr = arr.filter(x => x.status === "wish");
-    } else {
-      arr = arr.filter(x => x.status === "owned");
-    }
+    if(view === "all") arr = arr.filter(x => (x.type || "doll") === "doll");
+    else if(view === "wish") arr = arr.filter(x => x.status === "wish");
+    else arr = arr.filter(x => x.status === "owned");
 
     arr = arr.filter(x => matchesQuery(x, q));
     if(b !== "all") arr = arr.filter(x => x.brand === b);
-
-    if(view !== "all" && typeF !== "all") arr = arr.filter(x => (x.type || "doll") === typeF);
-    if(view !== "all" && c !== "all") arr = arr.filter(x => x.condition === c);
-
-    const s = sortEl.value;
-    const byName = (a,b)=> (displayName(a)||"").localeCompare(displayName(b)||"", (lang==="ru"?"ru":"en"));
-
-    if(s === "recent") arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    else if(s === "market_desc") arr.sort((a,b)=>(Number(b.marketPrice)||-1)-(Number(a.marketPrice)||-1));
-    else if(s === "market_asc") arr.sort((a,b)=>(Number(a.marketPrice)||1e18)-(Number(b.marketPrice)||1e18));
-    else if(s === "buy_desc") arr.sort((a,b)=>(Number(b.buyPrice)||-1)-(Number(a.buyPrice)||-1));
-    else if(s === "buy_asc") arr.sort((a,b)=>(Number(a.buyPrice)||1e18)-(Number(b.buyPrice)||1e18));
-    else if(s === "name_asc") arr.sort(byName);
-    else if(s === "name_desc") arr.sort((a,b)=>byName(b,a));
-
     return arr;
-  }
-
-  function setStats(visible){
-    const total = db.length;
-    const wish = db.filter(x=>x.status==="wish").length;
-    const owned = db.filter(x=>x.status==="owned").length;
-
-    const mode =
-      view === "all" ? t("tab_all") :
-      view === "wish" ? t("tab_wish") :
-      t("tab_owned");
-
-    statsEl.textContent = `${mode}: ${visible}/${total} • wish: ${wish} • owned: ${owned}`;
   }
 
   function render(){
     rebuildBrandFilter();
     toggleControlsForView();
-
     const arr = getFiltered();
+
     listEl.innerHTML = "";
     emptyEl.style.display = arr.length ? "none" : "block";
-    setStats(arr.length);
+    statsEl.textContent = `${view}: ${arr.length}/${db.length}`;
 
     for(const it of arr){
       const card = document.createElement("article");
       card.className = "card";
-
-      const cond = condLabel(it.condition);
-      const condCls = condClass(it.condition);
-
-      const title = displayName(it) || (lang==="ru" ? "(без названия)" : "(no title)");
-      const line = it.line || t("dash");
-      const brand = it.brand || t("dash");
-      const character = it.character || t("dash");
-      const year = (it.year ?? t("dash"));
-
-      const meta2 = (view === "all")
-        ? `${t("year")}: ${year} • ${t("status")}: ${statusLabel(it.status)}`
-        : `${t("year")}: ${year} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`;
-
-      const meta1 = ((it.type || "doll") === "accessory")
-        ? `${brand} • ${line}`
-        : `${brand} • ${line} • ${character}`;
-
-      const typeBadge = (view === "all")
-        ? ""
-        : ((it.type || "doll") === "accessory" ? t("type_accessory") : t("type_doll"));
-
-      // photo: показываем если есть (custom)
       const photo = it.photoDataUrl || null;
       const thumbClass = photo ? "thumb hasPhoto" : "thumb";
-      const thumbStyle = photo ? `style="background-image:url('${esc(photo)}')"` : "";
+      const thumbStyle = photo ? `style="background-image:url('${photo.replaceAll("'","\\'")}')"` : "";
 
       card.innerHTML = `
         <div class="${thumbClass}" ${thumbStyle}>
-          <span class="badge ${condCls}">${esc(cond)}</span>
-          <span class="badge">${esc(typeBadge || statusLabel(it.status))}</span>
+          <span class="badge">—</span>
+          <span class="badge">${it.status || "none"}</span>
         </div>
         <div class="body">
-          <div class="titleRow">
-            <h3 class="title">${esc(title)}</h3>
-          </div>
-          <div class="metaLine">${esc(meta1)}</div>
-          <div class="metaLine">${esc(meta2)}</div>
-
+          <h3 class="title">${(displayName(it) || "(без названия)").replaceAll("<","&lt;")}</h3>
           <div class="money">
-            <span>${esc(t("buy"))}: <b>${esc(formatMoney(it.buyPrice))}</b></span>
-            <span>${esc(t("market"))}: <b>${esc(formatMoney(it.marketPrice))}</b></span>
+            <span>Покупка: <b>${formatMoney(it.buyPrice)}</b></span>
+            <span>Рынок: <b>${formatMoney(it.marketPrice)}</b></span>
           </div>
-
           <div class="actions">
-            <button class="btnGhost" data-action="toggleWish" data-id="${it.id}">
-              ${it.status === "wish" ? esc(t("btn_from_wish")) : esc(t("btn_to_wish"))}
-            </button>
-            <button class="btnGhost" data-action="toggleOwned" data-id="${it.id}">
-              ${it.status === "owned" ? esc(t("btn_from_owned")) : esc(t("btn_to_owned"))}
-            </button>
-            <button class="btn" data-action="edit" data-id="${it.id}">${esc(t("btn_edit"))}</button>
+            <button class="btn" data-action="edit" data-id="${it.id}">Редактировать</button>
           </div>
         </div>
       `;
       listEl.appendChild(card);
     }
   }
-
-  function applyLang(){
-    document.documentElement.lang = lang;
-    document.title = t("title");
-
-    $("#ui_title").textContent = t("title");
-    $("#ui_sub").textContent = t("sub");
-    $("#tab_all").textContent = t("tab_all");
-    $("#tab_wish").textContent = t("tab_wish");
-    $("#tab_owned").textContent = t("tab_owned");
-    $("#addBtn").textContent = t("add");
-    $("#q").placeholder = t("q_ph");
-    $("#exportBtn").textContent = t("export");
-    $("#importBtn").textContent = t("import");
-    $("#ui_offline").textContent = t("offline");
-    $("#empty").textContent = t("empty");
-    $("#ui_footer").textContent = t("footer");
-
-    const allBrand = [...brandEl.options].find(o => o.value === "all");
-    if(allBrand) allBrand.textContent = t("brand_all");
-
-    [...typeFilterEl.options].forEach(o=>{
-      if(o.value==="all") o.textContent = t("type_all");
-      if(o.value==="doll") o.textContent = t("type_doll");
-      if(o.value==="accessory") o.textContent = t("type_accessory");
-    });
-
-    [...conditionEl.options].forEach(o=>{
-      if(o.value==="all") o.textContent = t("condition_all");
-      if(o.value==="new") o.textContent = t("c_new");
-      if(o.value==="good") o.textContent = t("c_good");
-      if(o.value==="ok") o.textContent = t("c_ok");
-      if(o.value==="bad") o.textContent = t("c_bad");
-    });
-
-    const sortMap = {
-      recent: t("sort_recent"),
-      market_desc: t("sort_market_desc"),
-      market_asc: t("sort_market_asc"),
-      buy_desc: t("sort_buy_desc"),
-      buy_asc: t("sort_buy_asc"),
-      name_asc: t("sort_name_asc"),
-      name_desc: t("sort_name_desc")
-    };
-    [...sortEl.options].forEach(o=>{ if(sortMap[o.value]) o.textContent = sortMap[o.value]; });
-
-    // modal labels
-    $("#l_photo").textContent = t("l_photo");
-    $("#clearPhotoBtn").textContent = t("clear_photo");
-    $("#h_photo").textContent = t("h_photo");
-
-    $("#h_buy").textContent = t("h_buy");
-    $("#h_market").textContent = t("h_market");
-
-    const curLabel = currencyName[currency] ? currencyName[currency][lang] : currency;
-    $("#l_buy").textContent = `${t("l_buy")} (${curLabel})`;
-    $("#l_market").textContent = `${t("l_market")} (${curLabel})`;
-
-    lockedHint.textContent = t("lockedHint");
-
-    render();
-  }
-
-  // ====== Tabs ======
-  function setView(next){
-    view = next;
-    for(const tbtn of tabs){
-      const selected = tbtn.dataset.view === view;
-      tbtn.setAttribute("aria-selected", selected ? "true" : "false");
-    }
-    render();
-  }
-  tabs.forEach(tbtn => tbtn.addEventListener("click", ()=> setView(tbtn.dataset.view)));
 
   // ====== Lock rules ======
   function setLock(el, locked){
@@ -1262,7 +868,6 @@
   }
 
   function lockForPrebuilt(){
-    // catalog fields locked
     setLock(f.type, true);
     setLock(f.name, true);
     setLock(f.brand, true);
@@ -1273,7 +878,6 @@
     setLock(yearInc, true);
     setLock(f.tags, true);
 
-    // user fields unlocked
     setLock(f.status, false);
     setLock(f.condition, false);
     setLock(f.complete, false);
@@ -1281,13 +885,13 @@
     setLock(f.market, false);
     setLock(f.notes, false);
 
-    // фото: запрещено для каталога
     photoBlock.classList.add("hide");
     pendingPhotoDataUrl = null;
-    photoPreview.style.backgroundImage = "";
+    setPhotoPreview(null);
     photoInput.value = "";
 
     lockedHint.style.display = "block";
+    lockedHint.textContent = "Это запись из каталога. Фото — только у своих записей.";
   }
 
   function unlockForCustom(){
@@ -1296,9 +900,7 @@
       f.status,f.condition,f.complete,f.buy,f.market,f.notes
     ].forEach(el => setLock(el, false));
 
-    // фото: доступно для custom
     photoBlock.classList.remove("hide");
-
     lockedHint.style.display = "none";
   }
 
@@ -1326,59 +928,6 @@
   }
 
   // ====== Modal ======
-  function openModal(mode, item){
-    modal.setAttribute("aria-hidden","false");
-    document.body.style.overflow = "hidden";
-
-    pendingPhotoDataUrl = null;
-    photoInput.value = "";
-    setPhotoPreview(null);
-
-    if(mode === "add"){
-      editingId = null;
-      mTitle.textContent = t("m_add");
-      deleteBtn.style.display = "inline-block";
-
-      fillForm({
-        type: "doll",
-        name:"", brand:"Monster High", line:"", character:"", year:"",
-        condition:"good", complete:"full", status:"none",
-        buyPrice:"", marketPrice:"", notes:"", tags:[],
-        photoDataUrl: null
-      });
-
-      unlockForCustom();
-      applyTypeUI();
-
-    } else {
-      editingId = item.id;
-      mTitle.textContent = t("m_edit");
-      deleteBtn.style.display = item.isPrebuilt ? "none" : "inline-block";
-
-      fillForm(item);
-
-      if(item.isPrebuilt){
-        lockForPrebuilt();
-      }else{
-        unlockForCustom();
-        // подставляем текущее фото (если есть)
-        pendingPhotoDataUrl = item.photoDataUrl || null;
-        setPhotoPreview(pendingPhotoDataUrl);
-      }
-
-      applyTypeUI();
-    }
-
-    applyLang();
-  }
-
-  function closeModal(){
-    modal.setAttribute("aria-hidden","true");
-    document.body.style.overflow = "";
-    editingId = null;
-    pendingPhotoDataUrl = null;
-  }
-
   function fillForm(item){
     f.type.value = item.type || "doll";
     f.name.value = displayName(item) || item.name || "";
@@ -1393,23 +942,58 @@
     f.market.value = item.marketPrice ?? "";
     f.notes.value = item.notes ?? "";
     f.tags.value = (item.tags || []).join(", ");
+  }
 
-    // photo only custom
-    if(!item.isPrebuilt && item.photoDataUrl){
-      pendingPhotoDataUrl = item.photoDataUrl;
-      setPhotoPreview(pendingPhotoDataUrl);
+  function openModal(mode, item){
+    modal.setAttribute("aria-hidden","false");
+    document.body.style.overflow = "hidden";
+
+    pendingPhotoDataUrl = null;
+    photoInput.value = "";
+    setPhotoPreview(null);
+
+    if(mode === "add"){
+      editingId = null;
+      mTitle.textContent = "Добавить";
+      deleteBtn.style.display = "none";
+      fillForm({
+        type:"doll", name:"", brand:"Monster High", line:"", character:"", year:"",
+        condition:"good", complete:"full", status:"none",
+        buyPrice:"", marketPrice:"", notes:"", tags:[], photoDataUrl:null
+      });
+      unlockForCustom();
+      applyTypeUI();
+    }else{
+      editingId = item.id;
+      mTitle.textContent = "Редактировать";
+      deleteBtn.style.display = item.isPrebuilt ? "none" : "inline-block";
+      fillForm(item);
+
+      if(item.isPrebuilt){
+        lockForPrebuilt();
+      }else{
+        unlockForCustom();
+        pendingPhotoDataUrl = item.photoDataUrl || null;
+        setPhotoPreview(pendingPhotoDataUrl);
+      }
+      applyTypeUI();
     }
+
+    // ✅ после выбора фото/действий можно пролистывать модалку (она теперь скроллится внутри)
+  }
+
+  function closeModal(){
+    modal.setAttribute("aria-hidden","true");
+    document.body.style.overflow = "";
+    editingId = null;
+    pendingPhotoDataUrl = null;
   }
 
   function readForm(){
     const year = f.year.value === "" ? null : Number(f.year.value);
     const buy = f.buy.value === "" ? null : Number(f.buy.value);
     const market = f.market.value === "" ? null : Number(f.market.value);
-
-    const tags = f.tags.value
-      .split(",")
-      .map(x=>x.trim())
-      .filter(Boolean);
+    const tags = f.tags.value.split(",").map(x=>x.trim()).filter(Boolean);
 
     return {
       type: f.type.value,
@@ -1429,40 +1013,16 @@
     };
   }
 
-  // ====== CRUD ======
-  function addItem(){
-    openModal("add", null);
-    setTimeout(()=> f.name.focus(), 0);
-  }
-
-  function editItem(id){
-    const item = db.find(x => x.id === id);
-    if(!item) return;
-    openModal("edit", item);
-    setTimeout(()=> (item.isPrebuilt ? f.status.focus() : f.name.focus()), 0);
-  }
-
   function saveItem(){
     const data = readForm();
-
-    if(!editingId && view === "all" && data.type === "accessory"){
-      showErrorNear(f.type, t("err_accessory_in_catalog"));
-      return;
-    }
-
-    if(data.type === "accessory" && data.status === "none"){
-      data.status = "wish";
-    }
 
     if(editingId){
       const idx = db.findIndex(x=>x.id===editingId);
       if(idx === -1) return;
-
       const current = db[idx];
 
       if(current.isPrebuilt){
-        db[idx] = {
-          ...current,
+        db[idx] = { ...current,
           status: data.status,
           condition: data.condition,
           complete: data.complete,
@@ -1470,14 +1030,13 @@
           marketPrice: data.marketPrice,
           notes: data.notes
         };
-      } else {
+      }else{
         if(!data.name){
-          showErrorNear(f.name, t("err_name_required"));
+          showErrorNear(f.name, "Название пустое.");
           f.name.focus();
           return;
         }
-        db[idx] = {
-          ...current,
+        db[idx] = { ...current,
           type: data.type,
           name: data.name,
           brand: data.brand,
@@ -1496,7 +1055,7 @@
       }
     } else {
       if(!data.name){
-        showErrorNear(f.name, t("err_name_required"));
+        showErrorNear(f.name, "Название пустое.");
         f.name.focus();
         return;
       }
@@ -1526,113 +1085,6 @@
     render();
   }
 
-  function deleteItem(){
-    if(!editingId) return;
-    const item = db.find(x=>x.id===editingId);
-    if(item && item.isPrebuilt) return;
-
-    const ok = confirm(t("confirm_delete"));
-    if(!ok) return;
-
-    db = db.filter(x=>x.id !== editingId);
-    saveDB(db);
-    closeModal();
-    render();
-  }
-
-  function toggleWish(id){
-    const item = db.find(x=>x.id===id);
-    if(!item) return;
-
-    if((item.type||"doll")==="accessory" && item.status==="none") item.status = "wish";
-    else item.status = (item.status === "wish") ? "none" : "wish";
-    if((item.type||"doll")==="accessory" && item.status==="none") item.status = "wish";
-
-    saveDB(db);
-    render();
-  }
-
-  function toggleOwned(id){
-    const item = db.find(x=>x.id===id);
-    if(!item) return;
-
-    item.status = (item.status === "owned") ? "none" : "owned";
-    if((item.type||"doll")==="accessory" && item.status==="none") item.status = "wish";
-
-    saveDB(db);
-    render();
-  }
-
-  // ====== Export/Import ======
-  function exportJSON(){
-    const payload = {
-      version: 5,
-      lang,
-      currency,
-      exportedAt: new Date().toISOString(),
-      items: db
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "collector_catalog_export.json";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function importJSONFile(file){
-    const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const parsed = JSON.parse(String(reader.result || ""));
-        const arr = Array.isArray(parsed) ? parsed : parsed.items;
-        if(!Array.isArray(arr)) throw new Error("bad format");
-
-        if(parsed && typeof parsed === "object"){
-          if(typeof parsed.lang === "string") lang = (parsed.lang === "en" ? "en" : "ru");
-          if(typeof parsed.currency === "string" && allowedCurrencies.includes(parsed.currency)) currency = parsed.currency;
-          localStorage.setItem(LS_LANG, lang);
-          localStorage.setItem(LS_CUR, currency);
-          currencyEl.value = currency;
-        }
-
-        const norm = arr.map(x => ({
-          id: x.id || uid(),
-          createdAt: x.createdAt || Date.now(),
-          isPrebuilt: !!x.isPrebuilt,
-          type: (x.type === "accessory") ? "accessory" : "doll",
-          name: x.name || "",
-          name_ru: x.name_ru || "",
-          name_en: x.name_en || "",
-          brand: x.brand || "Другие",
-          line: x.line || "",
-          character: x.character || "",
-          year: x.year ?? null,
-          condition: x.condition || "ok",
-          complete: x.complete || "unknown",
-          status: (x.status==="wish"||x.status==="owned"||x.status==="none") ? x.status : "none",
-          buyPrice: (x.buyPrice == null) ? null : Number(x.buyPrice),
-          marketPrice: (x.marketPrice == null) ? null : Number(x.marketPrice),
-          notes: x.notes || "",
-          tags: Array.isArray(x.tags) ? x.tags : [],
-          photoDataUrl: x.photoDataUrl || null
-        }));
-
-        db = ensurePrebuilt(norm);
-        saveDB(db);
-        closeModal();
-        applyLang();
-        showErrorNear(qEl, t("ok_import"));
-      }catch{
-        showErrorNear(qEl, t("err_import"));
-      }
-    };
-    reader.readAsText(file);
-  }
-
   // ====== Year stepper ======
   function clampYear(y){
     const min = Number(f.year.min || 1950);
@@ -1649,75 +1101,42 @@
   }
 
   // ====== EVENTS ======
-  addBtn.addEventListener("click", addItem);
-  exportBtn.addEventListener("click", exportJSON);
-
-  importBtn.addEventListener("click", () => importFile.click());
-  importFile.addEventListener("change", (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(file) importJSONFile(file);
-    importFile.value = "";
-  });
-
-  qEl.addEventListener("input", render);
-  brandEl.addEventListener("change", render);
-  typeFilterEl.addEventListener("change", render);
-  conditionEl.addEventListener("change", render);
-  sortEl.addEventListener("change", render);
-
-  listEl.addEventListener("click", (e)=>{
-    const btn = e.target.closest("[data-action]");
-    if(!btn) return;
-    const action = btn.dataset.action;
-    const id = btn.dataset.id;
-    if(action === "edit") editItem(id);
-    if(action === "toggleWish") toggleWish(id);
-    if(action === "toggleOwned") toggleOwned(id);
-  });
-
+  addBtn.addEventListener("click", ()=> openModal("add", null));
   mClose.addEventListener("click", closeModal);
   cancelBtn.addEventListener("click", closeModal);
   saveBtn.addEventListener("click", saveItem);
-  deleteBtn.addEventListener("click", deleteItem);
 
   modal.addEventListener("click", (e)=>{ if(e.target === modal) closeModal(); });
   document.addEventListener("keydown", (e)=>{
     if(e.key === "Escape" && modal.getAttribute("aria-hidden")==="false") closeModal();
   });
 
-  // language toggle (also switches catalog doll names RU/EN)
-  langBtn.addEventListener("click", ()=>{
-    lang = (lang === "ru") ? "en" : "ru";
-    localStorage.setItem(LS_LANG, lang);
-    applyLang();
-  });
-
-  // currency
-  currencyEl.value = currency;
-  currencyEl.addEventListener("change", ()=>{
-    const v = currencyEl.value;
-    if(allowedCurrencies.includes(v)){
-      currency = v;
-      localStorage.setItem(LS_CUR, currency);
-      applyLang();
+  listEl.addEventListener("click", (e)=>{
+    const btn = e.target.closest("[data-action]");
+    if(!btn) return;
+    const id = btn.dataset.id;
+    if(btn.dataset.action === "edit"){
+      const item = db.find(x=>x.id===id);
+      if(item) openModal("edit", item);
     }
   });
 
-  // year stepper
+  qEl.addEventListener("input", render);
+  brandEl.addEventListener("change", render);
+
   yearDec.addEventListener("click", ()=> stepYear(-1));
   yearInc.addEventListener("click", ()=> stepYear(+1));
-
-  // type ui
   f.type.addEventListener("change", applyTypeUI);
 
-  // photo input (custom only)
+  // ✅ новый поток выбора фото
+  pickPhotoBtn.addEventListener("click", ()=> photoInput.click());
+
   photoInput.addEventListener("change", async ()=>{
     const file = photoInput.files && photoInput.files[0];
     if(!file) return;
 
-    // простая защита по размеру (можно править)
     if(file.size > 2.5 * 1024 * 1024){
-      showErrorNear(photoInput, t("err_photo_too_big"));
+      showErrorNear(pickPhotoBtn, "Фото слишком большое. Возьми поменьше (до ~1–2 МБ).");
       photoInput.value = "";
       return;
     }
@@ -1725,9 +1144,7 @@
       const dataUrl = await fileToDataUrl(file);
       pendingPhotoDataUrl = dataUrl;
       setPhotoPreview(dataUrl);
-    }catch{
-      // молча
-    }
+    }catch{}
   });
 
   clearPhotoBtn.addEventListener("click", ()=>{
@@ -1736,8 +1153,31 @@
     setPhotoPreview(null);
   });
 
-  // ====== START ======
-  applyLang();
+  // Tabs (минимально)
+  tabs.forEach(tbtn => tbtn.addEventListener("click", ()=>{
+    view = tbtn.dataset.view;
+    tabs.forEach(x=>x.setAttribute("aria-selected", x===tbtn ? "true":"false"));
+    render();
+  }));
+
+  currencyEl.value = currency;
+  currencyEl.addEventListener("change", ()=>{
+    const v = currencyEl.value;
+    if(allowedCurrencies.includes(v)){
+      currency = v;
+      localStorage.setItem(LS_CUR, currency);
+      render();
+    }
+  });
+
+  langBtn.addEventListener("click", ()=>{
+    lang = (lang === "ru") ? "en" : "ru";
+    localStorage.setItem(LS_LANG, lang);
+    render();
+  });
+
+  // Init
+  render();
 </script>
 </body>
 </html>
