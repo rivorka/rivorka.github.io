@@ -262,7 +262,7 @@
       transform: rotate(45deg);
     }
 
-    /* Year "redesign": stepper-style control (same palette, new UX) */
+    /* Year stepper */
     .yearPicker{
       display:flex;
       align-items:center;
@@ -296,10 +296,20 @@
       border-radius: 14px;
       padding: 10px 12px;
     }
-    /* remove native spinners where possible */
     input.yearInput::-webkit-outer-spin-button,
     input.yearInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input.yearInput[type=number]{ -moz-appearance: textfield; }
+
+    /* Locked fields (prebuilt catalog items) */
+    .lockedHint{
+      margin-top: 6px;
+      font-size: 12px;
+      color: rgba(159,176,208,.80);
+    }
+    .isLocked{
+      opacity: .55;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 
@@ -322,7 +332,6 @@
           <button class="tab" id="tab_owned" role="tab" aria-selected="false" data-view="owned">Коллекция</button>
         </div>
 
-        <!-- валюта (новая функция) -->
         <select class="btnGhost" id="currency" title="Currency" style="padding: 11px 12px;">
           <option value="CZK">CZK</option>
           <option value="USD">USD</option>
@@ -331,9 +340,9 @@
           <option value="RUB">RUB</option>
         </select>
 
-        <!-- язык -->
         <button class="btnGhost" id="langBtn" title="Switch language">RU / EN</button>
 
+        <!-- оставил кнопку: можно будет позже разрешить “кастомные” записи -->
         <button class="btn" id="addBtn">＋ Добавить</button>
       </div>
     </div>
@@ -394,6 +403,7 @@
         <div class="field">
           <label id="l_name">Название (как хочешь)</label>
           <input id="f_name" placeholder="Напр: Draculaura базовая" />
+          <div class="lockedHint" id="lockedHint" style="display:none;">Это предзаготовка каталога: меняй только статус, цену покупки и заметки.</div>
         </div>
         <div class="field">
           <label id="l_brand">Бренд</label>
@@ -416,9 +426,7 @@
 
         <div class="field">
           <label id="l_year">Год</label>
-
-          <!-- редизайн года: stepper -->
-          <div class="yearPicker">
+          <div class="yearPicker" id="yearPicker">
             <button class="yearBtn" id="yearDec" type="button" aria-label="Year minus">−</button>
             <input id="f_year" class="yearInput" type="number" min="1950" max="2100" placeholder="Напр: 2012" />
             <button class="yearBtn" id="yearInc" type="button" aria-label="Year plus">+</button>
@@ -489,10 +497,9 @@
   const LS_LANG = "collector_lang_v1";
   let lang = localStorage.getItem(LS_LANG) || "ru";
 
-  // ====== CURRENCY (новая функция) ======
+  // ====== CURRENCY ======
   const LS_CUR = "collector_currency_v1";
   let currency = localStorage.getItem(LS_CUR) || "CZK";
-
   const allowedCurrencies = ["USD","UAH","RUB","CZK","EUR"];
   if(!allowedCurrencies.includes(currency)) currency = "CZK";
 
@@ -504,9 +511,7 @@
     EUR: { ru: "евро",   en: "EUR" }
   };
 
-  function localeForLang(){
-    return (lang === "ru") ? "ru-RU" : "en-US";
-  }
+  function localeForLang(){ return (lang === "ru") ? "ru-RU" : "en-US"; }
 
   function formatMoney(n){
     if(n == null || n === "" || Number.isNaN(Number(n))) return t("dash");
@@ -518,7 +523,6 @@
         maximumFractionDigits: 0
       }).format(Number(n));
     }catch{
-      // fallback
       return String(Number(n)) + " " + currency;
     }
   }
@@ -549,17 +553,16 @@
       import: "Импорт JSON",
       offline: "Всё офлайн. Данные хранятся в браузере (localStorage).",
       empty: "Пусто. Добавь запись или измени фильтры.",
-      footer: "Если захочешь: можно легко подключить API/бд и фотки вместо заглушки.",
-
+      footer: "Дальше можно расширить каталог и подключить фото.",
       m_add: "Добавить",
       m_edit: "Редактировать",
-      l_name: "Название (как хочешь)",
+      l_name: "Название",
       name_ph: "Напр: Draculaura базовая",
       l_brand: "Бренд",
       l_line: "Линейка / серия",
-      line_ph: "Напр: G1 / Creeproduction / Signature...",
+      line_ph: "Напр: G1 базовая / Signature...",
       l_char: "Персонаж",
-      char_ph: "Напр: Frankie / Raven / Barbie...",
+      char_ph: "Напр: Frankie / Clawdeen...",
       l_year: "Год",
       year_ph: "Напр: 2012",
       l_condition: "Состояние",
@@ -577,15 +580,14 @@
       h_buy: "Если не покупала — оставь пустым.",
       l_market: "Средняя цена рынка",
       market_ph: "Напр: 1200",
-      h_market: "Сюда позже можно подключить авто-расчёт.",
+      h_market: "Можно заполнять позже.",
       l_notes: "Заметки",
-      notes_ph: "Дефекты, реставрация, где лежит, что докупить...",
+      notes_ph: "Состояние, дефекты, что докупить...",
       l_tags: "Теги (через запятую)",
-      tags_ph: "Напр: g1, rare, box, boots missing",
+      tags_ph: "Напр: g1, core, box",
       save: "Сохранить",
       cancel: "Отмена",
       del: "Удалить",
-
       year: "Год",
       complete: "Комплект",
       status: "Статус",
@@ -598,9 +600,8 @@
       btn_to_owned: "В коллекцию",
       btn_from_owned: "Убрать из коллекции",
       btn_edit: "Редактировать",
-
       confirm_delete: "Удалить запись? Это действие нельзя отменить.",
-      err_name_required: "Название пустое. Впиши хоть что-то 🙂",
+      err_name_required: "Название пустое. Впиши хоть что-то.",
       err_import: "Не смог импортировать JSON. Проверь файл/формат.",
       ok_import: "Импорт готов."
     },
@@ -629,17 +630,16 @@
       import: "Import JSON",
       offline: "Offline. Data is stored in the browser (localStorage).",
       empty: "No items. Add one or change filters.",
-      footer: "If you want: easy to plug in API/DB and real photos later.",
-
+      footer: "Next: expand the catalog and plug in photos.",
       m_add: "Add",
       m_edit: "Edit",
-      l_name: "Title (anything)",
-      name_ph: "e.g. Basic Draculaura",
+      l_name: "Title",
+      name_ph: "e.g. Core Draculaura",
       l_brand: "Brand",
       l_line: "Line / series",
-      line_ph: "e.g. G1 / Creeproduction / Signature...",
+      line_ph: "e.g. G1 Core / Signature...",
       l_char: "Character",
-      char_ph: "e.g. Frankie / Raven / Barbie...",
+      char_ph: "e.g. Frankie / Clawdeen...",
       l_year: "Year",
       year_ph: "e.g. 2012",
       l_condition: "Condition",
@@ -657,15 +657,14 @@
       h_buy: "Leave empty if not bought.",
       l_market: "Market average",
       market_ph: "e.g. 1200",
-      h_market: "You can plug auto-calculation later.",
+      h_market: "Fill later if you want.",
       l_notes: "Notes",
-      notes_ph: "Flaws, restoration, where it is, missing parts...",
+      notes_ph: "Condition, flaws, missing parts...",
       l_tags: "Tags (comma-separated)",
-      tags_ph: "e.g. g1, rare, box, boots missing",
+      tags_ph: "e.g. g1, core, box",
       save: "Save",
       cancel: "Cancel",
       del: "Delete",
-
       year: "Year",
       complete: "Complete",
       status: "Status",
@@ -678,7 +677,6 @@
       btn_to_owned: "Add to collection",
       btn_from_owned: "Remove from collection",
       btn_edit: "Edit",
-
       confirm_delete: "Delete this item? This cannot be undone.",
       err_name_required: "Title is empty. Enter something.",
       err_import: "Could not import JSON. Check file/format.",
@@ -688,181 +686,114 @@
 
   function t(key){ return (i18n[lang] && i18n[lang][key]) ? i18n[lang][key] : key; }
 
-  function applyLang(){
-    document.documentElement.lang = lang;
-    document.title = t("title");
-
-    document.getElementById("ui_title").textContent = t("title");
-    document.getElementById("ui_sub").textContent = t("sub");
-    document.getElementById("tab_all").textContent = t("tab_all");
-    document.getElementById("tab_wish").textContent = t("tab_wish");
-    document.getElementById("tab_owned").textContent = t("tab_owned");
-    document.getElementById("addBtn").textContent = t("add");
-    document.getElementById("q").placeholder = t("q_ph");
-    document.getElementById("exportBtn").textContent = t("export");
-    document.getElementById("importBtn").textContent = t("import");
-    document.getElementById("ui_offline").textContent = t("offline");
-    document.getElementById("empty").textContent = t("empty");
-    document.getElementById("ui_footer").textContent = t("footer");
-
-    // filters text
-    const brandSelect = document.getElementById("brand");
-    if(brandSelect){
-      const allOpt = [...brandSelect.options].find(o => o.value === "all");
-      if(allOpt) allOpt.textContent = t("brand_all");
-    }
-
-    const cond = document.getElementById("condition");
-    if(cond){
-      const map = { all: t("condition_all"), new: t("c_new"), good: t("c_good"), ok: t("c_ok"), bad: t("c_bad") };
-      [...cond.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
-    }
-
-    const sort = document.getElementById("sort");
-    if(sort){
-      const map = {
-        recent: t("sort_recent"),
-        market_desc: t("sort_market_desc"),
-        market_asc: t("sort_market_asc"),
-        buy_desc: t("sort_buy_desc"),
-        buy_asc: t("sort_buy_asc"),
-        name_asc: t("sort_name_asc"),
-        name_desc: t("sort_name_desc")
-      };
-      [...sort.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
-    }
-
-    // modal labels + placeholders
-    document.getElementById("mTitle").textContent = (editingId ? t("m_edit") : t("m_add"));
-    document.getElementById("l_name").textContent = t("l_name");
-    document.getElementById("f_name").placeholder = t("name_ph");
-    document.getElementById("l_brand").textContent = t("l_brand");
-    document.getElementById("l_line").textContent = t("l_line");
-    document.getElementById("f_line").placeholder = t("line_ph");
-    document.getElementById("l_char").textContent = t("l_char");
-    document.getElementById("f_char").placeholder = t("char_ph");
-    document.getElementById("l_year").textContent = t("l_year");
-    document.getElementById("f_year").placeholder = t("year_ph");
-    document.getElementById("l_condition").textContent = t("l_condition");
-    document.getElementById("l_complete").textContent = t("l_complete");
-    document.getElementById("l_status").textContent = t("l_status");
-
-    // currency-aware labels inside modal
-    const curLabel = currencyName[currency] ? currencyName[currency][lang] : currency;
-    document.getElementById("l_buy").textContent = `${t("l_buy")} (${curLabel})`;
-    document.getElementById("l_market").textContent = `${t("l_market")} (${curLabel})`;
-
-    document.getElementById("f_buy").placeholder = t("buy_ph");
-    document.getElementById("h_buy").textContent = t("h_buy");
-    document.getElementById("f_market").placeholder = t("market_ph");
-    document.getElementById("h_market").textContent = t("h_market");
-    document.getElementById("l_notes").textContent = t("l_notes");
-    document.getElementById("f_notes").placeholder = t("notes_ph");
-    document.getElementById("l_tags").textContent = t("l_tags");
-    document.getElementById("f_tags").placeholder = t("tags_ph");
-    document.getElementById("saveBtn").textContent = t("save");
-    document.getElementById("cancelBtn").textContent = t("cancel");
-    document.getElementById("deleteBtn").textContent = t("del");
-
-    // modal selects: condition
-    const fcond = document.getElementById("f_condition");
-    if(fcond){
-      const map = { new: t("c_new"), good: t("c_good"), ok: t("c_ok"), bad: t("c_bad") };
-      [...fcond.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
-    }
-    // modal selects: complete
-    const fcomp = document.getElementById("f_complete");
-    if(fcomp){
-      const map = { full: t("comp_full"), partial: t("comp_partial"), nude: t("comp_nude"), unknown: t("comp_unknown") };
-      [...fcomp.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
-    }
-    // modal selects: status
-    const fstat = document.getElementById("f_status");
-    if(fstat){
-      const map = { none: t("st_none"), wish: t("st_wish"), owned: t("st_owned") };
-      [...fstat.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
-    }
-
-    render();
-  }
-
   // ====== STORAGE ======
-  const LS_KEY = "collector_catalog_v1";
+  const LS_KEY = "collector_catalog_v2"; // bump version so prebuilt catalog can appear cleanly
 
-  // Example seed if empty
   function uid(){
     return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
   }
 
-  const seed = [
-    {
-      id: uid(),
-      createdAt: Date.now() - 1000*60*60*24*6,
-      name: "Draculaura — базовая",
-      brand: "Monster High",
-      line: "G1",
-      character: "Draculaura",
-      year: 2012,
-      condition: "good",
-      complete: "partial",
-      status: "owned",
-      buyPrice: 950,
-      marketPrice: 1400,
-      notes: "Чуть пушатся волосы. Не хватает одной серёжки.",
-      tags: ["g1","monster high","pink"]
-    },
-    {
-      id: uid(),
-      createdAt: Date.now() - 1000*60*60*24*2,
-      name: "Raven Queen — wishlist",
-      brand: "Ever After High",
-      line: "Signature",
-      character: "Raven Queen",
-      year: 2014,
-      condition: "good",
-      complete: "full",
-      status: "wish",
-      buyPrice: null,
-      marketPrice: 1800,
-      notes: "Хочу полный комплект и коробку если повезёт.",
-      tags: ["eah","wishlist","rare?"]
-    },
-    {
-      id: uid(),
-      createdAt: Date.now() - 1000*60*60*12,
-      name: "Outfit set",
-      brand: "Barbie",
-      line: "Fashion",
-      character: "—",
-      year: 2020,
-      condition: "new",
-      complete: "full",
+  // ====== PREBUILT CATALOG: Monster High base (G1 + G3) ======
+  function prebuiltCatalog(){
+    const brand = "Monster High";
+    const tags = ["monster high","base","core"];
+
+    // минимальный, но “готовый заранее” набор. Дальше можно расширять списком.
+    const g1 = [
+      { id:"mh_g1_core_draculaura", character:"Draculaura", name:"Draculaura — базовая (G1)", year:2010 },
+      { id:"mh_g1_core_frankie",    character:"Frankie Stein", name:"Frankie Stein — базовая (G1)", year:2010 },
+      { id:"mh_g1_core_clawdeen",   character:"Clawdeen Wolf", name:"Clawdeen Wolf — базовая (G1)", year:2010 },
+      { id:"mh_g1_core_lagoona",    character:"Lagoona Blue", name:"Lagoona Blue — базовая (G1)", year:2010 },
+      { id:"mh_g1_core_cleo",       character:"Cleo de Nile", name:"Cleo de Nile — базовая (G1)", year:2010 },
+      { id:"mh_g1_core_deuce",      character:"Deuce Gorgon", name:"Deuce Gorgon — базовая (G1)", year:2010 }
+    ].map(x => ({
+      id: x.id,
+      createdAt: 0,
+      isPrebuilt: true,
+      name: x.name,
+      brand,
+      line: "G1 базовая",
+      character: x.character,
+      year: x.year,
+      // для каталога можно держать “нейтральные” поля
+      condition: "ok",
+      complete: "unknown",
       status: "none",
-      buyPrice: 250,
-      marketPrice: 300,
-      notes: "Под 11.5\" формат.",
-      tags: ["barbie","outfit"]
+      buyPrice: null,
+      marketPrice: null,
+      notes: "",
+      tags: [...tags, "g1"]
+    }));
+
+    const g3 = [
+      { id:"mh_g3_core_draculaura", character:"Draculaura", name:"Draculaura — базовая (G3)", year:2022 },
+      { id:"mh_g3_core_frankie",    character:"Frankie Stein", name:"Frankie Stein — базовая (G3)", year:2022 },
+      { id:"mh_g3_core_clawdeen",   character:"Clawdeen Wolf", name:"Clawdeen Wolf — базовая (G3)", year:2022 },
+      { id:"mh_g3_core_lagoona",    character:"Lagoona Blue", name:"Lagoona Blue — базовая (G3)", year:2022 },
+      { id:"mh_g3_core_cleo",       character:"Cleo de Nile", name:"Cleo de Nile — базовая (G3)", year:2022 },
+      { id:"mh_g3_core_deuce",      character:"Deuce Gorgon", name:"Deuce Gorgon — базовая (G3)", year:2022 }
+    ].map(x => ({
+      id: x.id,
+      createdAt: 0,
+      isPrebuilt: true,
+      name: x.name,
+      brand,
+      line: "G3 базовая",
+      character: x.character,
+      year: x.year,
+      condition: "ok",
+      complete: "unknown",
+      status: "none",
+      buyPrice: null,
+      marketPrice: null,
+      notes: "",
+      tags: [...tags, "g3"]
+    }));
+
+    return [...g1, ...g3];
+  }
+
+  function ensurePrebuilt(db){
+    const base = prebuiltCatalog();
+    const existing = new Set(db.map(x => x.id));
+    const merged = db.slice();
+
+    for(const item of base){
+      if(!existing.has(item.id)) merged.push(item);
     }
-  ];
+
+    // стабильно: сортируем так, чтобы prebuilt (createdAt=0) шли сверху по имени
+    merged.sort((a,b)=>{
+      const ap = a.isPrebuilt ? 0 : 1;
+      const bp = b.isPrebuilt ? 0 : 1;
+      if(ap !== bp) return ap - bp;
+      return (a.name||"").localeCompare(b.name||"", "ru");
+    });
+
+    return merged;
+  }
 
   function loadDB(){
     try{
       const raw = localStorage.getItem(LS_KEY);
       if(!raw){
-        localStorage.setItem(LS_KEY, JSON.stringify(seed));
-        return seed.slice();
+        const init = ensurePrebuilt([]);
+        localStorage.setItem(LS_KEY, JSON.stringify(init));
+        return init;
       }
       const arr = JSON.parse(raw);
       if(!Array.isArray(arr)) throw new Error("bad db");
-      return arr;
+      const merged = ensurePrebuilt(arr);
+      if(merged.length !== arr.length) localStorage.setItem(LS_KEY, JSON.stringify(merged));
+      return merged;
     }catch{
-      localStorage.setItem(LS_KEY, JSON.stringify(seed));
-      return seed.slice();
+      const init = ensurePrebuilt([]);
+      localStorage.setItem(LS_KEY, JSON.stringify(init));
+      return init;
     }
   }
-  function saveDB(arr){
-    localStorage.setItem(LS_KEY, JSON.stringify(arr));
-  }
+
+  function saveDB(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
 
   // ====== small popup near input ======
   let errorPopEl = null;
@@ -916,13 +847,10 @@
   const importBtn = $("#importBtn");
   const importFile = $("#importFile");
   const langBtn = $("#langBtn");
-
   const currencyEl = $("#currency");
 
-  // tabs
   const tabs = [...document.querySelectorAll(".tab")];
 
-  // modal
   const modal = $("#modal");
   const mTitle = $("#mTitle");
   const mClose = $("#mClose");
@@ -930,11 +858,11 @@
   const cancelBtn = $("#cancelBtn");
   const deleteBtn = $("#deleteBtn");
 
-  // year stepper buttons
   const yearDec = $("#yearDec");
   const yearInc = $("#yearInc");
+  const yearPicker = $("#yearPicker");
+  const lockedHint = $("#lockedHint");
 
-  // form fields
   const f = {
     name: $("#f_name"),
     brand: $("#f_brand"),
@@ -950,7 +878,6 @@
     tags: $("#f_tags"),
   };
 
-  // ====== INIT FILTERS ======
   function rebuildBrandFilter(){
     const brands = ["all", ...Array.from(new Set(db.map(x => x.brand).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ru'))];
     const current = brandEl.value || "all";
@@ -964,7 +891,6 @@
     brandEl.value = brands.includes(current) ? current : "all";
   }
 
-  // ====== HELPERS ======
   function esc(s){
     return String(s ?? "")
       .replaceAll("&","&amp;")
@@ -1054,13 +980,11 @@
     statsEl.textContent = `${mode}: ${visible}/${total} • wish: ${wish} • owned: ${owned}`;
   }
 
-  // ====== RENDER ======
   function render(){
     rebuildBrandFilter();
 
     const arr = getFiltered();
     listEl.innerHTML = "";
-
     emptyEl.style.display = arr.length ? "none" : "block";
     setStats(arr.length);
 
@@ -1073,9 +997,7 @@
 
       const title = it.name || (lang==="ru" ? "(без названия)" : "(no title)");
       const meta1 = `${it.brand || t("dash")} • ${it.line || t("dash")} • ${it.character || t("dash")}`;
-
-      const meta2 =
-        `${t("year")}: ${it.year ?? t("dash")} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`;
+      const meta2 = `${t("year")}: ${it.year ?? t("dash")} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`;
 
       card.innerHTML = `
         <div class="thumb">
@@ -1105,12 +1027,39 @@
           </div>
         </div>
       `;
-
       listEl.appendChild(card);
     }
   }
 
-  // ====== TABS ======
+  function applyLang(){
+    document.documentElement.lang = lang;
+    document.title = t("title");
+
+    $("#ui_title").textContent = t("title");
+    $("#ui_sub").textContent = t("sub");
+    $("#tab_all").textContent = t("tab_all");
+    $("#tab_wish").textContent = t("tab_wish");
+    $("#tab_owned").textContent = t("tab_owned");
+    $("#addBtn").textContent = t("add");
+    $("#q").placeholder = t("q_ph");
+    $("#exportBtn").textContent = t("export");
+    $("#importBtn").textContent = t("import");
+    $("#ui_offline").textContent = t("offline");
+    $("#empty").textContent = t("empty");
+    $("#ui_footer").textContent = t("footer");
+
+    const allOpt = [...brandEl.options].find(o => o.value === "all");
+    if(allOpt) allOpt.textContent = t("brand_all");
+
+    // currency-aware modal labels
+    const curLabel = currencyName[currency] ? currencyName[currency][lang] : currency;
+    $("#l_buy").textContent = `${t("l_buy")} (${curLabel})`;
+    $("#l_market").textContent = `${t("l_market")} (${curLabel})`;
+
+    render();
+  }
+
+  // ====== tabs ======
   function setView(next){
     view = next;
     for(const tbtn of tabs){
@@ -1121,7 +1070,30 @@
   }
   tabs.forEach(tbtn => tbtn.addEventListener("click", ()=> setView(tbtn.dataset.view)));
 
-  // ====== MODAL LOGIC ======
+  // ====== lock/unlock fields for prebuilt ======
+  function setLocked(isLocked){
+    const lock = (el, locked) => {
+      el.disabled = locked;
+      if(locked) el.classList.add("isLocked");
+      else el.classList.remove("isLocked");
+    };
+
+    // “каталог заранее”: базовые поля блокируем, чтобы пользователь трогал только своё
+    lock(f.name, isLocked);
+    lock(f.brand, isLocked);
+    lock(f.line, isLocked);
+    lock(f.char, isLocked);
+    lock(f.year, isLocked);
+    lock(yearDec, isLocked);
+    lock(yearInc, isLocked);
+    lock(f.condition, isLocked);
+    lock(f.complete, isLocked);
+    lock(f.tags, isLocked);
+
+    lockedHint.style.display = isLocked ? "block" : "none";
+  }
+
+  // ====== modal ======
   function openModal(mode, item){
     modal.setAttribute("aria-hidden","false");
     document.body.style.overflow = "hidden";
@@ -1129,20 +1101,21 @@
     if(mode === "add"){
       mTitle.textContent = t("m_add");
       editingId = null;
-      deleteBtn.style.display = "none";
+      deleteBtn.style.display = "inline-block"; // для кастомных можно удалять
       fillForm({
         name:"", brand:"Monster High", line:"", character:"", year:"",
         condition:"good", complete:"full", status:"none",
         buyPrice:"", marketPrice:"", notes:"", tags:[]
       });
+      setLocked(false);
     } else {
       mTitle.textContent = t("m_edit");
       editingId = item.id;
-      deleteBtn.style.display = "inline-block";
+      deleteBtn.style.display = item.isPrebuilt ? "none" : "inline-block";
       fillForm(item);
+      setLocked(!!item.isPrebuilt);
     }
 
-    // обновить валютные подписи в модалке
     applyLang();
   }
 
@@ -1194,35 +1167,53 @@
   }
 
   // ====== CRUD ======
-  function addItem(){
-    openModal("add", null);
-    setTimeout(()=> f.name.focus(), 0);
-  }
+  function addItem(){ openModal("add", null); setTimeout(()=> f.name.focus(), 0); }
 
   function editItem(id){
     const item = db.find(x => x.id === id);
     if(!item) return;
     openModal("edit", item);
-    setTimeout(()=> f.name.focus(), 0);
+    setTimeout(()=> (item.isPrebuilt ? f.status.focus() : f.name.focus()), 0);
   }
 
   function saveItem(){
     const data = readForm();
 
-    if(!data.name){
-      showErrorNear(f.name, t("err_name_required"));
-      f.name.focus();
-      return;
-    }
-
+    // если редактируем prebuilt: сохраняем только пользовательские поля (status/buy/notes/market/condition/complete по желанию)
     if(editingId){
       const idx = db.findIndex(x=>x.id===editingId);
       if(idx === -1) return;
-      db[idx] = { ...db[idx], ...data };
+
+      const current = db[idx];
+      if(current.isPrebuilt){
+        db[idx] = {
+          ...current,
+          status: data.status,
+          buyPrice: data.buyPrice,
+          marketPrice: data.marketPrice,
+          notes: data.notes,
+          // опционально: пусть пользователь уточняет эти поля тоже
+          condition: data.condition,
+          complete: data.complete
+        };
+      }else{
+        if(!data.name){
+          showErrorNear(f.name, t("err_name_required"));
+          f.name.focus();
+          return;
+        }
+        db[idx] = { ...current, ...data };
+      }
     } else {
+      if(!data.name){
+        showErrorNear(f.name, t("err_name_required"));
+        f.name.focus();
+        return;
+      }
       db.unshift({
         id: uid(),
         createdAt: Date.now(),
+        isPrebuilt: false,
         ...data
       });
     }
@@ -1234,6 +1225,9 @@
 
   function deleteItem(){
     if(!editingId) return;
+    const item = db.find(x=>x.id===editingId);
+    if(item && item.isPrebuilt) return;
+
     const ok = confirm(t("confirm_delete"));
     if(!ok) return;
 
@@ -1262,7 +1256,7 @@
   // ====== EXPORT / IMPORT ======
   function exportJSON(){
     const payload = {
-      version: 1,
+      version: 2,
       lang,
       currency,
       exportedAt: new Date().toISOString(),
@@ -1287,7 +1281,6 @@
         const arr = Array.isArray(parsed) ? parsed : parsed.items;
         if(!Array.isArray(arr)) throw new Error("bad format");
 
-        // optional: import currency/lang if present
         if(parsed && typeof parsed === "object"){
           if(typeof parsed.lang === "string") lang = (parsed.lang === "en" ? "en" : "ru");
           if(typeof parsed.currency === "string" && allowedCurrencies.includes(parsed.currency)) currency = parsed.currency;
@@ -1299,6 +1292,7 @@
         const norm = arr.map(x => ({
           id: x.id || uid(),
           createdAt: x.createdAt || Date.now(),
+          isPrebuilt: !!x.isPrebuilt,
           name: x.name || "",
           brand: x.brand || "Другие",
           line: x.line || "",
@@ -1313,7 +1307,7 @@
           tags: Array.isArray(x.tags) ? x.tags : []
         }));
 
-        db = norm;
+        db = ensurePrebuilt(norm); // важно: после импорта снова гарантируем prebuilt
         saveDB(db);
         closeModal();
         applyLang();
@@ -1326,7 +1320,7 @@
     reader.readAsText(file);
   }
 
-  // ====== YEAR STEPPER (новая UX для года) ======
+  // ====== YEAR STEPPER ======
   function clampYear(y){
     const min = Number(f.year.min || 1950);
     const max = Number(f.year.max || 2100);
@@ -1334,11 +1328,11 @@
     return Math.min(max, Math.max(min, y));
   }
   function stepYear(delta){
+    if(f.year.disabled) return;
     const cur = (f.year.value === "" ? new Date().getFullYear() : Number(f.year.value));
     const next = clampYear(cur + delta);
     if(next == null) return;
     f.year.value = String(next);
-    f.year.dispatchEvent(new Event("input"));
   }
 
   // ====== EVENTS ======
@@ -1360,10 +1354,8 @@
   listEl.addEventListener("click", (e)=>{
     const btn = e.target.closest("[data-action]");
     if(!btn) return;
-
     const action = btn.dataset.action;
     const id = btn.dataset.id;
-
     if(action === "edit") editItem(id);
     if(action === "toggleWish") toggleWish(id);
     if(action === "toggleOwned") toggleOwned(id);
@@ -1374,14 +1366,11 @@
   saveBtn.addEventListener("click", saveItem);
   deleteBtn.addEventListener("click", deleteItem);
 
-  modal.addEventListener("click", (e)=>{
-    if(e.target === modal) closeModal();
-  });
+  modal.addEventListener("click", (e)=>{ if(e.target === modal) closeModal(); });
   document.addEventListener("keydown", (e)=>{
     if(e.key === "Escape" && modal.getAttribute("aria-hidden")==="false") closeModal();
   });
 
-  // Enter to save (in modal)
   modal.addEventListener("keydown", (e)=>{
     if(e.key === "Enter" && (e.target.tagName === "INPUT")){
       e.preventDefault();
@@ -1389,28 +1378,26 @@
     }
   });
 
-  // language toggle
   langBtn.addEventListener("click", ()=>{
     lang = (lang === "ru") ? "en" : "ru";
     localStorage.setItem(LS_LANG, lang);
     applyLang();
   });
 
-  // currency selection
   currencyEl.value = currency;
   currencyEl.addEventListener("change", ()=>{
     const v = currencyEl.value;
     if(allowedCurrencies.includes(v)){
       currency = v;
       localStorage.setItem(LS_CUR, currency);
-      applyLang(); // re-render + relabel modal fields
+      applyLang();
     }
   });
 
-  // year stepper buttons + keyboard support
   yearDec.addEventListener("click", ()=> stepYear(-1));
   yearInc.addEventListener("click", ()=> stepYear(+1));
   f.year.addEventListener("keydown", (e)=>{
+    if(f.year.disabled) return;
     if(e.key === "ArrowUp"){ e.preventDefault(); stepYear(+1); }
     if(e.key === "ArrowDown"){ e.preventDefault(); stepYear(-1); }
   });
