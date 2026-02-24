@@ -113,7 +113,7 @@
     main{padding: 18px 0 40px}
     .controls{
       display:grid;
-      grid-template-columns: 1.4fr .8fr .8fr .8fr auto auto;
+      grid-template-columns: 1.4fr .85fr .85fr .85fr .85fr auto auto;
       gap:10px;
       align-items:center;
       width:min(1100px, 100%);
@@ -228,7 +228,6 @@
     label{color: var(--muted); font-size: 12px}
     .help{color: rgba(159,176,208,.75); font-size: 12px}
     footer{color: rgba(159,176,208,.75); font-size: 12px; padding: 10px 0 40px}
-    a{color:inherit}
 
     /* small popup near input (replaces alert) */
     .errorPop{
@@ -310,6 +309,9 @@
       opacity: .55;
       cursor: not-allowed;
     }
+
+    /* helpers */
+    .hide{display:none !important;}
   </style>
 </head>
 
@@ -342,23 +344,33 @@
 
         <button class="btnGhost" id="langBtn" title="Switch language">RU / EN</button>
 
-        <!-- оставил кнопку: можно будет позже разрешить “кастомные” записи -->
         <button class="btn" id="addBtn">＋ Добавить</button>
       </div>
     </div>
 
     <div style="margin-top:12px;" class="controls" role="search">
       <input id="q" placeholder="Поиск: имя / персонаж / заметки / теги…" autocomplete="off"/>
+
       <select id="brand">
         <option value="all">Все бренды</option>
       </select>
-      <select id="condition">
+
+      <!-- type filter: only for wishlist/collection -->
+      <select id="typeFilter" class="hide">
+        <option value="all">Все типы</option>
+        <option value="doll">Куклы</option>
+        <option value="accessory">Аксессуары</option>
+      </select>
+
+      <!-- condition filter: only for wishlist/collection -->
+      <select id="condition" class="hide">
         <option value="all">Любое состояние</option>
         <option value="new">Новое</option>
         <option value="good">Хорошее</option>
         <option value="ok">Ок</option>
         <option value="bad">Плохое</option>
       </select>
+
       <select id="sort">
         <option value="recent">Сорт: недавние</option>
         <option value="market_desc">Средняя цена: ↓</option>
@@ -368,6 +380,7 @@
         <option value="name_asc">Имя: A→Я</option>
         <option value="name_desc">Имя: Я→A</option>
       </select>
+
       <button class="btnGhost" id="exportBtn">Экспорт JSON</button>
       <button class="btnGhost" id="importBtn">Импорт JSON</button>
       <input id="importFile" type="file" accept="application/json" hidden />
@@ -388,23 +401,33 @@
 </main>
 
 <footer class="wrap" id="ui_footer">
-  Если захочешь: можно легко подключить API/бд и фотки вместо заглушки.
+  Дальше можно расширить каталог и подключить фото.
 </footer>
 
-<!-- Modal: Add/Edit -->
+<!-- Modal -->
 <div class="modalBackdrop" id="modal" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
     <div class="modalTop">
-      <strong id="mTitle">Добавить</strong>
+      <strong id="mTitle">Редактировать</strong>
       <button class="x" id="mClose" aria-label="Закрыть">×</button>
     </div>
     <div class="modalContent">
       <div class="formGrid">
+
         <div class="field">
-          <label id="l_name">Название (как хочешь)</label>
-          <input id="f_name" placeholder="Напр: Draculaura базовая" />
-          <div class="lockedHint" id="lockedHint" style="display:none;">Это предзаготовка каталога: меняй только статус, цену покупки и заметки.</div>
+          <label id="l_type">Тип</label>
+          <select id="f_type">
+            <option value="doll">Кукла</option>
+            <option value="accessory">Аксессуар</option>
+          </select>
         </div>
+
+        <div class="field">
+          <label id="l_name">Название</label>
+          <input id="f_name" placeholder="Напр: Draculaura (Core)" />
+          <div class="lockedHint" id="lockedHint" style="display:none;">Это предзаготовка каталога: меняй статус, цену покупки, заметки и комплектность.</div>
+        </div>
+
         <div class="field">
           <label id="l_brand">Бренд</label>
           <select id="f_brand">
@@ -417,11 +440,12 @@
 
         <div class="field">
           <label id="l_line">Линейка / серия</label>
-          <input id="f_line" placeholder="Напр: G1 / Creeproduction / Signature..." />
+          <input id="f_line" placeholder="Напр: G1 базовая / Signature..." />
         </div>
-        <div class="field">
+
+        <div class="field" id="fieldChar">
           <label id="l_char">Персонаж</label>
-          <input id="f_char" placeholder="Напр: Frankie / Raven / Barbie..." />
+          <input id="f_char" placeholder="Напр: Frankie / Clawdeen..." />
         </div>
 
         <div class="field">
@@ -452,6 +476,7 @@
             <option value="unknown">Не знаю</option>
           </select>
         </div>
+
         <div class="field">
           <label id="l_status">Статус</label>
           <select id="f_status">
@@ -466,20 +491,21 @@
           <input id="f_buy" type="number" min="0" step="1" placeholder="Напр: 950" />
           <div class="help" id="h_buy">Если не покупала — оставь пустым.</div>
         </div>
+
         <div class="field">
           <label id="l_market">Средняя цена рынка</label>
           <input id="f_market" type="number" min="0" step="1" placeholder="Напр: 1200" />
-          <div class="help" id="h_market">Сюда позже можно подключить авто-расчёт.</div>
+          <div class="help" id="h_market">Можно заполнять позже.</div>
         </div>
 
         <div class="field full">
           <label id="l_notes">Заметки</label>
-          <textarea id="f_notes" placeholder="Дефекты, реставрация, где лежит, что докупить..."></textarea>
+          <textarea id="f_notes" placeholder="Состояние, дефекты, что докупить..."></textarea>
         </div>
 
         <div class="field full">
           <label id="l_tags">Теги (через запятую)</label>
-          <input id="f_tags" placeholder="Напр: g1, rare, box, boots missing" />
+          <input id="f_tags" placeholder="Напр: g1, core, box" />
         </div>
 
         <div class="field full" style="display:flex; gap:10px; flex-direction:row; flex-wrap:wrap; margin-top:4px;">
@@ -487,6 +513,7 @@
           <button class="btnGhost" id="cancelBtn">Отмена</button>
           <button class="btnDanger" id="deleteBtn" style="display:none;">Удалить</button>
         </div>
+
       </div>
     </div>
   </div>
@@ -494,11 +521,11 @@
 
 <script>
   // ====== LANGUAGE ======
-  const LS_LANG = "collector_lang_v1";
+  const LS_LANG = "collector_lang_v2";
   let lang = localStorage.getItem(LS_LANG) || "ru";
 
   // ====== CURRENCY ======
-  const LS_CUR = "collector_currency_v1";
+  const LS_CUR = "collector_currency_v2";
   let currency = localStorage.getItem(LS_CUR) || "CZK";
   const allowedCurrencies = ["USD","UAH","RUB","CZK","EUR"];
   if(!allowedCurrencies.includes(currency)) currency = "CZK";
@@ -527,6 +554,7 @@
     }
   }
 
+  // ====== I18N ======
   const i18n = {
     ru: {
       title: "Каталог коллекционера",
@@ -537,6 +565,9 @@
       add: "＋ Добавить",
       q_ph: "Поиск: имя / персонаж / заметки / теги…",
       brand_all: "Все бренды",
+      type_all: "Все типы",
+      type_doll: "Куклы",
+      type_accessory: "Аксессуары",
       condition_all: "Любое состояние",
       c_new: "Новое",
       c_good: "Хорошее",
@@ -554,54 +585,57 @@
       offline: "Всё офлайн. Данные хранятся в браузере (localStorage).",
       empty: "Пусто. Добавь запись или измени фильтры.",
       footer: "Дальше можно расширить каталог и подключить фото.",
+
       m_add: "Добавить",
       m_edit: "Редактировать",
+
+      l_type: "Тип",
       l_name: "Название",
-      name_ph: "Напр: Draculaura базовая",
       l_brand: "Бренд",
       l_line: "Линейка / серия",
-      line_ph: "Напр: G1 базовая / Signature...",
       l_char: "Персонаж",
-      char_ph: "Напр: Frankie / Clawdeen...",
       l_year: "Год",
-      year_ph: "Напр: 2012",
       l_condition: "Состояние",
       l_complete: "Комплектность",
-      comp_full: "Полная",
-      comp_partial: "Частичная",
-      comp_nude: "Nude / без одежды",
-      comp_unknown: "Не знаю",
       l_status: "Статус",
       st_none: "Просто в каталоге",
       st_wish: "Вишлист",
       st_owned: "В коллекции",
+
+      comp_full: "Полная",
+      comp_partial: "Частичная",
+      comp_nude: "Nude / без одежды",
+      comp_unknown: "Не знаю",
+
       l_buy: "Цена покупки",
-      buy_ph: "Напр: 950",
-      h_buy: "Если не покупала — оставь пустым.",
       l_market: "Средняя цена рынка",
-      market_ph: "Напр: 1200",
+      h_buy: "Если не покупала — оставь пустым.",
       h_market: "Можно заполнять позже.",
       l_notes: "Заметки",
-      notes_ph: "Состояние, дефекты, что докупить...",
       l_tags: "Теги (через запятую)",
-      tags_ph: "Напр: g1, core, box",
+
       save: "Сохранить",
       cancel: "Отмена",
       del: "Удалить",
+
       year: "Год",
-      complete: "Комплект",
       status: "Статус",
+      complete: "Комплект",
       buy: "Покупка",
       market: "Рынок",
       dash: "—",
       status_catalog: "Каталог",
+
       btn_to_wish: "В вишлист",
       btn_from_wish: "Убрать из вишлиста",
       btn_to_owned: "В коллекцию",
       btn_from_owned: "Убрать из коллекции",
       btn_edit: "Редактировать",
+
+      lockedHint: "Это предзаготовка каталога: меняй статус, цену покупки, заметки и комплектность.",
       confirm_delete: "Удалить запись? Это действие нельзя отменить.",
       err_name_required: "Название пустое. Впиши хоть что-то.",
+      err_accessory_in_catalog: "Аксессуары не живут в каталоге — добавляй их в вишлист или коллекцию.",
       err_import: "Не смог импортировать JSON. Проверь файл/формат.",
       ok_import: "Импорт готов."
     },
@@ -614,6 +648,9 @@
       add: "＋ Add",
       q_ph: "Search: name / character / notes / tags…",
       brand_all: "All brands",
+      type_all: "All types",
+      type_doll: "Dolls",
+      type_accessory: "Accessories",
       condition_all: "Any condition",
       c_new: "New",
       c_good: "Good",
@@ -631,54 +668,57 @@
       offline: "Offline. Data is stored in the browser (localStorage).",
       empty: "No items. Add one or change filters.",
       footer: "Next: expand the catalog and plug in photos.",
+
       m_add: "Add",
       m_edit: "Edit",
+
+      l_type: "Type",
       l_name: "Title",
-      name_ph: "e.g. Core Draculaura",
       l_brand: "Brand",
       l_line: "Line / series",
-      line_ph: "e.g. G1 Core / Signature...",
       l_char: "Character",
-      char_ph: "e.g. Frankie / Clawdeen...",
       l_year: "Year",
-      year_ph: "e.g. 2012",
       l_condition: "Condition",
       l_complete: "Completeness",
-      comp_full: "Full",
-      comp_partial: "Partial",
-      comp_nude: "Nude / no outfit",
-      comp_unknown: "Not sure",
       l_status: "Status",
       st_none: "Just catalog",
       st_wish: "Wishlist",
       st_owned: "Owned",
+
+      comp_full: "Full",
+      comp_partial: "Partial",
+      comp_nude: "Nude / no outfit",
+      comp_unknown: "Not sure",
+
       l_buy: "Buy price",
-      buy_ph: "e.g. 950",
-      h_buy: "Leave empty if not bought.",
       l_market: "Market average",
-      market_ph: "e.g. 1200",
+      h_buy: "Leave empty if not bought.",
       h_market: "Fill later if you want.",
       l_notes: "Notes",
-      notes_ph: "Condition, flaws, missing parts...",
       l_tags: "Tags (comma-separated)",
-      tags_ph: "e.g. g1, core, box",
+
       save: "Save",
       cancel: "Cancel",
       del: "Delete",
+
       year: "Year",
-      complete: "Complete",
       status: "Status",
+      complete: "Complete",
       buy: "Buy",
       market: "Market",
       dash: "—",
       status_catalog: "Catalog",
+
       btn_to_wish: "Add to wishlist",
       btn_from_wish: "Remove from wishlist",
       btn_to_owned: "Add to collection",
       btn_from_owned: "Remove from collection",
       btn_edit: "Edit",
+
+      lockedHint: "This is a prebuilt catalog item: change status, buy price, notes, and completeness.",
       confirm_delete: "Delete this item? This cannot be undone.",
       err_name_required: "Title is empty. Enter something.",
+      err_accessory_in_catalog: "Accessories are not shown in the catalog — add them to wishlist or collection.",
       err_import: "Could not import JSON. Check file/format.",
       ok_import: "Import done."
     }
@@ -687,89 +727,79 @@
   function t(key){ return (i18n[lang] && i18n[lang][key]) ? i18n[lang][key] : key; }
 
   // ====== STORAGE ======
-  const LS_KEY = "collector_catalog_v2"; // bump version so prebuilt catalog can appear cleanly
+  const LS_KEY = "collector_catalog_v3";
 
   function uid(){
     return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
   }
 
-  // ====== PREBUILT CATALOG: Monster High base (G1 + G3) ======
+  // ====== PREBUILT CATALOG (MH base G1 + G3) with RU/EN names ======
   function prebuiltCatalog(){
     const brand = "Monster High";
     const tags = ["monster high","base","core"];
-
-    // минимальный, но “готовый заранее” набор. Дальше можно расширять списком.
-    const g1 = [
-      { id:"mh_g1_core_draculaura", character:"Draculaura", name:"Draculaura — базовая (G1)", year:2010 },
-      { id:"mh_g1_core_frankie",    character:"Frankie Stein", name:"Frankie Stein — базовая (G1)", year:2010 },
-      { id:"mh_g1_core_clawdeen",   character:"Clawdeen Wolf", name:"Clawdeen Wolf — базовая (G1)", year:2010 },
-      { id:"mh_g1_core_lagoona",    character:"Lagoona Blue", name:"Lagoona Blue — базовая (G1)", year:2010 },
-      { id:"mh_g1_core_cleo",       character:"Cleo de Nile", name:"Cleo de Nile — базовая (G1)", year:2010 },
-      { id:"mh_g1_core_deuce",      character:"Deuce Gorgon", name:"Deuce Gorgon — базовая (G1)", year:2010 }
-    ].map(x => ({
-      id: x.id,
+    const mk = (id, line, year, char_en, name_en, name_ru) => ({
+      id,
       createdAt: 0,
       isPrebuilt: true,
-      name: x.name,
+      type: "doll",
+      name_en,
+      name_ru,
       brand,
-      line: "G1 базовая",
-      character: x.character,
-      year: x.year,
-      // для каталога можно держать “нейтральные” поля
+      line,
+      character: char_en,
+      year,
       condition: "ok",
       complete: "unknown",
       status: "none",
       buyPrice: null,
       marketPrice: null,
       notes: "",
-      tags: [...tags, "g1"]
-    }));
+      tags: [...tags, line.startsWith("G1") ? "g1" : "g3"]
+    });
 
-    const g3 = [
-      { id:"mh_g3_core_draculaura", character:"Draculaura", name:"Draculaura — базовая (G3)", year:2022 },
-      { id:"mh_g3_core_frankie",    character:"Frankie Stein", name:"Frankie Stein — базовая (G3)", year:2022 },
-      { id:"mh_g3_core_clawdeen",   character:"Clawdeen Wolf", name:"Clawdeen Wolf — базовая (G3)", year:2022 },
-      { id:"mh_g3_core_lagoona",    character:"Lagoona Blue", name:"Lagoona Blue — базовая (G3)", year:2022 },
-      { id:"mh_g3_core_cleo",       character:"Cleo de Nile", name:"Cleo de Nile — базовая (G3)", year:2022 },
-      { id:"mh_g3_core_deuce",      character:"Deuce Gorgon", name:"Deuce Gorgon — базовая (G3)", year:2022 }
-    ].map(x => ({
-      id: x.id,
-      createdAt: 0,
-      isPrebuilt: true,
-      name: x.name,
-      brand,
-      line: "G3 базовая",
-      character: x.character,
-      year: x.year,
-      condition: "ok",
-      complete: "unknown",
-      status: "none",
-      buyPrice: null,
-      marketPrice: null,
-      notes: "",
-      tags: [...tags, "g3"]
-    }));
+    const g1line = "G1 базовая";
+    const g3line = "G3 базовая";
 
-    return [...g1, ...g3];
+    return [
+      mk("mh_g1_core_draculaura", g1line, 2010, "Draculaura", "Draculaura (Core, G1)", "Дракулаура (базовая, G1)"),
+      mk("mh_g1_core_frankie",    g1line, 2010, "Frankie Stein", "Frankie Stein (Core, G1)", "Фрэнки Штейн (базовая, G1)"),
+      mk("mh_g1_core_clawdeen",   g1line, 2010, "Clawdeen Wolf", "Clawdeen Wolf (Core, G1)", "Клодин Вульф (базовая, G1)"),
+      mk("mh_g1_core_lagoona",    g1line, 2010, "Lagoona Blue", "Lagoona Blue (Core, G1)", "Лагуна Блю (базовая, G1)"),
+      mk("mh_g1_core_cleo",       g1line, 2010, "Cleo de Nile", "Cleo de Nile (Core, G1)", "Клео де Нил (базовая, G1)"),
+      mk("mh_g1_core_deuce",      g1line, 2010, "Deuce Gorgon", "Deuce Gorgon (Core, G1)", "Дьюс Горгон (базовая, G1)"),
+
+      mk("mh_g3_core_draculaura", g3line, 2022, "Draculaura", "Draculaura (Core, G3)", "Дракулаура (базовая, G3)"),
+      mk("mh_g3_core_frankie",    g3line, 2022, "Frankie Stein", "Frankie Stein (Core, G3)", "Фрэнки Штейн (базовая, G3)"),
+      mk("mh_g3_core_clawdeen",   g3line, 2022, "Clawdeen Wolf", "Clawdeen Wolf (Core, G3)", "Клодин Вульф (базовая, G3)"),
+      mk("mh_g3_core_lagoona",    g3line, 2022, "Lagoona Blue", "Lagoona Blue (Core, G3)", "Лагуна Блю (базовая, G3)"),
+      mk("mh_g3_core_cleo",       g3line, 2022, "Cleo de Nile", "Cleo de Nile (Core, G3)", "Клео де Нил (базовая, G3)"),
+      mk("mh_g3_core_deuce",      g3line, 2022, "Deuce Gorgon", "Deuce Gorgon (Core, G3)", "Дьюс Горгон (базовая, G3)")
+    ];
   }
 
   function ensurePrebuilt(db){
     const base = prebuiltCatalog();
     const existing = new Set(db.map(x => x.id));
     const merged = db.slice();
-
     for(const item of base){
       if(!existing.has(item.id)) merged.push(item);
+      else{
+        // если уже есть старый вариант — подливаем name_ru/name_en/type (не трогаем пользовательские поля)
+        const idx = merged.findIndex(x=>x.id===item.id);
+        if(idx >= 0){
+          merged[idx] = {
+            ...item,
+            status: merged[idx].status ?? "none",
+            buyPrice: merged[idx].buyPrice ?? null,
+            marketPrice: merged[idx].marketPrice ?? null,
+            notes: merged[idx].notes ?? "",
+            condition: merged[idx].condition ?? "ok",
+            complete: merged[idx].complete ?? "unknown",
+            tags: Array.isArray(merged[idx].tags) ? merged[idx].tags : item.tags
+          };
+        }
+      }
     }
-
-    // стабильно: сортируем так, чтобы prebuilt (createdAt=0) шли сверху по имени
-    merged.sort((a,b)=>{
-      const ap = a.isPrebuilt ? 0 : 1;
-      const bp = b.isPrebuilt ? 0 : 1;
-      if(ap !== bp) return ap - bp;
-      return (a.name||"").localeCompare(b.name||"", "ru");
-    });
-
     return merged;
   }
 
@@ -820,7 +850,6 @@
     errorPopEl.style.left = left + "px";
 
     requestAnimationFrame(()=> errorPopEl.classList.add("show"));
-
     clearTimeout(errorPopTimer);
     errorPopTimer = setTimeout(()=> errorPopEl.classList.remove("show"), 2200);
   }
@@ -839,6 +868,7 @@
 
   const qEl = $("#q");
   const brandEl = $("#brand");
+  const typeFilterEl = $("#typeFilter");
   const conditionEl = $("#condition");
   const sortEl = $("#sort");
 
@@ -860,10 +890,11 @@
 
   const yearDec = $("#yearDec");
   const yearInc = $("#yearInc");
-  const yearPicker = $("#yearPicker");
   const lockedHint = $("#lockedHint");
+  const fieldChar = $("#fieldChar");
 
   const f = {
+    type: $("#f_type"),
     name: $("#f_name"),
     brand: $("#f_brand"),
     line: $("#f_line"),
@@ -878,19 +909,6 @@
     tags: $("#f_tags"),
   };
 
-  function rebuildBrandFilter(){
-    const brands = ["all", ...Array.from(new Set(db.map(x => x.brand).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ru'))];
-    const current = brandEl.value || "all";
-    brandEl.innerHTML = "";
-    for(const b of brands){
-      const opt = document.createElement("option");
-      opt.value = b;
-      opt.textContent = b === "all" ? t("brand_all") : b;
-      brandEl.appendChild(opt);
-    }
-    brandEl.value = brands.includes(current) ? current : "all";
-  }
-
   function esc(s){
     return String(s ?? "")
       .replaceAll("&","&amp;")
@@ -898,6 +916,11 @@
       .replaceAll(">","&gt;")
       .replaceAll('"',"&quot;")
       .replaceAll("'","&#039;");
+  }
+
+  function displayName(item){
+    if(lang === "ru") return item.name_ru || item.name || "";
+    return item.name_en || item.name || "";
   }
 
   function condLabel(c){
@@ -932,29 +955,80 @@
   function matchesQuery(item, q){
     if(!q) return true;
     const hay = [
-      item.name, item.brand, item.line, item.character,
+      displayName(item),
+      item.name || "",
+      item.name_ru || "",
+      item.name_en || "",
+      item.brand, item.line, item.character,
       item.notes, (item.tags||[]).join(" "),
-      String(item.year ?? "")
+      String(item.year ?? ""),
+      item.type
     ].join(" ").toLowerCase();
     return hay.includes(q.toLowerCase().trim());
+  }
+
+  function rebuildBrandFilter(){
+    const brands = ["all", ...Array.from(new Set(db.map(x => x.brand).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ru'))];
+    const current = brandEl.value || "all";
+    brandEl.innerHTML = "";
+    for(const b of brands){
+      const opt = document.createElement("option");
+      opt.value = b;
+      opt.textContent = (b === "all") ? t("brand_all") : b;
+      brandEl.appendChild(opt);
+    }
+    brandEl.value = brands.includes(current) ? current : "all";
+  }
+
+  function toggleControlsForView(){
+    const showExtra = (view !== "all");
+    typeFilterEl.classList.toggle("hide", !showExtra);
+    conditionEl.classList.toggle("hide", !showExtra);
+
+    if(!showExtra){
+      // фикс: в каталоге не фильтруем по состоянию/типу
+      typeFilterEl.value = "all";
+      conditionEl.value = "all";
+    }
   }
 
   function getFiltered(){
     const q = qEl.value.trim();
     const b = brandEl.value;
+    const typeF = typeFilterEl.value;
     const c = conditionEl.value;
 
     let arr = db.slice();
 
-    if(view === "wish") arr = arr.filter(x => x.status === "wish");
-    if(view === "owned") arr = arr.filter(x => x.status === "owned");
+    // view filter
+    if(view === "all"){
+      // В каталоге показываем только куклы (аксессуары НЕ попадают сюда)
+      arr = arr.filter(x => (x.type || "doll") === "doll");
+    } else if(view === "wish"){
+      arr = arr.filter(x => x.status === "wish");
+    } else if(view === "owned"){
+      arr = arr.filter(x => x.status === "owned");
+    }
 
+    // search
     arr = arr.filter(x => matchesQuery(x, q));
-    if(b !== "all") arr = arr.filter(x => x.brand === b);
-    if(c !== "all") arr = arr.filter(x => x.condition === c);
 
+    // brand
+    if(b !== "all") arr = arr.filter(x => x.brand === b);
+
+    // type filter (only wish/owned; in catalog it's hidden & reset)
+    if(view !== "all" && typeF !== "all"){
+      arr = arr.filter(x => (x.type || "doll") === typeF);
+    }
+
+    // condition filter (only wish/owned; in catalog it's hidden & reset)
+    if(view !== "all" && c !== "all"){
+      arr = arr.filter(x => x.condition === c);
+    }
+
+    // sort
     const s = sortEl.value;
-    const byName = (a,b)=> (a.name||"").localeCompare(b.name||"",'ru');
+    const byName = (a,b)=> (displayName(a)||"").localeCompare(displayName(b)||"", (lang==="ru"?"ru":"en"));
 
     if(s === "recent") arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
     else if(s === "market_desc") arr.sort((a,b)=>(Number(b.marketPrice)||-1)-(Number(a.marketPrice)||-1));
@@ -982,9 +1056,11 @@
 
   function render(){
     rebuildBrandFilter();
+    toggleControlsForView();
 
     const arr = getFiltered();
     listEl.innerHTML = "";
+
     emptyEl.style.display = arr.length ? "none" : "block";
     setStats(arr.length);
 
@@ -995,14 +1071,31 @@
       const cond = condLabel(it.condition);
       const condCls = condClass(it.condition);
 
-      const title = it.name || (lang==="ru" ? "(без названия)" : "(no title)");
-      const meta1 = `${it.brand || t("dash")} • ${it.line || t("dash")} • ${it.character || t("dash")}`;
-      const meta2 = `${t("year")}: ${it.year ?? t("dash")} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`;
+      const title = displayName(it) || (lang==="ru" ? "(без названия)" : "(no title)");
+      const line = it.line || t("dash");
+      const brand = it.brand || t("dash");
+      const character = it.character || t("dash");
+      const year = (it.year ?? t("dash"));
+
+      // ✅ Комплектность: НЕ показываем в каталоге (view=all), но показываем в wish/owned
+      const meta2 = (view === "all")
+        ? `${t("year")}: ${year} • ${t("status")}: ${statusLabel(it.status)}`
+        : `${t("year")}: ${year} • ${t("complete")}: ${completeLabel(it.complete)} • ${t("status")}: ${statusLabel(it.status)}`;
+
+      // meta1: для аксессуаров персонаж может быть пустым — не шумим
+      const meta1 = ((it.type || "doll") === "accessory")
+        ? `${brand} • ${line}`
+        : `${brand} • ${line} • ${character}`;
+
+      // бейдж справа: тип для wish/owned (чтобы аксессуары видно)
+      const typeBadge = (view === "all")
+        ? ""
+        : ((it.type || "doll") === "accessory" ? t("type_accessory") : t("type_doll"));
 
       card.innerHTML = `
         <div class="thumb">
           <span class="badge ${condCls}">${esc(cond)}</span>
-          <span class="badge">${esc(statusLabel(it.status))}</span>
+          <span class="badge">${esc(typeBadge || statusLabel(it.status))}</span>
         </div>
         <div class="body">
           <div class="titleRow">
@@ -1048,10 +1141,82 @@
     $("#empty").textContent = t("empty");
     $("#ui_footer").textContent = t("footer");
 
-    const allOpt = [...brandEl.options].find(o => o.value === "all");
-    if(allOpt) allOpt.textContent = t("brand_all");
+    // brand filter "all"
+    const allBrand = [...brandEl.options].find(o => o.value === "all");
+    if(allBrand) allBrand.textContent = t("brand_all");
 
-    // currency-aware modal labels
+    // type filter labels
+    [...typeFilterEl.options].forEach(o=>{
+      if(o.value==="all") o.textContent = t("type_all");
+      if(o.value==="doll") o.textContent = t("type_doll");
+      if(o.value==="accessory") o.textContent = t("type_accessory");
+    });
+
+    // condition filter labels
+    [...conditionEl.options].forEach(o=>{
+      if(o.value==="all") o.textContent = t("condition_all");
+      if(o.value==="new") o.textContent = t("c_new");
+      if(o.value==="good") o.textContent = t("c_good");
+      if(o.value==="ok") o.textContent = t("c_ok");
+      if(o.value==="bad") o.textContent = t("c_bad");
+    });
+
+    // sort labels
+    const sortMap = {
+      recent: t("sort_recent"),
+      market_desc: t("sort_market_desc"),
+      market_asc: t("sort_market_asc"),
+      buy_desc: t("sort_buy_desc"),
+      buy_asc: t("sort_buy_asc"),
+      name_asc: t("sort_name_asc"),
+      name_desc: t("sort_name_desc")
+    };
+    [...sortEl.options].forEach(o=>{ if(sortMap[o.value]) o.textContent = sortMap[o.value]; });
+
+    // modal labels
+    $("#l_type").textContent = t("l_type");
+    $("#l_name").textContent = t("l_name");
+    $("#l_brand").textContent = t("l_brand");
+    $("#l_line").textContent = t("l_line");
+    $("#l_char").textContent = t("l_char");
+    $("#l_year").textContent = t("l_year");
+    $("#l_condition").textContent = t("l_condition");
+    $("#l_complete").textContent = t("l_complete");
+    $("#l_status").textContent = t("l_status");
+    $("#h_buy").textContent = t("h_buy");
+    $("#h_market").textContent = t("h_market");
+    $("#l_notes").textContent = t("l_notes");
+    $("#l_tags").textContent = t("l_tags");
+    $("#saveBtn").textContent = t("save");
+    $("#cancelBtn").textContent = t("cancel");
+    $("#deleteBtn").textContent = t("del");
+    lockedHint.textContent = t("lockedHint");
+
+    // modal selects: type
+    [...f.type.options].forEach(o=>{
+      if(o.value==="doll") o.textContent = t("type_doll").slice(0,-1) || t("type_doll"); // "Куклы" -> "Кукл" не надо, поэтому просто зададим вручную ниже
+    });
+    // корректно:
+    f.type.options[0].textContent = (lang==="ru") ? "Кукла" : "Doll";
+    f.type.options[1].textContent = (lang==="ru") ? "Аксессуар" : "Accessory";
+
+    // modal selects: condition
+    [...f.condition.options].forEach(o=>{
+      if(o.value==="new") o.textContent = t("c_new");
+      if(o.value==="good") o.textContent = t("c_good");
+      if(o.value==="ok") o.textContent = t("c_ok");
+      if(o.value==="bad") o.textContent = t("c_bad");
+    });
+
+    // modal selects: completeness
+    const compMap = { full: t("comp_full"), partial: t("comp_partial"), nude: t("comp_nude"), unknown: t("comp_unknown") };
+    [...f.complete.options].forEach(o=>{ if(compMap[o.value]) o.textContent = compMap[o.value]; });
+
+    // modal selects: status
+    const stMap = { none: t("st_none"), wish: t("st_wish"), owned: t("st_owned") };
+    [...f.status.options].forEach(o=>{ if(stMap[o.value]) o.textContent = stMap[o.value]; });
+
+    // currency-aware buy/market labels
     const curLabel = currencyName[currency] ? currencyName[currency][lang] : currency;
     $("#l_buy").textContent = `${t("l_buy")} (${curLabel})`;
     $("#l_market").textContent = `${t("l_market")} (${curLabel})`;
@@ -1059,7 +1224,7 @@
     render();
   }
 
-  // ====== tabs ======
+  // ====== Tabs ======
   function setView(next){
     view = next;
     for(const tbtn of tabs){
@@ -1070,7 +1235,7 @@
   }
   tabs.forEach(tbtn => tbtn.addEventListener("click", ()=> setView(tbtn.dataset.view)));
 
-  // ====== lock/unlock fields for prebuilt ======
+  // ====== Lock/unlock for prebuilt ======
   function setLocked(isLocked){
     const lock = (el, locked) => {
       el.disabled = locked;
@@ -1078,42 +1243,71 @@
       else el.classList.remove("isLocked");
     };
 
-    // “каталог заранее”: базовые поля блокируем, чтобы пользователь трогал только своё
-    lock(f.name, isLocked);
-    lock(f.brand, isLocked);
-    lock(f.line, isLocked);
-    lock(f.char, isLocked);
-    lock(f.year, isLocked);
-    lock(yearDec, isLocked);
-    lock(yearInc, isLocked);
-    lock(f.condition, isLocked);
-    lock(f.complete, isLocked);
-    lock(f.tags, isLocked);
+    // для prebuilt фиксируем базу каталога
+    lock(f.type, true);     // тип у prebuilt всегда кукла
+    lock(f.name, true);
+    lock(f.brand, true);
+    lock(f.line, true);
+    lock(f.char, true);
+    lock(f.year, true);
+    lock(yearDec, true);
+    lock(yearInc, true);
+
+    // ✅ важно по задаче: комплектность РЕДАКТИРУЕМА (не лочим)
+    // condition тоже оставим редактируемым (полезно в wish/owned)
+    // lock(f.condition, false);
+    // lock(f.complete, false);
+
+    lock(f.tags, true); // теги у каталога фиксируем (можно потом снять)
 
     lockedHint.style.display = isLocked ? "block" : "none";
   }
 
-  // ====== modal ======
+  function applyTypeUI(){
+    const isAccessory = (f.type.value === "accessory");
+    fieldChar.classList.toggle("hide", isAccessory); // у аксессуаров персонаж не обязателен
+  }
+
+  // ====== Modal ======
   function openModal(mode, item){
     modal.setAttribute("aria-hidden","false");
     document.body.style.overflow = "hidden";
 
     if(mode === "add"){
-      mTitle.textContent = t("m_add");
       editingId = null;
-      deleteBtn.style.display = "inline-block"; // для кастомных можно удалять
+      mTitle.textContent = t("m_add");
+      deleteBtn.style.display = "inline-block";
       fillForm({
+        type: "doll",
         name:"", brand:"Monster High", line:"", character:"", year:"",
         condition:"good", complete:"full", status:"none",
         buyPrice:"", marketPrice:"", notes:"", tags:[]
       });
-      setLocked(false);
+      lockedHint.style.display = "none";
+      // add: аксессуары нельзя держать в каталоге
+      applyTypeUI();
     } else {
-      mTitle.textContent = t("m_edit");
       editingId = item.id;
+      mTitle.textContent = t("m_edit");
       deleteBtn.style.display = item.isPrebuilt ? "none" : "inline-block";
       fillForm(item);
-      setLocked(!!item.isPrebuilt);
+      if(item.isPrebuilt){
+        setLocked(true);
+      }else{
+        lockedHint.style.display = "none";
+        // пользовательские записи полностью редактируемые
+        f.type.disabled = false;
+        f.name.disabled = false;
+        f.brand.disabled = false;
+        f.line.disabled = false;
+        f.char.disabled = false;
+        f.year.disabled = false;
+        yearDec.disabled = false;
+        yearInc.disabled = false;
+        f.tags.disabled = false;
+        [f.type,f.name,f.brand,f.line,f.char,f.year,yearDec,yearInc,f.tags].forEach(el=>el.classList.remove("isLocked"));
+      }
+      applyTypeUI();
     }
 
     applyLang();
@@ -1126,7 +1320,8 @@
   }
 
   function fillForm(item){
-    f.name.value = item.name ?? "";
+    f.type.value = item.type || "doll";
+    f.name.value = displayName(item) || item.name || "";
     f.brand.value = item.brand ?? "Другие";
     f.line.value = item.line ?? "";
     f.char.value = item.character ?? "";
@@ -1151,6 +1346,7 @@
       .filter(Boolean);
 
     return {
+      type: f.type.value,
       name: f.name.value.trim(),
       brand: f.brand.value,
       line: f.line.value.trim(),
@@ -1167,7 +1363,10 @@
   }
 
   // ====== CRUD ======
-  function addItem(){ openModal("add", null); setTimeout(()=> f.name.focus(), 0); }
+  function addItem(){
+    openModal("add", null);
+    setTimeout(()=> f.name.focus(), 0);
+  }
 
   function editItem(id){
     const item = db.find(x => x.id === id);
@@ -1179,20 +1378,32 @@
   function saveItem(){
     const data = readForm();
 
-    // если редактируем prebuilt: сохраняем только пользовательские поля (status/buy/notes/market/condition/complete по желанию)
+    // ✅ правило: аксессуары НЕ должны попадать в каталог (view=all)
+    if(!editingId && view === "all" && data.type === "accessory"){
+      showErrorNear(f.type, t("err_accessory_in_catalog"));
+      return;
+    }
+    // ✅ правило: аксессуары вообще не должны иметь status=none (только wish/owned)
+    if(data.type === "accessory" && data.status === "none"){
+      // мягко: если человек в каталоге добавляет аксессуар — уже остановили выше.
+      // если он в wish/owned оставил none — подвинем в wish.
+      data.status = "wish";
+    }
+
     if(editingId){
       const idx = db.findIndex(x=>x.id===editingId);
       if(idx === -1) return;
 
       const current = db[idx];
+
       if(current.isPrebuilt){
+        // prebuilt: сохраняем только пользовательские поля + комплектность (по задаче)
         db[idx] = {
           ...current,
           status: data.status,
           buyPrice: data.buyPrice,
           marketPrice: data.marketPrice,
           notes: data.notes,
-          // опционально: пусть пользователь уточняет эти поля тоже
           condition: data.condition,
           complete: data.complete
         };
@@ -1202,7 +1413,24 @@
           f.name.focus();
           return;
         }
-        db[idx] = { ...current, ...data };
+        db[idx] = {
+          ...current,
+          type: data.type,
+          name: data.name,
+          // для пользовательских записей можно хранить только одну строку имени
+          // (а language toggle просто переключает UI, не переводит автогеном)
+          brand: data.brand,
+          line: data.line,
+          character: data.character,
+          year: data.year,
+          condition: data.condition,
+          complete: data.complete,
+          status: data.status,
+          buyPrice: data.buyPrice,
+          marketPrice: data.marketPrice,
+          notes: data.notes,
+          tags: data.tags
+        };
       }
     } else {
       if(!data.name){
@@ -1214,7 +1442,19 @@
         id: uid(),
         createdAt: Date.now(),
         isPrebuilt: false,
-        ...data
+        type: data.type,
+        name: data.name,
+        brand: data.brand,
+        line: data.line,
+        character: data.character,
+        year: data.year,
+        condition: data.condition,
+        complete: data.complete,
+        status: data.status,
+        buyPrice: data.buyPrice,
+        marketPrice: data.marketPrice,
+        notes: data.notes,
+        tags: data.tags
       });
     }
 
@@ -1240,7 +1480,14 @@
   function toggleWish(id){
     const item = db.find(x=>x.id===id);
     if(!item) return;
-    item.status = (item.status === "wish") ? "none" : "wish";
+
+    // аксессуары не должны быть "none"
+    if((item.type||"doll")==="accessory" && item.status==="none") item.status = "wish";
+    else item.status = (item.status === "wish") ? "none" : "wish";
+
+    // если аксессуар стал none — перекинем в wish
+    if((item.type||"doll")==="accessory" && item.status==="none") item.status = "wish";
+
     saveDB(db);
     render();
   }
@@ -1248,15 +1495,20 @@
   function toggleOwned(id){
     const item = db.find(x=>x.id===id);
     if(!item) return;
+
     item.status = (item.status === "owned") ? "none" : "owned";
+
+    // если аксессуар стал none — перекинем в owned? логичнее в wish, но пусть будет wish
+    if((item.type||"doll")==="accessory" && item.status==="none") item.status = "wish";
+
     saveDB(db);
     render();
   }
 
-  // ====== EXPORT / IMPORT ======
+  // ====== Export/Import ======
   function exportJSON(){
     const payload = {
-      version: 2,
+      version: 3,
       lang,
       currency,
       exportedAt: new Date().toISOString(),
@@ -1293,7 +1545,10 @@
           id: x.id || uid(),
           createdAt: x.createdAt || Date.now(),
           isPrebuilt: !!x.isPrebuilt,
+          type: (x.type === "accessory") ? "accessory" : "doll",
           name: x.name || "",
+          name_ru: x.name_ru || "",
+          name_en: x.name_en || "",
           brand: x.brand || "Другие",
           line: x.line || "",
           character: x.character || "",
@@ -1307,11 +1562,10 @@
           tags: Array.isArray(x.tags) ? x.tags : []
         }));
 
-        db = ensurePrebuilt(norm); // важно: после импорта снова гарантируем prebuilt
+        db = ensurePrebuilt(norm);
         saveDB(db);
         closeModal();
         applyLang();
-
         showErrorNear(qEl, t("ok_import"));
       }catch{
         showErrorNear(qEl, t("err_import"));
@@ -1320,7 +1574,7 @@
     reader.readAsText(file);
   }
 
-  // ====== YEAR STEPPER ======
+  // ====== Year stepper ======
   function clampYear(y){
     const min = Number(f.year.min || 1950);
     const max = Number(f.year.max || 2100);
@@ -1337,6 +1591,7 @@
 
   // ====== EVENTS ======
   addBtn.addEventListener("click", addItem);
+
   exportBtn.addEventListener("click", exportJSON);
 
   importBtn.addEventListener("click", () => importFile.click());
@@ -1348,6 +1603,7 @@
 
   qEl.addEventListener("input", render);
   brandEl.addEventListener("change", render);
+  typeFilterEl.addEventListener("change", render);
   conditionEl.addEventListener("change", render);
   sortEl.addEventListener("change", render);
 
@@ -1371,6 +1627,7 @@
     if(e.key === "Escape" && modal.getAttribute("aria-hidden")==="false") closeModal();
   });
 
+  // Enter to save (in modal)
   modal.addEventListener("keydown", (e)=>{
     if(e.key === "Enter" && (e.target.tagName === "INPUT")){
       e.preventDefault();
@@ -1378,12 +1635,14 @@
     }
   });
 
+  // language toggle (also switches doll names RU/EN)
   langBtn.addEventListener("click", ()=>{
     lang = (lang === "ru") ? "en" : "ru";
     localStorage.setItem(LS_LANG, lang);
     applyLang();
   });
 
+  // currency
   currencyEl.value = currency;
   currencyEl.addEventListener("change", ()=>{
     const v = currencyEl.value;
@@ -1394,6 +1653,7 @@
     }
   });
 
+  // year stepper
   yearDec.addEventListener("click", ()=> stepYear(-1));
   yearInc.addEventListener("click", ()=> stepYear(+1));
   f.year.addEventListener("keydown", (e)=>{
@@ -1402,8 +1662,10 @@
     if(e.key === "ArrowDown"){ e.preventDefault(); stepYear(-1); }
   });
 
+  // type UI (modal)
+  f.type.addEventListener("change", applyTypeUI);
+
   // ====== START ======
-  rebuildBrandFilter();
   applyLang();
 </script>
 </body>
