@@ -1,194 +1,1294 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Collion — Каталог коллекционера</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Каталог коллекционера</title>
   <style>
-:root { color-scheme: dark; --bg:#111827; --surface:#1f2937; --surface-2:#273547; --text:#f9fafb; --muted:#9ca3af; --danger:#ef4444; font-family: Inter, system-ui, sans-serif; }
-* { box-sizing: border-box; }
-body { margin:0; background:linear-gradient(145deg,#0f172a,#111827 30%,#0b1220); color:var(--text); }
-.hero { padding:2rem 1rem 1rem; border-bottom:1px solid #334155; }
-.hero__content { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; gap:1rem; align-items:center; flex-wrap:wrap; }
-h1,h2,h3,h4{ margin:0 0 .6rem; }
-.layout { max-width:1100px; margin:1rem auto 2rem; display:grid; grid-template-columns:minmax(280px,340px) 1fr; gap:1rem; padding:0 1rem; }
-.panel { background:var(--surface); border:1px solid #334155; border-radius:14px; padding:1rem; }
-.form { display:grid; gap:.75rem; }
-.field { display:grid; gap:.35rem; }
-label { font-size:.9rem; color:var(--muted); }
-input,select,textarea,button { border-radius:8px; border:1px solid #475569; background:var(--surface-2); color:var(--text); padding:.6rem .75rem; font:inherit; }
-button { cursor:pointer; border-color:#059669; background:#059669; }
-button:hover { filter:brightness(1.08); }
-.lang-switch { background:transparent; border:1px solid #64748b; }
-.toolbar { display:flex; justify-content:space-between; align-items:center; gap:.8rem; flex-wrap:wrap; }
-.toolbar input { min-width:260px; flex:1; }
-.stats { margin:.8rem 0 1rem; color:var(--muted); font-size:.95rem; }
-.lists { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
-.cards { display:grid; gap:.8rem; }
-.card { display:grid; grid-template-columns:96px 1fr; gap:.8rem; background:#172033; border:1px solid #334155; border-radius:12px; overflow:hidden; }
-.card__image { width:100%; height:100%; min-height:100px; object-fit:cover; background:#334155; }
-.card__content { padding:.65rem .75rem .75rem 0; }
-.card__meta,.card__notes{ margin:.2rem 0; color:var(--muted); font-size:.85rem; }
-.card__actions { display:flex; gap:.5rem; margin-top:.6rem; }
-.card__actions button { padding:.45rem .6rem; font-size:.82rem; }
-button.danger { background:transparent; border-color:var(--danger); color:#fecaca; }
-.empty { color:var(--muted); padding:.8rem; border:1px dashed #475569; border-radius:10px; }
-.error { color:#fecaca; background:rgba(239,68,68,.2); border:1px solid rgba(239,68,68,.6); border-radius:8px; font-size:.75rem; padding:.25rem .5rem; display:none; margin-top:.1rem; }
-.invalid { border-color:var(--danger) !important; }
-@media (max-width:880px){ .layout{grid-template-columns:1fr;} }
+    :root{
+      --bg:#0b0f1a;
+      --panel:#121a2a;
+      --card:#0f1626;
+      --text:#eaf0ff;
+      --muted:#9fb0d0;
+      --brand:#7c5cff;
+      --brand2:#00d4ff;
+      --danger:#ff4d6d;
+      --ok:#22c55e;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,.25), transparent 60%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(0,212,255,.18), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,26,.72);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .wrap{max-width:1200px; margin:0 auto; padding:18px 16px;}
+    .top{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .brand{display:flex; align-items:center; gap:10px;}
+    .logo{
+      width:38px; height:38px; border-radius:12px;
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      box-shadow: var(--shadow);
+    }
+    h1{font-size:18px; margin:0;}
+    .sub{color:var(--muted); font-size:13px; margin-top:2px}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .tabs{
+      display:flex; gap:8px; flex-wrap:wrap;
+      padding: 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(18,26,42,.55);
+    }
+    .tab{
+      border: none;
+      padding: 9px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 800;
+    }
+    .tab[aria-selected="true"]{
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(124,92,255,.85), rgba(0,212,255,.55));
+    }
+    input, select, button, textarea{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(18,26,42,.85);
+      color: var(--text);
+      padding: 11px 12px;
+      outline:none;
+    }
+    textarea{min-height:90px; resize: vertical}
+    input::placeholder{color:rgba(159,176,208,.75)}
+    .btn{
+      cursor:pointer;
+      border: none;
+      font-weight: 900;
+      padding: 11px 14px;
+      transition: transform .06s ease;
+      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(0,212,255,.70));
+    }
+    .btn:active{transform: scale(.98)}
+    .btnGhost{
+      background: rgba(18,26,42,.75);
+      border: 1px solid rgba(255,255,255,.12);
+      font-weight: 900;
+      cursor:pointer;
+    }
+    .btnDanger{
+      background: rgba(255,77,109,.18);
+      border: 1px solid rgba(255,77,109,.35);
+      color: var(--text);
+      font-weight: 900;
+      cursor:pointer;
+    }
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      color: var(--muted);
+      font-size: 12px;
+      user-select:none;
+    }
+    main{padding: 18px 0 40px}
+    .controls{
+      display:grid;
+      grid-template-columns: 1.4fr .8fr .8fr .8fr auto auto;
+      gap:10px;
+      align-items:center;
+      width:min(1100px, 100%);
+    }
+    @media (max-width: 980px){
+      .controls{grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
+    .card{
+      grid-column: span 4;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      position:relative;
+    }
+    @media (max-width: 980px){ .card{grid-column: span 6;} }
+    @media (max-width: 620px){ .card{grid-column: span 12;} }
+    .thumb{
+      height: 120px;
+      background: linear-gradient(135deg, rgba(124,92,255,.25), rgba(0,212,255,.18));
+      display:flex; align-items:flex-end; justify-content:space-between;
+      padding: 12px;
+      gap:10px;
+    }
+    .badge{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.10);
+      white-space:nowrap;
+    }
+    .badge.ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.18);}
+    .badge.warn{border-color: rgba(255,185,0,.35); background: rgba(255,185,0,.14);}
+    .badge.bad{border-color: rgba(255,77,109,.35); background: rgba(255,77,109,.14);}
+    .body{padding: 12px 12px 14px}
+    .titleRow{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .title{font-weight: 950; margin:0; font-size: 15px; line-height: 1.25}
+    .metaLine{color: var(--muted); font-size: 12.5px; margin-top:6px; line-height:1.35}
+    .money{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-top:10px;
+      color: rgba(234,240,255,.92);
+      font-size: 12.5px;
+    }
+    .money span{
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
+    .actions button{flex:1}
+    .empty{
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+    }
+
+    /* Modal */
+    .modalBackdrop{
+      position: fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center; justify-content:center;
+      padding: 18px;
+      z-index:100;
+    }
+    .modalBackdrop[aria-hidden="false"]{display:flex;}
+    .modal{
+      width: min(980px, 100%);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(18,26,42,.92);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modalTop{
+      padding: 14px 14px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+    }
+    .modalTop strong{font-size: 14px}
+    .x{
+      width: 38px; height: 38px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      cursor:pointer;
+      display:grid; place-items:center;
+      font-weight:900;
+    }
+    .modalContent{padding: 14px}
+    .formGrid{
+      display:grid; gap:12px;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .field{grid-column: span 6; display:flex; flex-direction:column; gap:6px; position:relative}
+    .field.full{grid-column: span 12}
+    @media (max-width: 760px){ .field{grid-column: span 12} }
+    label{color: var(--muted); font-size: 12px}
+    .help{color: rgba(159,176,208,.75); font-size: 12px}
+    footer{color: rgba(159,176,208,.75); font-size: 12px; padding: 10px 0 40px}
+    a{color:inherit}
+
+    /* Small popup error near input */
+    .errorPop{
+      position: fixed;
+      z-index: 9999;
+      max-width: 320px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,77,109,.16);
+      border: 1px solid rgba(255,77,109,.38);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      line-height: 1.25;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .errorPop.show{
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .errorPop:after{
+      content:"";
+      position:absolute;
+      left: 16px;
+      top: -7px;
+      width: 12px;
+      height: 12px;
+      background: rgba(255,77,109,.16);
+      border-left: 1px solid rgba(255,77,109,.38);
+      border-top: 1px solid rgba(255,77,109,.38);
+      transform: rotate(45deg);
+    }
   </style>
 </head>
 <body>
-  <header class="hero">
-    <div class="hero__content">
-      <div>
-        <h1 id="title">Collion</h1>
-        <p id="subtitle">Каталог для коллекционеров: храните свою коллекцию и формируйте вишлист.</p>
-      </div>
-      <button id="lang-toggle" class="lang-switch">EN</button>
-    </div>
-  </header>
-
-  <main class="layout">
-    <section class="panel">
-      <h2 id="form-heading">Добавить предмет</h2>
-      <form id="item-form" class="form" novalidate>
-        <div class="field"><label for="name" id="label-name">Название</label><input id="name" name="name" type="text" required /><div class="error" data-error-for="name"></div></div>
-        <div class="field"><label for="category" id="label-category">Категория</label><input id="category" name="category" type="text" required /><div class="error" data-error-for="category"></div></div>
-        <div class="field"><label for="year" id="label-year">Год</label><input id="year" name="year" type="number" min="1900" max="2100" required /><div class="error" data-error-for="year"></div></div>
-        <div class="field"><label for="rarity" id="label-rarity">Редкость</label><select id="rarity" name="rarity" required></select><div class="error" data-error-for="rarity"></div></div>
-        <div class="field"><label for="condition" id="label-condition">Состояние</label><select id="condition" name="condition" required></select><div class="error" data-error-for="condition"></div></div>
-        <div class="field"><label for="image" id="label-image">Фото (URL)</label><input id="image" name="image" type="url" required /><div class="error" data-error-for="image"></div></div>
-        <div class="field"><label for="notes" id="label-notes">Заметки</label><textarea id="notes" name="notes" rows="3"></textarea><div class="error" data-error-for="notes"></div></div>
-        <div class="field"><label for="listType" id="label-list">Раздел</label><select id="listType" name="listType" required></select><div class="error" data-error-for="listType"></div></div>
-        <button type="submit" id="save-btn">Сохранить</button>
-      </form>
-    </section>
-
-    <section class="panel panel--wide">
-      <div class="toolbar">
-        <h2 id="catalog-heading">Каталог</h2>
-        <input id="search" type="search" />
-      </div>
-      <div class="stats" id="stats"></div>
-      <div class="lists">
-        <article><h3 id="collection-heading">Моя коллекция</h3><div id="collection-list" class="cards"></div></article>
-        <article><h3 id="wishlist-heading">Вишлист</h3><div id="wishlist-list" class="cards"></div></article>
-      </div>
-    </section>
-  </main>
-
-  <template id="item-template">
-    <article class="card">
-      <img class="card__image" alt="" />
-      <div class="card__content">
-        <h4 class="card__title"></h4>
-        <p class="card__meta"></p>
-        <p class="card__notes"></p>
-        <div class="card__actions">
-          <button data-action="toggle"></button>
-          <button data-action="remove" class="danger"></button>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1 id="ui_title">Каталог коллекционера</h1>
+          <div class="sub" id="ui_sub">каталог • вишлист • коллекция • заметки • import/export JSON</div>
         </div>
       </div>
-    </article>
-  </template>
+
+      <div class="row">
+        <div class="tabs" role="tablist" aria-label="Режимы">
+          <button class="tab" id="tab_all" role="tab" aria-selected="true" data-view="all">Каталог</button>
+          <button class="tab" id="tab_wish" role="tab" aria-selected="false" data-view="wish">Вишлист</button>
+          <button class="tab" id="tab_owned" role="tab" aria-selected="false" data-view="owned">Коллекция</button>
+        </div>
+        <button class="btnGhost" id="langBtn" title="Switch language">RU / EN</button>
+        <button class="btn" id="addBtn">＋ Добавить</button>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;" class="controls" role="search">
+      <input id="q" placeholder="Поиск: имя / персонаж / заметки / теги…" autocomplete="off"/>
+      <select id="brand">
+        <option value="all">Все бренды</option>
+      </select>
+      <select id="condition">
+        <option value="all">Любое состояние</option>
+        <option value="new">Новое</option>
+        <option value="good">Хорошее</option>
+        <option value="ok">Ок</option>
+        <option value="bad">Плохое</option>
+      </select>
+      <select id="sort">
+        <option value="recent">Сорт: недавние</option>
+        <option value="market_desc">Средняя цена: ↓</option>
+        <option value="market_asc">Средняя цена: ↑</option>
+        <option value="buy_desc">Покупка: ↓</option>
+        <option value="buy_asc">Покупка: ↑</option>
+        <option value="name_asc">Имя: A→Я</option>
+        <option value="name_desc">Имя: Я→A</option>
+      </select>
+      <button class="btnGhost" id="exportBtn">Экспорт JSON</button>
+      <button class="btnGhost" id="importBtn">Импорт JSON</button>
+      <input id="importFile" type="file" accept="application/json" hidden />
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <span class="pill" id="stats"></span>
+      <span class="pill" id="ui_offline">Всё офлайн. Данные хранятся в браузере (localStorage).</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="list" class="grid" aria-live="polite"></section>
+  <div id="empty" class="empty" style="display:none; margin-top:14px;">
+    Пусто. Добавь запись или измени фильтры.
+  </div>
+</main>
+
+<footer class="wrap" id="ui_footer">
+  Если захочешь: можно легко подключить API/бд и фотки вместо заглушки.
+</footer>
+
+<!-- Modal: Add/Edit -->
+<div class="modalBackdrop" id="modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="modalTop">
+      <strong id="mTitle">Добавить</strong>
+      <button class="x" id="mClose" aria-label="Закрыть">×</button>
+    </div>
+    <div class="modalContent">
+      <div class="formGrid">
+        <div class="field" id="field_name">
+          <label id="l_name">Название (как хочешь)</label>
+          <input id="f_name" placeholder="Напр: Draculaura базовая" />
+        </div>
+        <div class="field">
+          <label id="l_brand">Бренд</label>
+          <select id="f_brand">
+            <option>Monster High</option>
+            <option>Ever After High</option>
+            <option>Barbie</option>
+            <option>Другие</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label id="l_line">Линейка / серия</label>
+          <input id="f_line" placeholder="Напр: G1 / Creeproduction / Signature..." />
+        </div>
+        <div class="field">
+          <label id="l_char">Персонаж</label>
+          <input id="f_char" placeholder="Напр: Frankie / Raven / Barbie..." />
+        </div>
+
+        <div class="field">
+          <label id="l_year">Год</label>
+          <input id="f_year" type="number" min="1950" max="2100" placeholder="Напр: 2012" />
+        </div>
+        <div class="field">
+          <label id="l_condition">Состояние</label>
+          <select id="f_condition">
+            <option value="new">Новое</option>
+            <option value="good">Хорошее</option>
+            <option value="ok">Ок</option>
+            <option value="bad">Плохое</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label id="l_complete">Комплектность</label>
+          <select id="f_complete">
+            <option value="full">Полная</option>
+            <option value="partial">Частичная</option>
+            <option value="nude">Nude / без одежды</option>
+            <option value="unknown">Не знаю</option>
+          </select>
+        </div>
+        <div class="field">
+          <label id="l_status">Статус</label>
+          <select id="f_status">
+            <option value="none">Просто в каталоге</option>
+            <option value="wish">Вишлист</option>
+            <option value="owned">В коллекции</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label id="l_buy">Цена покупки (Kč)</label>
+          <input id="f_buy" type="number" min="0" step="1" placeholder="Напр: 950" />
+          <div class="help" id="h_buy">Если не покупала — оставь пустым.</div>
+        </div>
+        <div class="field">
+          <label id="l_market">Средняя цена рынка (Kč)</label>
+          <input id="f_market" type="number" min="0" step="1" placeholder="Напр: 1200" />
+          <div class="help" id="h_market">Сюда позже можно подключить авто-расчёт.</div>
+        </div>
+
+        <div class="field full">
+          <label id="l_notes">Заметки</label>
+          <textarea id="f_notes" placeholder="Дефекты, реставрация, где лежит, что докупить..."></textarea>
+        </div>
+
+        <div class="field full">
+          <label id="l_tags">Теги (через запятую)</label>
+          <input id="f_tags" placeholder="Напр: g1, rare, box, boots missing" />
+        </div>
+
+        <div class="field full" style="display:flex; gap:10px; flex-direction:row; flex-wrap:wrap; margin-top:4px;">
+          <button class="btn" id="saveBtn">Сохранить</button>
+          <button class="btnGhost" id="cancelBtn">Отмена</button>
+          <button class="btnDanger" id="deleteBtn" style="display:none;">Удалить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-const STORAGE_KEY = 'collion-items-v2';
-const placeholderImage = 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=320&q=60';
-const i18n = {
-  ru: {
-    title:'Collion', subtitle:'Каталог для коллекционеров: храните свою коллекцию и формируйте вишлист.', formHeading:'Добавить предмет',
-    name:'Название', category:'Категория', year:'Год', rarity:'Редкость', condition:'Состояние', image:'Фото (URL)', notes:'Заметки', list:'Раздел',
-    save:'Сохранить', catalog:'Каталог', collection:'Моя коллекция', wishlist:'Вишлист', search:'Поиск по названию, категории, заметкам',
-    rarityOpts:['Не указана','Обычная','Редкая','Очень редкая','Лимитированная'],
-    conditionOpts:['Новая','Отличная','Хорошая','Требует реставрации'], listOpts:['Моя коллекция','Вишлист'],
-    remove:'Удалить', toWishlist:'В вишлист', toCollection:'В коллекцию', noCategory:'Без категории', noNotes:'Без заметок', yearLabel:'год',
-    emptyCollection:'Пока пусто. Добавьте предмет в раздел «Моя коллекция».', emptyWishlist:'Пока пусто. Добавьте предмет в раздел «Вишлист».',
-    stats:(t,c,w,f)=>`Всего: ${t} • В коллекции: ${c} • В вишлисте: ${w} • Найдено: ${f}`,
-    errors:{ required:'Обязательное поле', url:'Введите корректный URL', year:'Год должен быть между 1900 и 2100' }
-  },
-  en: {
-    title:'Collion', subtitle:'Collector catalog: manage your collection and wishlist.', formHeading:'Add item',
-    name:'Name', category:'Category', year:'Year', rarity:'Rarity', condition:'Condition', image:'Photo (URL)', notes:'Notes', list:'Section',
-    save:'Save', catalog:'Catalog', collection:'My collection', wishlist:'Wishlist', search:'Search by name, category, notes',
-    rarityOpts:['Not specified','Common','Rare','Very rare','Limited'],
-    conditionOpts:['New','Excellent','Good','Needs restoration'], listOpts:['My collection','Wishlist'],
-    remove:'Delete', toWishlist:'To wishlist', toCollection:'To collection', noCategory:'No category', noNotes:'No notes', yearLabel:'year',
-    emptyCollection:'No items yet. Add one to “My collection”.', emptyWishlist:'No items yet. Add one to “Wishlist”.',
-    stats:(t,c,w,f)=>`Total: ${t} • Collection: ${c} • Wishlist: ${w} • Found: ${f}`,
-    errors:{ required:'Required field', url:'Enter a valid URL', year:'Year must be between 1900 and 2100' }
+  // ====== I18N ======
+  const LS_LANG = "collector_lang_v1";
+  let lang = localStorage.getItem(LS_LANG) || "ru";
+
+  const i18n = {
+    ru: {
+      title: "Каталог коллекционера",
+      sub: "каталог • вишлист • коллекция • заметки • import/export JSON",
+      tab_all: "Каталог",
+      tab_wish: "Вишлист",
+      tab_owned: "Коллекция",
+      add: "＋ Добавить",
+      q_ph: "Поиск: имя / персонаж / заметки / теги…",
+      brand_all: "Все бренды",
+      condition_all: "Любое состояние",
+      c_new: "Новое",
+      c_good: "Хорошее",
+      c_ok: "Ок",
+      c_bad: "Плохое",
+      sort_recent: "Сорт: недавние",
+      sort_market_desc: "Средняя цена: ↓",
+      sort_market_asc: "Средняя цена: ↑",
+      sort_buy_desc: "Покупка: ↓",
+      sort_buy_asc: "Покупка: ↑",
+      sort_name_asc: "Имя: A→Я",
+      sort_name_desc: "Имя: Я→A",
+      export: "Экспорт JSON",
+      import: "Импорт JSON",
+      offline: "Всё офлайн. Данные хранятся в браузере (localStorage).",
+      empty: "Пусто. Добавь запись или измени фильтры.",
+      footer: "Если захочешь: можно легко подключить API/бд и фотки вместо заглушки.",
+      // modal
+      m_add: "Добавить",
+      m_edit: "Редактировать",
+      l_name: "Название (как хочешь)",
+      name_ph: "Напр: Draculaura базовая",
+      l_brand: "Бренд",
+      l_line: "Линейка / серия",
+      line_ph: "Напр: G1 / Creeproduction / Signature...",
+      l_char: "Персонаж",
+      char_ph: "Напр: Frankie / Raven / Barbie...",
+      l_year: "Год",
+      year_ph: "Напр: 2012",
+      l_condition: "Состояние",
+      l_complete: "Комплектность",
+      comp_full: "Полная",
+      comp_partial: "Частичная",
+      comp_nude: "Nude / без одежды",
+      comp_unknown: "Не знаю",
+      l_status: "Статус",
+      st_none: "Просто в каталоге",
+      st_wish: "Вишлист",
+      st_owned: "В коллекции",
+      l_buy: "Цена покупки (Kč)",
+      buy_ph: "Напр: 950",
+      h_buy: "Если не покупала — оставь пустым.",
+      l_market: "Средняя цена рынка (Kč)",
+      market_ph: "Напр: 1200",
+      h_market: "Сюда позже можно подключить авто-расчёт.",
+      l_notes: "Заметки",
+      notes_ph: "Дефекты, реставрация, где лежит, что докупить...",
+      l_tags: "Теги (через запятую)",
+      tags_ph: "Напр: g1, rare, box, boots missing",
+      save: "Сохранить",
+      cancel: "Отмена",
+      del: "Удалить",
+      // cards / misc
+      buy: "Покупка",
+      market: "Рынок",
+      dash: "—",
+      btn_to_wish: "В вишлист",
+      btn_from_wish: "Убрать из вишлиста",
+      btn_to_owned: "В коллекцию",
+      btn_from_owned: "Убрать из коллекции",
+      btn_edit: "Редактировать",
+      confirm_delete: "Удалить запись? Это действие нельзя отменить.",
+      err_name_required: "Название пустое. Впиши хоть что-то.",
+      err_import: "Не смог импортировать JSON. Проверь файл/формат.",
+      ok_import: "Импорт готов."
+    },
+    en: {
+      title: "Collector Catalog",
+      sub: "catalog • wishlist • collection • notes • import/export JSON",
+      tab_all: "Catalog",
+      tab_wish: "Wishlist",
+      tab_owned: "Collection",
+      add: "＋ Add",
+      q_ph: "Search: name / character / notes / tags…",
+      brand_all: "All brands",
+      condition_all: "Any condition",
+      c_new: "New",
+      c_good: "Good",
+      c_ok: "OK",
+      c_bad: "Bad",
+      sort_recent: "Sort: recent",
+      sort_market_desc: "Market avg: ↓",
+      sort_market_asc: "Market avg: ↑",
+      sort_buy_desc: "Buy price: ↓",
+      sort_buy_asc: "Buy price: ↑",
+      sort_name_asc: "Name: A→Z",
+      sort_name_desc: "Name: Z→A",
+      export: "Export JSON",
+      import: "Import JSON",
+      offline: "Offline. Data is stored in the browser (localStorage).",
+      empty: "No items. Add one or change filters.",
+      footer: "Next step: easy to plug in API/DB and real photos instead of placeholders.",
+      // modal
+      m_add: "Add",
+      m_edit: "Edit",
+      l_name: "Title (anything)",
+      name_ph: "e.g. Basic Draculaura",
+      l_brand: "Brand",
+      l_line: "Line / series",
+      line_ph: "e.g. G1 / Creeproduction / Signature...",
+      l_char: "Character",
+      char_ph: "e.g. Frankie / Raven / Barbie...",
+      l_year: "Year",
+      year_ph: "e.g. 2012",
+      l_condition: "Condition",
+      l_complete: "Completeness",
+      comp_full: "Full",
+      comp_partial: "Partial",
+      comp_nude: "Nude / no outfit",
+      comp_unknown: "Not sure",
+      l_status: "Status",
+      st_none: "Just catalog",
+      st_wish: "Wishlist",
+      st_owned: "Owned",
+      l_buy: "Buy price (CZK)",
+      buy_ph: "e.g. 950",
+      h_buy: "Leave empty if not bought.",
+      l_market: "Market average (CZK)",
+      market_ph: "e.g. 1200",
+      h_market: "You can plug auto-calculation later.",
+      l_notes: "Notes",
+      notes_ph: "Flaws, restoration, where it is, missing parts...",
+      l_tags: "Tags (comma-separated)",
+      tags_ph: "e.g. g1, rare, box, boots missing",
+      save: "Save",
+      cancel: "Cancel",
+      del: "Delete",
+      // cards / misc
+      buy: "Buy",
+      market: "Market",
+      dash: "—",
+      btn_to_wish: "Add to wishlist",
+      btn_from_wish: "Remove from wishlist",
+      btn_to_owned: "Add to collection",
+      btn_from_owned: "Remove from collection",
+      btn_edit: "Edit",
+      confirm_delete: "Delete this item? This cannot be undone.",
+      err_name_required: "Title is empty. Enter something.",
+      err_import: "Could not import JSON. Check file/format.",
+      ok_import: "Import done."
+    }
+  };
+
+  function t(key){ return (i18n[lang] && i18n[lang][key]) ? i18n[lang][key] : key; }
+
+  function applyLang(){
+    document.documentElement.lang = lang;
+
+    // header
+    document.getElementById("ui_title").textContent = t("title");
+    document.getElementById("ui_sub").textContent = t("sub");
+    document.getElementById("tab_all").textContent = t("tab_all");
+    document.getElementById("tab_wish").textContent = t("tab_wish");
+    document.getElementById("tab_owned").textContent = t("tab_owned");
+    document.getElementById("addBtn").textContent = t("add");
+    document.getElementById("q").placeholder = t("q_ph");
+    document.getElementById("exportBtn").textContent = t("export");
+    document.getElementById("importBtn").textContent = t("import");
+    document.getElementById("ui_offline").textContent = t("offline");
+    document.getElementById("empty").textContent = t("empty");
+    document.getElementById("ui_footer").textContent = t("footer");
+    document.title = t("title");
+
+    // filter selects (text only)
+    const brandSelect = document.getElementById("brand");
+    if(brandSelect && brandSelect.options.length){
+      const allOpt = [...brandSelect.options].find(o => o.value === "all");
+      if(allOpt) allOpt.textContent = t("brand_all");
+    }
+
+    const cond = document.getElementById("condition");
+    if(cond){
+      const map = {
+        all: t("condition_all"),
+        new: t("c_new"),
+        good: t("c_good"),
+        ok: t("c_ok"),
+        bad: t("c_bad")
+      };
+      [...cond.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
+    }
+
+    const sort = document.getElementById("sort");
+    if(sort){
+      const map = {
+        recent: t("sort_recent"),
+        market_desc: t("sort_market_desc"),
+        market_asc: t("sort_market_asc"),
+        buy_desc: t("sort_buy_desc"),
+        buy_asc: t("sort_buy_asc"),
+        name_asc: t("sort_name_asc"),
+        name_desc: t("sort_name_desc")
+      };
+      [...sort.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
+    }
+
+    // modal labels + placeholders
+    document.getElementById("l_name").textContent = t("l_name");
+    document.getElementById("f_name").placeholder = t("name_ph");
+    document.getElementById("l_brand").textContent = t("l_brand");
+    document.getElementById("l_line").textContent = t("l_line");
+    document.getElementById("f_line").placeholder = t("line_ph");
+    document.getElementById("l_char").textContent = t("l_char");
+    document.getElementById("f_char").placeholder = t("char_ph");
+    document.getElementById("l_year").textContent = t("l_year");
+    document.getElementById("f_year").placeholder = t("year_ph");
+    document.getElementById("l_condition").textContent = t("l_condition");
+    document.getElementById("l_complete").textContent = t("l_complete");
+    document.getElementById("l_status").textContent = t("l_status");
+    document.getElementById("l_buy").textContent = t("l_buy");
+    document.getElementById("f_buy").placeholder = t("buy_ph");
+    document.getElementById("h_buy").textContent = t("h_buy");
+    document.getElementById("l_market").textContent = t("l_market");
+    document.getElementById("f_market").placeholder = t("market_ph");
+    document.getElementById("h_market").textContent = t("h_market");
+    document.getElementById("l_notes").textContent = t("l_notes");
+    document.getElementById("f_notes").placeholder = t("notes_ph");
+    document.getElementById("l_tags").textContent = t("l_tags");
+    document.getElementById("f_tags").placeholder = t("tags_ph");
+    document.getElementById("saveBtn").textContent = t("save");
+    document.getElementById("cancelBtn").textContent = t("cancel");
+    document.getElementById("deleteBtn").textContent = t("del");
+
+    // modal selects: condition
+    const fcond = document.getElementById("f_condition");
+    if(fcond){
+      const map = { new: t("c_new"), good: t("c_good"), ok: t("c_ok"), bad: t("c_bad") };
+      [...fcond.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
+    }
+    // modal selects: complete
+    const fcomp = document.getElementById("f_complete");
+    if(fcomp){
+      const map = {
+        full: t("comp_full"),
+        partial: t("comp_partial"),
+        nude: t("comp_nude"),
+        unknown: t("comp_unknown")
+      };
+      [...fcomp.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
+    }
+    // modal selects: status
+    const fstat = document.getElementById("f_status");
+    if(fstat){
+      const map = { none: t("st_none"), wish: t("st_wish"), owned: t("st_owned") };
+      [...fstat.options].forEach(o => { if(map[o.value]) o.textContent = map[o.value]; });
+    }
+
+    render();
   }
-};
-let lang='ru';
 
-const form = document.getElementById('item-form');
-const searchInput = document.getElementById('search');
-const collectionList = document.getElementById('collection-list');
-const wishlistList = document.getElementById('wishlist-list');
-const stats = document.getElementById('stats');
-const template = document.getElementById('item-template');
+  // ====== STORAGE ======
+  const LS_KEY = "collector_catalog_v1";
 
-const seedItems = [
-  { id: makeId(), name:'Barbie Silkstone Debut', category:'Doll', year:'2000', rarity:'Limited', condition:'Excellent', image:'https://images.unsplash.com/photo-1610147836585-4f2ac6f74266?auto=format&fit=crop&w=600&q=80', notes:'Starter sample with image.', listType:'collection', createdAt: Date.now()-2000 },
-  { id: makeId(), name:'Monster High Draculaura', category:'Doll', year:'2012', rarity:'Rare', condition:'Good', image:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=600&q=80', notes:'Wishlist sample.', listType:'wishlist', createdAt: Date.now()-1000 }
-];
+  // ====== UTIL ======
+  function uid(){
+    return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+  }
 
-let items = loadItems();
+  // Example seed if empty
+  const seed = [
+    {
+      id: uid(),
+      createdAt: Date.now() - 1000*60*60*24*6,
+      name: "Draculaura — базовая",
+      brand: "Monster High",
+      line: "G1",
+      character: "Draculaura",
+      year: 2012,
+      condition: "good",
+      complete: "partial",
+      status: "owned",
+      buyPrice: 950,
+      marketPrice: 1400,
+      notes: "Чуть пушатся волосы. Не хватает одной серёжки.",
+      tags: ["g1","monster high","pink"]
+    },
+    {
+      id: uid(),
+      createdAt: Date.now() - 1000*60*60*24*2,
+      name: "Raven Queen — wishlist",
+      brand: "Ever After High",
+      line: "Signature",
+      character: "Raven Queen",
+      year: 2014,
+      condition: "good",
+      complete: "full",
+      status: "wish",
+      buyPrice: null,
+      marketPrice: 1800,
+      notes: "Хочу полный комплект и коробку если повезёт.",
+      tags: ["eah","wishlist","rare?"]
+    },
+    {
+      id: uid(),
+      createdAt: Date.now() - 1000*60*60*12,
+      name: "Outfit set",
+      brand: "Barbie",
+      line: "Fashion",
+      character: "—",
+      year: 2020,
+      condition: "new",
+      complete: "full",
+      status: "none",
+      buyPrice: 250,
+      marketPrice: 300,
+      notes: "Под 11.5\" формат.",
+      tags: ["barbie","outfit"]
+    }
+  ];
 
-function loadItems(){ try { const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return [...seedItems]; const parsed=JSON.parse(raw); return Array.isArray(parsed)&&parsed.length?parsed:[...seedItems]; } catch { return [...seedItems]; } }
-function saveItems(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
-function makeId(){ return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()); }
+  function loadDB(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw){
+        localStorage.setItem(LS_KEY, JSON.stringify(seed));
+        return seed.slice();
+      }
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) throw new Error("bad db");
+      return arr;
+    }catch(e){
+      localStorage.setItem(LS_KEY, JSON.stringify(seed));
+      return seed.slice();
+    }
+  }
+  function saveDB(arr){
+    localStorage.setItem(LS_KEY, JSON.stringify(arr));
+  }
 
-function applyTranslations(){
-  const t=i18n[lang]; document.documentElement.lang=lang; document.getElementById('lang-toggle').textContent = lang==='ru' ? 'EN' : 'RU';
-  document.getElementById('title').textContent=t.title; document.getElementById('subtitle').textContent=t.subtitle; document.getElementById('form-heading').textContent=t.formHeading;
-  document.getElementById('label-name').textContent=t.name; document.getElementById('label-category').textContent=t.category; document.getElementById('label-year').textContent=t.year;
-  document.getElementById('label-rarity').textContent=t.rarity; document.getElementById('label-condition').textContent=t.condition; document.getElementById('label-image').textContent=t.image;
-  document.getElementById('label-notes').textContent=t.notes; document.getElementById('label-list').textContent=t.list; document.getElementById('save-btn').textContent=t.save;
-  document.getElementById('catalog-heading').textContent=t.catalog; document.getElementById('collection-heading').textContent=t.collection; document.getElementById('wishlist-heading').textContent=t.wishlist;
-  searchInput.placeholder=t.search; document.getElementById('name').placeholder = lang==='ru' ? 'Например, Barbie Silkstone' : 'Example: Barbie Silkstone';
-  document.getElementById('category').placeholder = lang==='ru' ? 'Кукла, фигурка, открытка...' : 'Doll, figure, postcard...';
-  document.getElementById('year').placeholder = '1998'; document.getElementById('image').placeholder='https://...';
-  document.getElementById('notes').placeholder = lang==='ru' ? 'Где куплено, цена, история...' : 'Where bought, price, story...';
-  fillSelect('rarity', t.rarityOpts); fillSelect('condition', t.conditionOpts); fillSelect('listType', t.listOpts, ['collection','wishlist']);
-  render();
-}
-function fillSelect(id, texts, values=[]){ const select=document.getElementById(id); const prev=select.value; select.innerHTML=''; texts.forEach((text,idx)=>{ const opt=document.createElement('option'); opt.textContent=text; opt.value=values[idx] ?? text; if(id==='rarity' && idx===0) opt.value=''; select.appendChild(opt); }); select.value = [...select.options].some(o=>o.value===prev) ? prev : select.options[0].value; }
+  // ====== ERROR POPUP NEAR INPUT ======
+  let errorPopEl = null;
+  let errorPopTimer = null;
 
-function setFieldError(field,msg=''){ const el=form.querySelector(`[data-error-for="${field.id}"]`); field.classList.toggle('invalid', Boolean(msg)); if(el){ el.textContent=msg; el.style.display=msg?'block':'none'; }}
-function validateField(field){
-  const t=i18n[lang]; let msg=''; const value=field.value.trim();
-  if(field.required && !value) msg=t.errors.required;
-  else if(field.id==='image' && value){ try { new URL(value); } catch { msg=t.errors.url; } }
-  else if(field.id==='year' && value){ const y=Number(value); if(Number.isNaN(y)||y<1900||y>2100) msg=t.errors.year; }
-  setFieldError(field,msg); return !msg;
-}
-function validateForm(){ const fields=[...form.querySelectorAll('input,select,textarea')]; let ok=true; fields.forEach((f)=>{ if(!validateField(f)) ok=false; }); return ok; }
+  function showErrorNear(el, message){
+    if(!el) return;
+    if(!errorPopEl){
+      errorPopEl = document.createElement("div");
+      errorPopEl.className = "errorPop";
+      document.body.appendChild(errorPopEl);
+    }
+    errorPopEl.textContent = message;
 
-function createItem(data){ return { id: makeId(), name:data.get('name').trim(), category:data.get('category').trim(), year:data.get('year').trim(), rarity:data.get('rarity'), condition:data.get('condition'), image:data.get('image').trim() || placeholderImage, notes:data.get('notes').trim(), listType:data.get('listType'), createdAt:Date.now() }; }
-function filterItems(){ const q=searchInput.value.toLowerCase().trim(); const sorted=[...items].sort((a,b)=>b.createdAt-a.createdAt); if(!q) return sorted; return sorted.filter((item)=>[item.name,item.category,item.notes,item.rarity,item.condition].join(' ').toLowerCase().includes(q)); }
+    // position under the input
+    const r = el.getBoundingClientRect();
+    const top = r.bottom + 10;
+    let left = r.left;
+    const maxW = 320;
 
-function renderCards(container,listItems,target){
-  container.innerHTML=''; const t=i18n[lang];
-  if(!listItems.length){ container.innerHTML=`<p class="empty">${target==='collection' ? t.emptyCollection : t.emptyWishlist}</p>`; return; }
-  listItems.forEach((item)=>{ const node=template.content.firstElementChild.cloneNode(true); node.querySelector('.card__image').src=item.image||placeholderImage; node.querySelector('.card__image').alt=item.name;
-    node.querySelector('.card__title').textContent=item.name; node.querySelector('.card__meta').textContent=[item.category||t.noCategory,item.year?`${t.yearLabel}: ${item.year}`:'',item.rarity||'',item.condition||''].filter(Boolean).join(' • ');
-    node.querySelector('.card__notes').textContent=item.notes||t.noNotes;
-    const tg=node.querySelector('[data-action="toggle"]'); tg.textContent= target==='collection'?t.toWishlist:t.toCollection; tg.addEventListener('click',()=>toggleList(item.id));
-    const rm=node.querySelector('[data-action="remove"]'); rm.textContent=t.remove; rm.addEventListener('click',()=>removeItem(item.id)); container.appendChild(node); });
-}
-function updateStats(visible){ const t=i18n[lang]; const c=items.filter((i)=>i.listType==='collection').length; const w=items.filter((i)=>i.listType==='wishlist').length; stats.textContent=t.stats(items.length,c,w,visible.length); }
-function render(){ const f=filterItems(); renderCards(collectionList,f.filter((i)=>i.listType==='collection'),'collection'); renderCards(wishlistList,f.filter((i)=>i.listType==='wishlist'),'wishlist'); updateStats(f); }
-function toggleList(id){ items=items.map((item)=>item.id===id?{...item,listType:item.listType==='collection'?'wishlist':'collection'}:item); saveItems(); render(); }
-function removeItem(id){ items=items.filter((item)=>item.id!==id); saveItems(); render(); }
+    // clamp within viewport
+    const vw = window.innerWidth;
+    if(left + maxW > vw - 12) left = Math.max(12, vw - maxW - 12);
+    if(left < 12) left = 12;
 
-form.addEventListener('submit',(e)=>{ e.preventDefault(); if(!validateForm()) return; const item=createItem(new FormData(form)); items.push(item); saveItems(); form.reset(); [...form.querySelectorAll('.error')].forEach((e)=>e.style.display='none'); [...form.querySelectorAll('.invalid')].forEach((n)=>n.classList.remove('invalid')); render(); });
-form.querySelectorAll('input,select,textarea').forEach((field)=>{ field.addEventListener('input',()=>validateField(field)); field.addEventListener('blur',()=>validateField(field)); });
-searchInput.addEventListener('input', render);
-document.getElementById('lang-toggle').addEventListener('click', ()=>{ lang = lang === 'ru' ? 'en' : 'ru'; applyTranslations(); });
+    errorPopEl.style.top = top + "px";
+    errorPopEl.style.left = left + "px";
 
-applyTranslations();
+    // animate
+    requestAnimationFrame(()=> errorPopEl.classList.add("show"));
+
+    clearTimeout(errorPopTimer);
+    errorPopTimer = setTimeout(()=>{
+      errorPopEl.classList.remove("show");
+    }, 2200);
+  }
+
+  // ====== STATE ======
+  let db = loadDB();
+  let view = "all"; // all | wish | owned
+  let editingId = null;
+
+  // ====== DOM ======
+  const $ = (s) => document.querySelector(s);
+
+  const listEl = $("#list");
+  const emptyEl = $("#empty");
+  const statsEl = $("#stats");
+
+  const qEl = $("#q");
+  const brandEl = $("#brand");
+  const conditionEl = $("#condition");
+  const sortEl = $("#sort");
+
+  const addBtn = $("#addBtn");
+  const exportBtn = $("#exportBtn");
+  const importBtn = $("#importBtn");
+  const importFile = $("#importFile");
+  const langBtn = $("#langBtn");
+
+  // tabs
+  const tabs = [...document.querySelectorAll(".tab")];
+
+  // modal
+  const modal = $("#modal");
+  const mTitle = $("#mTitle");
+  const mClose = $("#mClose");
+  const saveBtn = $("#saveBtn");
+  const cancelBtn = $("#cancelBtn");
+  const deleteBtn = $("#deleteBtn");
+
+  // form fields
+  const f = {
+    name: $("#f_name"),
+    brand: $("#f_brand"),
+    line: $("#f_line"),
+    char: $("#f_char"),
+    year: $("#f_year"),
+    condition: $("#f_condition"),
+    complete: $("#f_complete"),
+    status: $("#f_status"),
+    buy: $("#f_buy"),
+    market: $("#f_market"),
+    notes: $("#f_notes"),
+    tags: $("#f_tags"),
+  };
+
+  // ====== FILTER INIT ======
+  function rebuildBrandFilter(){
+    const brands = ["all", ...Array.from(new Set(db.map(x => x.brand).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ru'))];
+    const current = brandEl.value || "all";
+    brandEl.innerHTML = "";
+    for(const b of brands){
+      const opt = document.createElement("option");
+      opt.value = b;
+      opt.textContent = b === "all" ? t("brand_all") : b;
+      brandEl.appendChild(opt);
+    }
+    brandEl.value = brands.includes(current) ? current : "all";
+  }
+
+  // ====== HELPERS ======
+  const fmtKc = (n) => (n == null || n === "" || Number.isNaN(Number(n)))
+    ? t("dash")
+    : new Intl.NumberFormat("ru-RU").format(Number(n)) + " Kč";
+
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function condLabel(c){
+    if(c==="new") return t("c_new");
+    if(c==="good") return t("c_good");
+    if(c==="ok") return t("c_ok");
+    if(c==="bad") return t("c_bad");
+    return t("dash");
+  }
+
+  function condClass(c){
+    if(c==="new" || c==="good") return "ok";
+    if(c==="ok") return "warn";
+    if(c==="bad") return "bad";
+    return "";
+  }
+
+  function completeLabel(v){
+    if(v==="full") return t("comp_full");
+    if(v==="partial") return t("comp_partial");
+    if(v==="nude") return t("comp_nude");
+    if(v==="unknown") return t("comp_unknown");
+    return t("dash");
+  }
+
+  function statusLabel(s){
+    if(s==="wish") return t("st_wish");
+    if(s==="owned") return t("st_owned");
+    if(s==="none") return (lang==="ru" ? "Каталог" : "Catalog");
+    return (lang==="ru" ? "Каталог" : "Catalog");
+  }
+
+  function matchesQuery(item, q){
+    if(!q) return true;
+    const hay = [
+      item.name, item.brand, item.line, item.character,
+      item.notes, (item.tags||[]).join(" "),
+      String(item.year ?? "")
+    ].join(" ").toLowerCase();
+    return hay.includes(q.toLowerCase().trim());
+  }
+
+  function getFiltered(){
+    const q = qEl.value.trim();
+    const b = brandEl.value;
+    const c = conditionEl.value;
+
+    let arr = db.slice();
+
+    if(view === "wish") arr = arr.filter(x => x.status === "wish");
+    if(view === "owned") arr = arr.filter(x => x.status === "owned");
+
+    arr = arr.filter(x => matchesQuery(x, q));
+
+    if(b !== "all") arr = arr.filter(x => x.brand === b);
+    if(c !== "all") arr = arr.filter(x => x.condition === c);
+
+    const s = sortEl.value;
+    const byName = (a,b)=> (a.name||"").localeCompare(b.name||"",'ru');
+
+    if(s === "recent") arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    else if(s === "market_desc") arr.sort((a,b)=>(Number(b.marketPrice)||-1)-(Number(a.marketPrice)||-1));
+    else if(s === "market_asc") arr.sort((a,b)=>(Number(a.marketPrice)||1e18)-(Number(b.marketPrice)||1e18));
+    else if(s === "buy_desc") arr.sort((a,b)=>(Number(b.buyPrice)||-1)-(Number(a.buyPrice)||-1));
+    else if(s === "buy_asc") arr.sort((a,b)=>(Number(a.buyPrice)||1e18)-(Number(b.buyPrice)||1e18));
+    else if(s === "name_asc") arr.sort(byName);
+    else if(s === "name_desc") arr.sort((a,b)=>byName(b,a));
+
+    return arr;
+  }
+
+  function setStats(visible){
+    const total = db.length;
+    const wish = db.filter(x=>x.status==="wish").length;
+    const owned = db.filter(x=>x.status==="owned").length;
+
+    const mode =
+      view === "all" ? t("tab_all") :
+      view === "wish" ? t("tab_wish") :
+      t("tab_owned");
+
+    const wishLabel = lang==="ru" ? "wish" : "wish";
+    const ownedLabel = lang==="ru" ? "owned" : "owned";
+
+    statsEl.textContent = `${mode}: ${visible}/${total} • ${wishLabel}: ${wish} • ${ownedLabel}: ${owned}`;
+  }
+
+  // ====== RENDER ======
+  function render(){
+    rebuildBrandFilter();
+
+    const arr = getFiltered();
+    listEl.innerHTML = "";
+    emptyEl.style.display = arr.length ? "none" : "block";
+    setStats(arr.length);
+
+    for(const it of arr){
+      const card = document.createElement("article");
+      card.className = "card";
+
+      const cond = condLabel(it.condition);
+      const condCls = condClass(it.condition);
+
+      const title = it.name || (lang==="ru" ? "(без названия)" : "(no title)");
+      const meta1 = `${it.brand || t("dash")} • ${it.line || t("dash")} • ${it.character || t("dash")}`;
+      const meta2 =
+        (lang==="ru"
+          ? `Год: ${it.year ?? t("dash")} • Комплект: ${completeLabel(it.complete)} • Статус: ${statusLabel(it.status)}`
+          : `Year: ${it.year ?? t("dash")} • Complete: ${completeLabel(it.complete)} • Status: ${statusLabel(it.status)}`
+        );
+
+      card.innerHTML = `
+        <div class="thumb">
+          <span class="badge ${condCls}">${esc(cond)}</span>
+          <span class="badge">${esc(statusLabel(it.status))}</span>
+        </div>
+        <div class="body">
+          <div class="titleRow">
+            <h3 class="title">${esc(title)}</h3>
+          </div>
+          <div class="metaLine">${esc(meta1)}</div>
+          <div class="metaLine">${esc(meta2)}</div>
+
+          <div class="money">
+            <span>${esc(t("buy"))}: <b>${esc(fmtKc(it.buyPrice))}</b></span>
+            <span>${esc(t("market"))}: <b>${esc(fmtKc(it.marketPrice))}</b></span>
+          </div>
+
+          <div class="actions">
+            <button class="btnGhost" data-action="toggleWish" data-id="${it.id}">
+              ${it.status === "wish" ? esc(t("btn_from_wish")) : esc(t("btn_to_wish"))}
+            </button>
+            <button class="btnGhost" data-action="toggleOwned" data-id="${it.id}">
+              ${it.status === "owned" ? esc(t("btn_from_owned")) : esc(t("btn_to_owned"))}
+            </button>
+            <button class="btn" data-action="edit" data-id="${it.id}">${esc(t("btn_edit"))}</button>
+          </div>
+        </div>
+      `;
+      listEl.appendChild(card);
+    }
+  }
+
+  // ====== TABS ======
+  function setView(next){
+    view = next;
+    for(const tbtn of tabs){
+      const selected = tbtn.dataset.view === view;
+      tbtn.setAttribute("aria-selected", selected ? "true" : "false");
+    }
+    render();
+  }
+  tabs.forEach(tbtn => tbtn.addEventListener("click", ()=> setView(tbtn.dataset.view)));
+
+  // ====== MODAL LOGIC ======
+  function openModal(mode, item){
+    modal.setAttribute("aria-hidden","false");
+    document.body.style.overflow = "hidden";
+
+    if(mode === "add"){
+      mTitle.textContent = t("m_add");
+      editingId = null;
+      deleteBtn.style.display = "none";
+      fillForm({
+        name:"", brand:"Monster High", line:"", character:"", year:"",
+        condition:"good", complete:"full", status:"none",
+        buyPrice:"", marketPrice:"", notes:"", tags:[]
+      });
+    } else {
+      mTitle.textContent = t("m_edit");
+      editingId = item.id;
+      deleteBtn.style.display = "inline-block";
+      fillForm(item);
+    }
+  }
+
+  function closeModal(){
+    modal.setAttribute("aria-hidden","true");
+    document.body.style.overflow = "";
+    editingId = null;
+  }
+
+  function fillForm(item){
+    f.name.value = item.name ?? "";
+    f.brand.value = item.brand ?? "Другие";
+    f.line.value = item.line ?? "";
+    f.char.value = item.character ?? "";
+    f.year.value = item.year ?? "";
+    f.condition.value = item.condition ?? "good";
+    f.complete.value = item.complete ?? "unknown";
+    f.status.value = item.status ?? "none";
+    f.buy.value = item.buyPrice ?? "";
+    f.market.value = item.marketPrice ?? "";
+    f.notes.value = item.notes ?? "";
+    f.tags.value = (item.tags || []).join(", ");
+  }
+
+  function readForm(){
+    const year = f.year.value === "" ? null : Number(f.year.value);
+    const buy = f.buy.value === "" ? null : Number(f.buy.value);
+    const market = f.market.value === "" ? null : Number(f.market.value);
+
+    const tags = f.tags.value
+      .split(",")
+      .map(x=>x.trim())
+      .filter(Boolean);
+
+    return {
+      name: f.name.value.trim(),
+      brand: f.brand.value,
+      line: f.line.value.trim(),
+      character: f.char.value.trim(),
+      year: (year != null && !Number.isNaN(year)) ? year : null,
+      condition: f.condition.value,
+      complete: f.complete.value,
+      status: f.status.value,
+      buyPrice: (buy != null && !Number.isNaN(buy)) ? buy : null,
+      marketPrice: (market != null && !Number.isNaN(market)) ? market : null,
+      notes: f.notes.value.trim(),
+      tags
+    };
+  }
+
+  // ====== CRUD ======
+  function addItem(){
+    openModal("add", null);
+    // фокус на поле названия
+    setTimeout(()=> f.name.focus(), 0);
+  }
+
+  function editItem(id){
+    const item = db.find(x => x.id === id);
+    if(!item) return;
+    openModal("edit", item);
+    setTimeout(()=> f.name.focus(), 0);
+  }
+
+  function saveItem(){
+    const data = readForm();
+
+    if(!data.name){
+      showErrorNear(f.name, t("err_name_required"));
+      f.name.focus();
+      return;
+    }
+
+    if(editingId){
+      const idx = db.findIndex(x=>x.id===editingId);
+      if(idx === -1) return;
+      db[idx] = { ...db[idx], ...data };
+    } else {
+      db.unshift({
+        id: uid(),
+        createdAt: Date.now(),
+        ...data
+      });
+    }
+
+    saveDB(db);
+    closeModal();
+    render();
+  }
+
+  function deleteItem(){
+    if(!editingId) return;
+    const ok = confirm(t("confirm_delete"));
+    if(!ok) return;
+
+    db = db.filter(x=>x.id !== editingId);
+    saveDB(db);
+    closeModal();
+    render();
+  }
+
+  function toggleWish(id){
+    const item = db.find(x=>x.id===id);
+    if(!item) return;
+    item.status = (item.status === "wish") ? "none" : "wish";
+    saveDB(db);
+    render();
+  }
+
+  function toggleOwned(id){
+    const item = db.find(x=>x.id===id);
+    if(!item) return;
+    item.status = (item.status === "owned") ? "none" : "owned";
+    saveDB(db);
+    render();
+  }
+
+  // ====== EXPORT / IMPORT ======
+  function exportJSON(){
+    const payload = {
+      version: 1,
+      lang,
+      exportedAt: new Date().toISOString(),
+      items: db
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "collector_catalog_export.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importJSONFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(String(reader.result || ""));
+        const arr = Array.isArray(parsed) ? parsed : parsed.items;
+        if(!Array.isArray(arr)) throw new Error("bad format");
+
+        const norm = arr.map(x => ({
+          id: x.id || uid(),
+          createdAt: x.createdAt || Date.now(),
+          name: x.name || "",
+          brand: x.brand || "Другие",
+          line: x.line || "",
+          character: x.character || "",
+          year: x.year ?? null,
+          condition: x.condition || "ok",
+          complete: x.complete || "unknown",
+          status: (x.status==="wish"||x.status==="owned"||x.status==="none") ? x.status : "none",
+          buyPrice: (x.buyPrice == null) ? null : Number(x.buyPrice),
+          marketPrice: (x.marketPrice == null) ? null : Number(x.marketPrice),
+          notes: x.notes || "",
+          tags: Array.isArray(x.tags) ? x.tags : []
+        }));
+
+        db = norm;
+        saveDB(db);
+        closeModal();
+        rebuildBrandFilter();
+        render();
+
+        // маленький попап рядом с поиском как "ok"
+        showErrorNear(qEl, t("ok_import"));
+      }catch(e){
+        showErrorNear(qEl, t("err_import"));
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ====== EVENTS ======
+  addBtn.addEventListener("click", addItem);
+  exportBtn.addEventListener("click", exportJSON);
+
+  importBtn.addEventListener("click", () => importFile.click());
+  importFile.addEventListener("change", (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(file) importJSONFile(file);
+    importFile.value = "";
+  });
+
+  qEl.addEventListener("input", render);
+  brandEl.addEventListener("change", render);
+  conditionEl.addEventListener("change", render);
+  sortEl.addEventListener("change", render);
+
+  listEl.addEventListener("click", (e)=>{
+    const btn = e.target.closest("[data-action]");
+    if(!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+
+    if(action === "edit") editItem(id);
+    if(action === "toggleWish") toggleWish(id);
+    if(action === "toggleOwned") toggleOwned(id);
+  });
+
+  mClose.addEventListener("click", closeModal);
+  cancelBtn.addEventListener("click", closeModal);
+  saveBtn.addEventListener("click", saveItem);
+  deleteBtn.addEventListener("click", deleteItem);
+
+  modal.addEventListener("click", (e)=>{
+    if(e.target === modal) closeModal();
+  });
+  document.addEventListener("keydown", (e)=>{
+    if(e.key === "Escape" && modal.getAttribute("aria-hidden")==="false") closeModal();
+  });
+
+  // Enter to save (in modal)
+  modal.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" && (e.target.tagName === "INPUT")){
+      e.preventDefault();
+      saveItem();
+    }
+  });
+
+  // Language toggle
+  langBtn.addEventListener("click", ()=>{
+    lang = (lang === "ru") ? "en" : "ru";
+    localStorage.setItem(LS_LANG, lang);
+    applyLang();
+  });
+
+  // ====== START ======
+  // init filters text + UI
+  applyLang();
 </script>
 </body>
 </html>
