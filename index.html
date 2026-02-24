@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Каталог коллекционера</title>
+  <title>Corllion</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
   <style>
@@ -372,7 +372,7 @@
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>
-          <h1 id="ui_title">Каталог коллекционера</h1>
+          <h1 id="ui_title">Corllion</h1>
           <div class="sub" id="ui_sub">каталог • вишлист • коллекция • заметки • import/export JSON</div>
         </div>
       </div>
@@ -584,6 +584,50 @@
 
 <script>
   // ====== LANGUAGE ======
+  const I18N = {
+  ru: {
+    title: "Каталог коллекционера",
+    subtitle: "каталог • вишлист • коллекция • заметки • import/export JSON",
+    tab_all: "Каталог",
+    tab_wish: "Вишлист",
+    tab_owned: "Коллекция",
+    add: "＋ Добавить",
+    search: "Поиск…",
+    allBrands: "Все бренды",
+    export: "Экспорт JSON",
+    import: "Импорт JSON",
+    empty: "Пусто. Добавь запись или измени фильтры.",
+    edit: "Редактировать",
+    toWish: "В вишлист",
+    toOwned: "В коллекцию",
+    remove: "Убрать",
+    save: "Сохранить",
+    cancel: "Отмена",
+    delete: "Удалить",
+    offline: "Всё офлайн. Данные хранятся в браузере (localStorage)."
+  },
+  en: {
+    title: "Collector Catalog",
+    subtitle: "catalog • wishlist • collection • notes • import/export JSON",
+    tab_all: "Catalog",
+    tab_wish: "Wishlist",
+    tab_owned: "Collection",
+    add: "＋ Add",
+    search: "Search…",
+    allBrands: "All brands",
+    export: "Export JSON",
+    import: "Import JSON",
+    empty: "Empty. Add items or change filters.",
+    edit: "Edit",
+    toWish: "Add to wishlist",
+    toOwned: "Add to collection",
+    remove: "Remove",
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    offline: "Offline mode. Data stored in browser (localStorage)."
+  }
+};
   const LS_LANG = "collector_lang_v4";
   let lang = localStorage.getItem(LS_LANG) || "ru";
 
