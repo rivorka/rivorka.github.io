@@ -2,9 +2,8 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <!-- ✅ важно для телефонов -->
+  <!-- phone-safe viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-
   <title>Каталог коллекционера</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
@@ -15,15 +14,14 @@
       --muted:#9fb0d0;
       --brand:#7c5cff;
       --brand2:#00d4ff;
-      --danger:#ff4d6d;
       --shadow: 0 10px 30px rgba(0,0,0,.35);
       --radius: 18px;
 
       --site-hero: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,.25), transparent 60%),
                    radial-gradient(900px 500px at 90% 10%, rgba(0,212,255,.18), transparent 55%);
 
-      /* ✅ отступы “окна” модалки от краёв */
       --modal-inset: clamp(12px, 3.5vw, 28px);
+      --sheet-radius: 22px;
     }
 
     *{box-sizing:border-box}
@@ -32,7 +30,7 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
       background: var(--site-hero), var(--bg);
       color:var(--text);
-      overflow-x: hidden; /* ✅ страховка от горизонтального скролла */
+      overflow-x:hidden;
     }
 
     header{
@@ -52,7 +50,7 @@
       width:38px; height:38px; border-radius:12px;
       background: linear-gradient(135deg, var(--brand), var(--brand2));
       box-shadow: var(--shadow);
-      flex: 0 0 auto;
+      flex:0 0 auto;
     }
     h1{font-size:18px; margin:0; line-height:1.15}
     .sub{color:var(--muted); font-size:13px; margin-top:2px}
@@ -107,14 +105,6 @@
       font-weight: 900;
       cursor:pointer;
     }
-    .btnDanger{
-      background: rgba(255,77,109,.18);
-      border: 1px solid rgba(255,77,109,.35);
-      color: var(--text);
-      font-weight: 900;
-      cursor:pointer;
-    }
-
     .pill{
       display:inline-flex; gap:8px; align-items:center;
       padding: 6px 10px;
@@ -128,14 +118,12 @@
 
     .controls{
       display:grid;
-      grid-template-columns: 1.3fr .85fr .85fr .95fr auto auto;
+      grid-template-columns: 1.3fr .85fr .95fr auto auto;
       gap:10px;
       align-items:center;
       width:100%;
       margin-top:12px;
     }
-
-    /* ✅ адаптация фильтров под телефон */
     @media (max-width: 980px){
       .controls{grid-template-columns: 1fr 1fr 1fr; }
     }
@@ -144,7 +132,7 @@
       .row{width:100%}
       .tabs{width:100%}
       .tab{flex:1}
-      #currency, #langBtn, #addBtn{flex:1}
+      #addBtn{flex:1}
     }
 
     main{padding: 16px 0 40px}
@@ -196,21 +184,19 @@
 
     .body{padding: 12px 12px 14px}
     .title{font-weight: 950; margin:0; font-size: 15px; line-height: 1.25}
-    .money{
-      display:flex; gap:8px; flex-wrap:wrap;
-      margin-top:10px;
-      font-size: 12.5px;
-    }
-    .money span{
-      padding: 6px 9px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.08);
-    }
+    .meta{color: var(--muted); font-size: 12.5px; margin-top:6px; line-height:1.35}
     .actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
     .actions button{flex:1}
 
-    /* ✅ модалка = “окно”, не прилипает к краям */
+    .empty{
+      padding: 22px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+    }
+
+    /* ===== Modal / Window (desktop) + Bottom sheet (mobile) ===== */
     .modalBackdrop{
       position: fixed; inset:0;
       background: rgba(0,0,0,.55);
@@ -233,23 +219,33 @@
       display:flex;
       flex-direction: column;
       min-width: 0;
-    }
-
-    /* ✅ на телефоне делаем окно чуть уже и скролл внутри */
-    @media (max-width: 560px){
-      .modal{
-        border-radius: 18px;
-      }
+      transform: translateY(0);
+      will-change: transform;
     }
 
     .modalTop{
-      padding: 14px 14px;
+      padding: 12px 14px;
       display:flex; align-items:center; justify-content:space-between; gap:12px;
       border-bottom: 1px solid rgba(255,255,255,.08);
       background: rgba(255,255,255,.03);
       flex: 0 0 auto;
+      position: relative;
     }
-    .modalTop strong{font-size: 14px}
+
+    /* drag handle (shows on mobile) */
+    .handle{
+      position:absolute;
+      left: 50%;
+      top: 8px;
+      transform: translateX(-50%);
+      width: 52px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      display:none;
+    }
+
+    .modalTop strong{font-size: 14px; padding-top: 6px;}
     .x{
       width: 38px; height: 38px; border-radius: 14px;
       border: 1px solid rgba(255,255,255,.14);
@@ -259,6 +255,7 @@
       display:grid; place-items:center;
       font-weight:900;
       flex: 0 0 auto;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .modalContent{
@@ -281,6 +278,7 @@
     label{color: var(--muted); font-size: 12px}
     .help{color: rgba(159,176,208,.75); font-size: 12px}
 
+    /* photo UI */
     .photoCard{
       border-radius: 18px;
       border: 1px solid rgba(255,255,255,.10);
@@ -319,17 +317,25 @@
     }
     .fileHidden{display:none;}
 
-    .empty{
-      padding: 22px;
-      border-radius: var(--radius);
-      border: 1px dashed rgba(255,255,255,.18);
-      background: rgba(255,255,255,.03);
-      color: var(--muted);
+    /* ===== Mobile bottom-sheet mode ===== */
+    @media (max-width: 560px){
+      .modalBackdrop{
+        align-items:flex-end;
+        padding: 0;
+      }
+      .modal{
+        width: 100vw;
+        max-height: 92dvh;
+        border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+        border-left: none;
+        border-right: none;
+        border-bottom: none;
+      }
+      .handle{display:block;}
+      .modalTop strong{padding-top: 12px;}
     }
 
     .hide{display:none !important;}
-    .isLocked{opacity:.55; cursor:not-allowed;}
-    .lockedHint{ margin-top:6px; font-size:12px; color: rgba(159,176,208,.80); }
   </style>
 </head>
 
@@ -340,59 +346,29 @@
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div style="min-width:0;">
-          <h1 id="ui_title">Каталог коллекционера</h1>
-          <div class="sub" id="ui_sub">каталог • вишлист • коллекция • заметки • import/export JSON</div>
+          <h1>Каталог коллекционера</h1>
+          <div class="sub">каталог • вишлист • коллекция • заметки</div>
         </div>
       </div>
 
       <div class="row">
         <div class="tabs" role="tablist" aria-label="Режимы">
-          <button class="tab" id="tab_all" role="tab" aria-selected="true" data-view="all">Каталог</button>
-          <button class="tab" id="tab_wish" role="tab" aria-selected="false" data-view="wish">Вишлист</button>
-          <button class="tab" id="tab_owned" role="tab" aria-selected="false" data-view="owned">Коллекция</button>
+          <button class="tab" aria-selected="true" data-view="all">Каталог</button>
+          <button class="tab" aria-selected="false" data-view="wish">Вишлист</button>
+          <button class="tab" aria-selected="false" data-view="owned">Коллекция</button>
         </div>
-
-        <select class="btnGhost" id="currency" title="Currency" style="padding: 11px 12px;">
-          <option value="CZK">CZK</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="UAH">UAH</option>
-          <option value="RUB">RUB</option>
-        </select>
-
-        <button class="btnGhost" id="langBtn" title="Switch language">RU / EN</button>
         <button class="btn" id="addBtn">＋ Добавить</button>
       </div>
     </div>
 
     <div class="controls" role="search">
-      <input id="q" placeholder="Поиск…" autocomplete="off"/>
+      <input id="q" placeholder="Поиск: имя / линейка / персонаж…" autocomplete="off"/>
       <select id="brand"><option value="all">Все бренды</option></select>
-
-      <select id="typeFilter" class="hide">
-        <option value="all">Все типы</option>
-        <option value="doll">Куклы</option>
-        <option value="accessory">Аксессуары</option>
-      </select>
-
-      <select id="condition" class="hide">
-        <option value="all">Любое состояние</option>
-        <option value="new">Новое</option>
-        <option value="good">Хорошее</option>
-        <option value="ok">Ок</option>
-        <option value="bad">Плохое</option>
-      </select>
-
       <select id="sort">
-        <option value="recent">Сорт: недавние</option>
-        <option value="market_desc">Средняя цена: ↓</option>
-        <option value="market_asc">Средняя цена: ↑</option>
-        <option value="buy_desc">Покупка: ↓</option>
-        <option value="buy_asc">Покупка: ↑</option>
         <option value="name_asc">Имя: A→Я</option>
         <option value="name_desc">Имя: Я→A</option>
+        <option value="recent">Недавние</option>
       </select>
-
       <button class="btnGhost" id="exportBtn">Экспорт JSON</button>
       <button class="btnGhost" id="importBtn">Импорт JSON</button>
       <input id="importFile" type="file" accept="application/json" hidden />
@@ -400,29 +376,27 @@
 
     <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
       <span class="pill" id="stats"></span>
-      <span class="pill" id="ui_offline">Всё офлайн. Данные хранятся в браузере (localStorage).</span>
+      <span class="pill">Офлайн (localStorage)</span>
     </div>
   </div>
 </header>
 
 <main class="wrap">
   <section id="list" class="grid" aria-live="polite"></section>
-  <div id="empty" class="empty" style="display:none; margin-top:14px;">Пусто. Добавь запись или измени фильтры.</div>
+  <div id="empty" class="empty" style="display:none; margin-top:14px;">Пусто.</div>
 </main>
-
-<footer class="wrap" id="ui_footer">Дальше можно расширить каталог и подключить фото.</footer>
 
 <!-- Modal -->
 <div class="modalBackdrop" id="modal" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-    <div class="modalTop">
-      <strong id="mTitle">Редактировать</strong>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="sheet">
+    <div class="modalTop" id="sheetTop">
+      <div class="handle" aria-hidden="true"></div>
+      <strong id="mTitle">Добавить</strong>
       <button class="x" id="mClose" aria-label="Закрыть">×</button>
     </div>
 
     <div class="modalContent">
       <div class="formGrid">
-
         <div class="field">
           <label>Тип</label>
           <select id="f_type">
@@ -434,7 +408,6 @@
         <div class="field">
           <label>Название</label>
           <input id="f_name" placeholder="Напр: Draculaura (Core)" />
-          <div class="lockedHint" id="lockedHint" style="display:none;"></div>
         </div>
 
         <div class="field">
@@ -461,38 +434,10 @@
           <label>Год</label>
           <div style="display:flex; gap:8px; min-width:0;">
             <button class="btnGhost" id="yearDec" type="button" style="width:44px; padding:0;">−</button>
-            <input id="f_year" type="number" min="1950" max="2100" placeholder="2012" style="flex:1; text-align:center; font-weight:900;">
+            <input id="f_year" type="number" min="1950" max="2100" placeholder="2012"
+                   style="flex:1; text-align:center; font-weight:900;">
             <button class="btnGhost" id="yearInc" type="button" style="width:44px; padding:0;">+</button>
           </div>
-        </div>
-
-        <div class="field">
-          <label>Состояние</label>
-          <select id="f_condition">
-            <option value="new">Новое</option>
-            <option value="good">Хорошее</option>
-            <option value="ok">Ок</option>
-            <option value="bad">Плохое</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Комплектность</label>
-          <select id="f_complete">
-            <option value="full">Полная</option>
-            <option value="partial">Частичная</option>
-            <option value="nude">Nude / без одежды</option>
-            <option value="unknown">Не знаю</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Статус</label>
-          <select id="f_status">
-            <option value="none">Просто в каталоге</option>
-            <option value="wish">Вишлист</option>
-            <option value="owned">В коллекции</option>
-          </select>
         </div>
 
         <!-- Фото -->
@@ -506,22 +451,10 @@
                 <button class="btnGhost" id="pickPhotoBtn" type="button">Выбрать фото</button>
                 <button class="btnGhost" id="clearPhotoBtn" type="button">Убрать фото</button>
               </div>
-              <div class="help" style="margin-top:8px;">Фото хранится локально (в браузере). Лучше до ~1–2 МБ.</div>
+              <div class="help" style="margin-top:8px;">Фото хранится локально. Лучше до ~1–2 МБ.</div>
               <input id="f_photo" class="fileHidden" type="file" accept="image/*" />
             </div>
           </div>
-        </div>
-
-        <div class="field">
-          <label>Цена покупки</label>
-          <input id="f_buy" type="number" min="0" step="1" placeholder="Напр: 950" />
-          <div class="help">Если не покупала — оставь пустым.</div>
-        </div>
-
-        <div class="field">
-          <label>Средняя цена рынка</label>
-          <input id="f_market" type="number" min="0" step="1" placeholder="Напр: 1200" />
-          <div class="help">Можно заполнять позже.</div>
         </div>
 
         <div class="field full">
@@ -537,7 +470,6 @@
         <div class="field full" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:4px;">
           <button class="btn" id="saveBtn">Сохранить</button>
           <button class="btnGhost" id="cancelBtn">Отмена</button>
-          <button class="btnDanger" id="deleteBtn" style="display:none;">Удалить</button>
         </div>
 
       </div>
@@ -546,18 +478,127 @@
 </div>
 
 <script>
-  const LS_KEY = "collector_catalog_mobilefix_v1";
+  const LS_KEY = "collector_global_offline_v2";
   const $ = (s)=>document.querySelector(s);
 
-  // минимальная база, чтобы файл был самодостаточный
   function uid(){ return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16); }
+
+  // ===== Prebuilt catalog: 50 dolls =====
+  function prebuiltCatalog50(){
+    const B = "Monster High";
+    const mk = (id, name, line, year, character) => ({
+      id,
+      createdAt: 0,
+      isPrebuilt: true,
+      type: "doll",
+      name,
+      brand: B,
+      line,
+      character,
+      year,
+      status: "none",        // none | wish | owned
+      notes: "",
+      tags: ["monster high"],
+      photoDataUrl: null
+    });
+
+    // Years are approximate (safe defaults). You can корректировать позже.
+    return [
+      // G1 Core / Wave 1-ish
+      mk("mh_g1_core_draculaura", "Draculaura (Core G1)", "G1 базовая", 2010, "Draculaura"),
+      mk("mh_g1_core_frankie", "Frankie Stein (Core G1)", "G1 базовая", 2010, "Frankie Stein"),
+      mk("mh_g1_core_clawdeen", "Clawdeen Wolf (Core G1)", "G1 базовая", 2010, "Clawdeen Wolf"),
+      mk("mh_g1_core_lagoona", "Lagoona Blue (Core G1)", "G1 базовая", 2010, "Lagoona Blue"),
+      mk("mh_g1_core_cleo", "Cleo de Nile (Core G1)", "G1 базовая", 2010, "Cleo de Nile"),
+      mk("mh_g1_core_deuce", "Deuce Gorgon (Core G1)", "G1 базовая", 2010, "Deuce Gorgon"),
+      mk("mh_g1_core_ghoulia", "Ghoulia Yelps (Core G1)", "G1 базовая", 2011, "Ghoulia Yelps"),
+      mk("mh_g1_core_abbey", "Abbey Bominable (Core G1)", "G1 базовая", 2012, "Abbey Bominable"),
+      mk("mh_g1_core_spectra", "Spectra Vondergeist (Core G1)", "G1 базовая", 2011, "Spectra Vondergeist"),
+      mk("mh_g1_core_toralei", "Toralei Stripe (Core G1)", "G1 базовая", 2011, "Toralei Stripe"),
+      mk("mh_g1_core_rochelle", "Rochelle Goyle (Core G1)", "G1 базовая", 2012, "Rochelle Goyle"),
+      mk("mh_g1_core_venus", "Venus McFlytrap (Core G1)", "G1 базовая", 2012, "Venus McFlytrap"),
+      mk("mh_g1_core_robecca", "Robecca Steam (Core G1)", "G1 базовая", 2011, "Robecca Steam"),
+      mk("mh_g1_core_nefera", "Nefera de Nile", "G1", 2012, "Nefera de Nile"),
+      mk("mh_g1_core_howleen", "Howleen Wolf", "G1", 2012, "Howleen Wolf"),
+      mk("mh_g1_core_catty", "Catty Noir", "G1", 2013, "Catty Noir"),
+      mk("mh_g1_core_twyla", "Twyla", "G1", 2013, "Twyla"),
+      mk("mh_g1_core_cupid", "C.A. Cupid", "G1", 2011, "C.A. Cupid"),
+      mk("mh_g1_core_honey", "Honey Swamp", "G1", 2013, "Honey Swamp"),
+      mk("mh_g1_core_viperine", "Viperine Gorgon", "G1", 2013, "Viperine Gorgon"),
+      mk("mh_g1_core_jinafire", "Jinafire Long", "G1", 2012, "Jinafire Long"),
+      mk("mh_g1_core_skelita", "Skelita Calaveras", "G1", 2013, "Skelita Calaveras"),
+      mk("mh_g1_core_catrine", "Catrine DeMew", "G1", 2013, "Catrine DeMew"),
+      mk("mh_g1_core_jane", "Jane Boolittle", "G1", 2014, "Jane Boolittle"),
+      mk("mh_g1_core_gigi", "Gigi Grant", "G1", 2014, "Gigi Grant"),
+      mk("mh_g1_core_vandala", "Vandala Doubloons", "G1", 2015, "Vandala Doubloons"),
+      mk("mh_g1_core_kiyomi", "Kiyomi Haunterly", "G1", 2015, "Kiyomi Haunterly"),
+      mk("mh_g1_core_river", "River Styxx", "G1", 2015, "River Styxx"),
+      mk("mh_g1_core_porter", "Porter Geiss", "G1", 2015, "Porter Geiss"),
+      mk("mh_g1_core_isi", "Isi Dawndancer", "G1", 2014, "Isi Dawndancer"),
+      mk("mh_g1_core_marisol", "Marisol Coxi", "G1", 2014, "Marisol Coxi"),
+      mk("mh_g1_core_kala", "Kala Mer'ri", "G1", 2015, "Kala Mer'ri"),
+      mk("mh_g1_core_lorna", "Lorna McNessie", "G1", 2013, "Lorna McNessie"),
+      mk("mh_g1_core_sirena", "Sirena Von Boo", "G1", 2014, "Sirena Von Boo"),
+      mk("mh_g1_core_iris", "Iris Clops", "G1", 2012, "Iris Clops"),
+      mk("mh_g1_core_manny", "Manny Taur", "G1", 2011, "Manny Taur"),
+      mk("mh_g1_core_operetta", "Operetta", "G1", 2012, "Operetta"),
+      mk("mh_g1_core_mouscedes", "Mousecedes King", "G1", 2015, "Mousecedes King"),
+      mk("mh_g1_core_astra", "Astranova", "G1", 2015, "Astranova"),
+      mk("mh_g1_core_batsy", "Batsy Claro", "G1", 2015, "Batsy Claro"),
+      mk("mh_g1_core_clawdia", "Clawdia Wolf", "G1", 2014, "Clawdia Wolf"),
+      mk("mh_g1_core_elissabat", "Elissabat", "G1", 2014, "Elissabat"),
+
+      // Creeproduction
+      mk("mh_creep_draculaura", "Draculaura (Creeproduction)", "Creeproduction (G1)", 2022, "Draculaura"),
+      mk("mh_creep_frankie", "Frankie Stein (Creeproduction)", "Creeproduction (G1)", 2022, "Frankie Stein"),
+      mk("mh_creep_clawdeen", "Clawdeen Wolf (Creeproduction)", "Creeproduction (G1)", 2022, "Clawdeen Wolf"),
+      mk("mh_creep_lagoona", "Lagoona Blue (Creeproduction)", "Creeproduction (G1)", 2022, "Lagoona Blue"),
+
+      // G3 Core
+      mk("mh_g3_core_draculaura", "Draculaura (Core G3)", "G3 базовая", 2022, "Draculaura"),
+      mk("mh_g3_core_frankie", "Frankie Stein (Core G3)", "G3 базовая", 2022, "Frankie Stein"),
+      mk("mh_g3_core_clawdeen", "Clawdeen Wolf (Core G3)", "G3 базовая", 2022, "Clawdeen Wolf"),
+      mk("mh_g3_core_lagoona", "Lagoona Blue (Core G3)", "G3 базовая", 2022, "Lagoona Blue"),
+      mk("mh_g3_core_cleo", "Cleo de Nile (Core G3)", "G3 базовая", 2022, "Cleo de Nile"),
+      mk("mh_g3_core_deuce", "Deuce Gorgon (Core G3)", "G3 базовая", 2022, "Deuce Gorgon"),
+    ].slice(0, 50);
+  }
+
+  function ensurePrebuilt(arr){
+    const base = prebuiltCatalog50();
+    const map = new Map(arr.map(x => [x.id, x]));
+    for(const item of base){
+      if(!map.has(item.id)){
+        map.set(item.id, item);
+      }else{
+        // preserve user fields if already exists
+        const keep = map.get(item.id);
+        map.set(item.id, {
+          ...item,
+          status: keep.status ?? item.status,
+          notes: keep.notes ?? "",
+          tags: Array.isArray(keep.tags) ? keep.tags : item.tags,
+          photoDataUrl: keep.photoDataUrl || null
+        });
+      }
+    }
+    // keep user-created items too
+    return Array.from(map.values());
+  }
+
   function loadDB(){
     try{
       const raw = localStorage.getItem(LS_KEY);
       const arr = raw ? JSON.parse(raw) : [];
-      if(!Array.isArray(arr)) return [];
-      return arr;
-    }catch{ return []; }
+      const safe = Array.isArray(arr) ? arr : [];
+      const merged = ensurePrebuilt(safe);
+      localStorage.setItem(LS_KEY, JSON.stringify(merged));
+      return merged;
+    }catch{
+      const merged = ensurePrebuilt([]);
+      localStorage.setItem(LS_KEY, JSON.stringify(merged));
+      return merged;
+    }
   }
   function saveDB(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
 
@@ -571,6 +612,8 @@
   const statsEl = $("#stats");
 
   const modal = $("#modal");
+  const sheet = $("#sheet");
+  const sheetTop = $("#sheetTop");
   const mTitle = $("#mTitle");
   const mClose = $("#mClose");
 
@@ -580,11 +623,11 @@
 
   const qEl = $("#q");
   const brandEl = $("#brand");
+  const sortEl = $("#sort");
 
   const yearDec = $("#yearDec");
   const yearInc = $("#yearInc");
 
-  const photoBlock = $("#photoBlock");
   const photoInput = $("#f_photo");
   const photoPreview = $("#photoPreview");
   const pickPhotoBtn = $("#pickPhotoBtn");
@@ -597,30 +640,17 @@
     line: $("#f_line"),
     char: $("#f_char"),
     year: $("#f_year"),
-    condition: $("#f_condition"),
-    complete: $("#f_complete"),
-    status: $("#f_status"),
-    buy: $("#f_buy"),
-    market: $("#f_market"),
     notes: $("#f_notes"),
     tags: $("#f_tags")
   };
 
-  function formatMoney(n){
-    if(n == null || n === "" || Number.isNaN(Number(n))) return "—";
-    return String(Number(n));
-  }
-
-  function setPhotoPreview(dataUrl){
-    photoPreview.style.backgroundImage = dataUrl ? `url('${dataUrl}')` : "";
-  }
-  function fileToDataUrl(file){
-    return new Promise((resolve, reject)=>{
-      const reader = new FileReader();
-      reader.onload = ()=> resolve(String(reader.result || ""));
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  function esc(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
   }
 
   function rebuildBrandFilter(){
@@ -645,13 +675,21 @@
   function getFiltered(){
     const q = qEl.value.trim();
     const b = brandEl.value;
+
     let arr = db.slice();
 
-    if(view === "wish") arr = arr.filter(x=>x.status==="wish");
+    if(view === "all") arr = arr.filter(x => (x.type||"doll") === "doll"); // catalog only dolls
+    else if(view === "wish") arr = arr.filter(x=>x.status==="wish");
     else if(view === "owned") arr = arr.filter(x=>x.status==="owned");
 
     arr = arr.filter(x=>matchesQuery(x,q));
     if(b!=="all") arr = arr.filter(x=>x.brand===b);
+
+    const s = sortEl.value;
+    if(s==="recent") arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    if(s==="name_asc") arr.sort((a,b)=>(a.name||"").localeCompare(b.name||"","ru"));
+    if(s==="name_desc") arr.sort((a,b)=>(b.name||"").localeCompare(a.name||"","ru"));
+
     return arr;
   }
 
@@ -666,25 +704,42 @@
       const card = document.createElement("article");
       card.className = "card";
       const thumbClass = it.photoDataUrl ? "thumb hasPhoto" : "thumb";
-      const thumbStyle = it.photoDataUrl ? `style="background-image:url('${it.photoDataUrl.replaceAll("'","\\'")}')"` : "";
+      const bg = it.photoDataUrl ? `style="background-image:url('${it.photoDataUrl.replaceAll("'","\\'")}')"` : "";
+
       card.innerHTML = `
-        <div class="${thumbClass}" ${thumbStyle}>
-          <span class="badge">${it.condition || "—"}</span>
-          <span class="badge">${it.status || "none"}</span>
+        <div class="${thumbClass}" ${bg}>
+          <span class="badge">${esc(it.line || "—")}</span>
+          <span class="badge">${esc(it.year ?? "—")}</span>
         </div>
         <div class="body">
-          <h3 class="title">${(it.name || "(без названия)").replaceAll("<","&lt;")}</h3>
-          <div class="money">
-            <span>Покупка: <b>${formatMoney(it.buyPrice)}</b></span>
-            <span>Рынок: <b>${formatMoney(it.marketPrice)}</b></span>
-          </div>
+          <h3 class="title">${esc(it.name || "(без названия)")}</h3>
+          <div class="meta">${esc(it.brand || "—")} • ${esc(it.character || "—")}</div>
           <div class="actions">
+            <button class="btnGhost" data-action="wish" data-id="${it.id}">
+              ${it.status==="wish" ? "Убрать из wish" : "В wish"}
+            </button>
+            <button class="btnGhost" data-action="owned" data-id="${it.id}">
+              ${it.status==="owned" ? "Убрать из колл." : "В коллекцию"}
+            </button>
             <button class="btn" data-action="edit" data-id="${it.id}">Редактировать</button>
           </div>
         </div>
       `;
       listEl.appendChild(card);
     }
+  }
+
+  // ===== Modal open/close =====
+  function setPhotoPreview(dataUrl){
+    photoPreview.style.backgroundImage = dataUrl ? `url('${dataUrl}')` : "";
+  }
+  function fileToDataUrl(file){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = ()=> resolve(String(reader.result || ""));
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
   function fillForm(item){
@@ -694,21 +749,13 @@
     f.line.value = item.line || "";
     f.char.value = item.character || "";
     f.year.value = item.year ?? "";
-    f.condition.value = item.condition || "good";
-    f.complete.value = item.complete || "unknown";
-    f.status.value = item.status || "none";
-    f.buy.value = item.buyPrice ?? "";
-    f.market.value = item.marketPrice ?? "";
     f.notes.value = item.notes || "";
     f.tags.value = (item.tags || []).join(", ");
   }
 
   function readForm(){
     const year = f.year.value === "" ? null : Number(f.year.value);
-    const buy = f.buy.value === "" ? null : Number(f.buy.value);
-    const market = f.market.value === "" ? null : Number(f.market.value);
     const tags = f.tags.value.split(",").map(x=>x.trim()).filter(Boolean);
-
     return {
       type: f.type.value,
       name: f.name.value.trim(),
@@ -716,11 +763,6 @@
       line: f.line.value.trim(),
       character: f.char.value.trim(),
       year: (year != null && !Number.isNaN(year)) ? year : null,
-      condition: f.condition.value,
-      complete: f.complete.value,
-      status: f.status.value,
-      buyPrice: (buy != null && !Number.isNaN(buy)) ? buy : null,
-      marketPrice: (market != null && !Number.isNaN(market)) ? market : null,
       notes: f.notes.value.trim(),
       tags,
       photoDataUrl: pendingPhotoDataUrl || null
@@ -730,6 +772,7 @@
   function openModal(mode, item){
     modal.setAttribute("aria-hidden","false");
     document.body.style.overflow = "hidden";
+    resetSheetPosition();
 
     pendingPhotoDataUrl = null;
     photoInput.value = "";
@@ -739,14 +782,12 @@
       editingId = null;
       mTitle.textContent = "Добавить";
       fillForm({});
-      photoBlock.classList.remove("hide");
     }else{
       editingId = item.id;
       mTitle.textContent = "Редактировать";
       fillForm(item);
       pendingPhotoDataUrl = item.photoDataUrl || null;
       setPhotoPreview(pendingPhotoDataUrl);
-      photoBlock.classList.remove("hide");
     }
   }
 
@@ -755,6 +796,7 @@
     document.body.style.overflow = "";
     editingId = null;
     pendingPhotoDataUrl = null;
+    resetSheetPosition(true);
   }
 
   function saveItem(){
@@ -763,10 +805,31 @@
 
     if(editingId){
       const idx = db.findIndex(x=>x.id===editingId);
-      if(idx>=0) db[idx] = { ...db[idx], ...data };
+      if(idx>=0){
+        const current = db[idx];
+
+        // If prebuilt: allow updating notes/photo/tags only + keep catalog identity
+        if(current.isPrebuilt){
+          db[idx] = {
+            ...current,
+            notes: data.notes,
+            tags: data.tags,
+            photoDataUrl: data.photoDataUrl
+          };
+        }else{
+          db[idx] = { ...current, ...data };
+        }
+      }
     }else{
-      db.unshift({ id: uid(), createdAt: Date.now(), ...data });
+      db.unshift({
+        id: uid(),
+        createdAt: Date.now(),
+        isPrebuilt: false,
+        status: "none",
+        ...data
+      });
     }
+
     saveDB(db);
     closeModal();
     render();
@@ -774,15 +837,140 @@
 
   function stepYear(delta){
     const cur = (f.year.value === "" ? new Date().getFullYear() : Number(f.year.value));
-    const next = cur + delta;
-    f.year.value = String(next);
+    f.year.value = String(cur + delta);
   }
 
-  // события
-  addBtn.addEventListener("click", ()=>openModal("add", null));
-  mClose.addEventListener("click", closeModal);
-  cancelBtn.addEventListener("click", closeModal);
-  saveBtn.addEventListener("click", saveItem);
+  // ===== Bottom sheet swipe-to-close (mobile) =====
+  let dragging = false;
+  let startY = 0;
+  let lastY = 0;
+  let startT = 0;
+  let currentTranslate = 0;
+
+  function isMobileSheet(){
+    return window.matchMedia("(max-width: 560px)").matches;
+  }
+
+  function setSheetTranslate(y){
+    currentTranslate = Math.max(0, y);
+    sheet.style.transform = `translateY(${currentTranslate}px)`;
+  }
+
+  function resetSheetPosition(forceZero=false){
+    sheet.style.transition = forceZero ? "" : "transform .18s ease";
+    setSheetTranslate(0);
+    if(!forceZero){
+      setTimeout(()=>{ sheet.style.transition = ""; }, 220);
+    }
+  }
+
+  function closeWithAnimation(){
+    if(!isMobileSheet()){
+      closeModal();
+      return;
+    }
+    const h = sheet.getBoundingClientRect().height;
+    sheet.style.transition = "transform .18s ease";
+    setSheetTranslate(h);
+    setTimeout(()=> closeModal(), 180);
+  }
+
+  function onTouchStart(e){
+    if(!isMobileSheet()) return;
+    // only when modal open
+    if(modal.getAttribute("aria-hidden") !== "false") return;
+
+    // avoid starting drag when user scrolls inside content
+    // start only from header/top area
+    dragging = true;
+    startY = e.touches[0].clientY;
+    lastY = startY;
+    startT = performance.now();
+    sheet.style.transition = "";
+  }
+
+  function onTouchMove(e){
+    if(!dragging || !isMobileSheet()) return;
+    const y = e.touches[0].clientY;
+    const dy = y - startY;
+    lastY = y;
+
+    if(dy > 0){
+      // prevent page scroll while dragging sheet down
+      e.preventDefault();
+      setSheetTranslate(dy);
+    }
+  }
+
+  function onTouchEnd(){
+    if(!dragging || !isMobileSheet()) return;
+    dragging = false;
+
+    const dy = lastY - startY;
+    const dt = Math.max(1, performance.now() - startT);
+    const velocity = dy / dt; // px/ms
+
+    const h = sheet.getBoundingClientRect().height;
+    const closeThreshold = Math.min(180, h * 0.25);
+
+    if(dy > closeThreshold || velocity > 0.8){
+      closeWithAnimation();
+    }else{
+      resetSheetPosition();
+    }
+  }
+
+  // Also allow mouse drag on desktop? (optional) — keep only mobile behavior.
+
+  // ===== Status toggles =====
+  function toggleStatus(id, target){
+    const idx = db.findIndex(x=>x.id===id);
+    if(idx<0) return;
+    const cur = db[idx].status || "none";
+    db[idx].status = (cur === target) ? "none" : target;
+    saveDB(db);
+    render();
+  }
+
+  // ===== Import/Export =====
+  const exportBtn = $("#exportBtn");
+  const importBtn = $("#importBtn");
+  const importFile = $("#importFile");
+
+  function exportJSON(){
+    const payload = { version: 1, exportedAt: new Date().toISOString(), items: db };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "collector_export.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importJSONFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(String(reader.result || ""));
+        const arr = Array.isArray(parsed) ? parsed : parsed.items;
+        if(!Array.isArray(arr)) throw new Error("bad");
+        // merge with prebuilt
+        db = ensurePrebuilt(arr);
+        saveDB(db);
+        render();
+      }catch{}
+    };
+    reader.readAsText(file);
+  }
+
+  // ===== Events =====
+  $("#addBtn").addEventListener("click", ()=>openModal("add", null));
+  $("#mClose").addEventListener("click", closeModal);
+  $("#cancelBtn").addEventListener("click", closeModal);
+  $("#saveBtn").addEventListener("click", saveItem);
 
   modal.addEventListener("click", (e)=>{ if(e.target === modal) closeModal(); });
   document.addEventListener("keydown", (e)=>{
@@ -793,12 +981,19 @@
     const btn = e.target.closest("[data-action]");
     if(!btn) return;
     const id = btn.dataset.id;
-    const item = db.find(x=>x.id===id);
-    if(item) openModal("edit", item);
+    const action = btn.dataset.action;
+
+    if(action==="wish") toggleStatus(id, "wish");
+    if(action==="owned") toggleStatus(id, "owned");
+    if(action==="edit"){
+      const item = db.find(x=>x.id===id);
+      if(item) openModal("edit", item);
+    }
   });
 
   qEl.addEventListener("input", render);
   brandEl.addEventListener("change", render);
+  sortEl.addEventListener("change", render);
 
   yearDec.addEventListener("click", ()=>stepYear(-1));
   yearInc.addEventListener("click", ()=>stepYear(+1));
@@ -821,13 +1016,32 @@
     setPhotoPreview(null);
   });
 
-  // табы
+  exportBtn.addEventListener("click", exportJSON);
+  importBtn.addEventListener("click", ()=>importFile.click());
+  importFile.addEventListener("change", (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(file) importJSONFile(file);
+    importFile.value = "";
+  });
+
+  // tabs
   const tabs = [...document.querySelectorAll(".tab")];
   tabs.forEach(tbtn => tbtn.addEventListener("click", ()=>{
     view = tbtn.dataset.view;
     tabs.forEach(x=>x.setAttribute("aria-selected", x===tbtn ? "true":"false"));
     render();
   }));
+
+  // bottom sheet gesture listeners (only header/top)
+  sheetTop.addEventListener("touchstart", onTouchStart, {passive:false});
+  sheetTop.addEventListener("touchmove", onTouchMove, {passive:false});
+  sheetTop.addEventListener("touchend", onTouchEnd);
+  sheetTop.addEventListener("touchcancel", onTouchEnd);
+
+  // if screen rotates while open, reset translate
+  window.addEventListener("resize", ()=>{
+    if(modal.getAttribute("aria-hidden")==="false") resetSheetPosition();
+  });
 
   // init
   render();
