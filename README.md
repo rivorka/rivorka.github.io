@@ -1,10 +1,8 @@
-# Collion
-Catalog web site for dolls collectors
 diff --git a/README.md b/README.md
-index 843c9855c786eb8ae705ebc7d58a00c3d5b8cb09..6d6ee00c5c9a3d1caed810c4f26265edf49addc2 100644
+index 843c9855c786eb8ae705ebc7d58a00c3d5b8cb09..92e574d8a5394c69ff902a80fe2c60d879ac5bbf 100644
 --- a/README.md
 +++ b/README.md
-@@ -1,2 +1,16 @@
+@@ -1,2 +1,22 @@
  # Collion
 -Catalog web site for dolls collectors
 +
@@ -21,4 +19,10 @@ index 843c9855c786eb8ae705ebc7d58a00c3d5b8cb09..6d6ee00c5c9a3d1caed810c4f26265ed
 +
 +## Запуск
 +
-+Откройте `index.html` в браузере.
++Рекомендуется запускать через локальный сервер, чтобы гарантированно подключались `styles.css` и `script.js`:
++
++```bash
++python3 -m http.server 8000
++```
++
++После этого откройте `http://localhost:8000`.
