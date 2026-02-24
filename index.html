@@ -1,9 +1,9 @@
 diff --git a/index.html b/index.html
 new file mode 100644
-index 0000000000000000000000000000000000000000..4af236f8fb00c24e0af9da45e0e26a53e5766a76
+index 0000000000000000000000000000000000000000..899419741a40ba63c6abda7f93ac78b807835ea8
 --- /dev/null
 +++ b/index.html
-@@ -0,0 +1,446 @@
+@@ -0,0 +1,194 @@
 +<!DOCTYPE html>
 +<html lang="ru">
 +<head>
@@ -11,269 +11,122 @@ index 0000000000000000000000000000000000000000..4af236f8fb00c24e0af9da45e0e26a53
 +  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 +  <title>Collion — Каталог коллекционера</title>
 +  <style>
-+:root {
-+  color-scheme: dark;
-+  --bg: #111827;
-+  --surface: #1f2937;
-+  --surface-2: #273547;
-+  --text: #f9fafb;
-+  --muted: #9ca3af;
-+  --accent: #10b981;
-+  --danger: #ef4444;
-+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-+}
-+
++:root { color-scheme: dark; --bg:#111827; --surface:#1f2937; --surface-2:#273547; --text:#f9fafb; --muted:#9ca3af; --danger:#ef4444; font-family: Inter, system-ui, sans-serif; }
 +* { box-sizing: border-box; }
-+
-+body {
-+  margin: 0;
-+  background: linear-gradient(145deg, #0f172a, #111827 30%, #0b1220);
-+  color: var(--text);
-+}
-+
-+.hero {
-+  padding: 2rem 1rem 1rem;
-+  border-bottom: 1px solid #334155;
-+}
-+
-+.hero__content {
-+  max-width: 1100px;
-+  margin: 0 auto;
-+}
-+
-+h1, h2, h3, h4 { margin: 0 0 .6rem; }
-+
-+.layout {
-+  max-width: 1100px;
-+  margin: 1rem auto 2rem;
-+  display: grid;
-+  grid-template-columns: minmax(280px, 340px) 1fr;
-+  gap: 1rem;
-+  padding: 0 1rem;
-+}
-+
-+.panel {
-+  background: var(--surface);
-+  border: 1px solid #334155;
-+  border-radius: 14px;
-+  padding: 1rem;
-+}
-+
-+.panel--wide { min-width: 0; }
-+
-+.form {
-+  display: grid;
-+  gap: .7rem;
-+}
-+
-+label {
-+  font-size: .9rem;
-+  color: var(--muted);
-+  display: grid;
-+  gap: .35rem;
-+}
-+
-+input, select, textarea, button {
-+  border-radius: 8px;
-+  border: 1px solid #475569;
-+  background: var(--surface-2);
-+  color: var(--text);
-+  padding: .6rem .75rem;
-+  font: inherit;
-+}
-+
-+button {
-+  cursor: pointer;
-+  border-color: #059669;
-+  background: #059669;
-+}
-+
-+button:hover { filter: brightness(1.1); }
-+
-+.toolbar {
-+  display: flex;
-+  justify-content: space-between;
-+  align-items: center;
-+  gap: .8rem;
-+  flex-wrap: wrap;
-+}
-+
-+.toolbar input { min-width: 260px; flex: 1; }
-+
-+.stats {
-+  margin: .8rem 0 1rem;
-+  color: var(--muted);
-+  font-size: .95rem;
-+}
-+
-+.lists {
-+  display: grid;
-+  gap: 1rem;
-+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-+}
-+
-+.cards {
-+  display: grid;
-+  gap: .8rem;
-+}
-+
-+.card {
-+  display: grid;
-+  grid-template-columns: 96px 1fr;
-+  gap: .8rem;
-+  background: #172033;
-+  border: 1px solid #334155;
-+  border-radius: 12px;
-+  overflow: hidden;
-+}
-+
-+.card__image {
-+  width: 100%;
-+  height: 100%;
-+  min-height: 100px;
-+  object-fit: cover;
-+  background: #334155;
-+}
-+
-+.card__content { padding: .65rem .75rem .75rem 0; }
-+.card__title { font-size: 1rem; }
-+.card__meta, .card__notes {
-+  margin: .2rem 0;
-+  color: var(--muted);
-+  font-size: .85rem;
-+}
-+
-+.card__actions {
-+  display: flex;
-+  gap: .5rem;
-+  margin-top: .6rem;
-+}
-+
-+.card__actions button {
-+  padding: .45rem .6rem;
-+  font-size: .82rem;
-+}
-+
-+button.danger {
-+  background: transparent;
-+  border-color: var(--danger);
-+  color: #fecaca;
-+}
-+
-+.empty {
-+  color: var(--muted);
-+  padding: .8rem;
-+  border: 1px dashed #475569;
-+  border-radius: 10px;
-+}
-+
-+@media (max-width: 880px) {
-+  .layout { grid-template-columns: 1fr; }
-+}
++body { margin:0; background:linear-gradient(145deg,#0f172a,#111827 30%,#0b1220); color:var(--text); }
++.hero { padding:2rem 1rem 1rem; border-bottom:1px solid #334155; }
++.hero__content { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; gap:1rem; align-items:center; flex-wrap:wrap; }
++h1,h2,h3,h4{ margin:0 0 .6rem; }
++.layout { max-width:1100px; margin:1rem auto 2rem; display:grid; grid-template-columns:minmax(280px,340px) 1fr; gap:1rem; padding:0 1rem; }
++.panel { background:var(--surface); border:1px solid #334155; border-radius:14px; padding:1rem; }
++.form { display:grid; gap:.75rem; }
++.field { display:grid; gap:.35rem; }
++label { font-size:.9rem; color:var(--muted); }
++input,select,textarea,button { border-radius:8px; border:1px solid #475569; background:var(--surface-2); color:var(--text); padding:.6rem .75rem; font:inherit; }
++button { cursor:pointer; border-color:#059669; background:#059669; }
++button:hover { filter:brightness(1.08); }
++.lang-switch { background:transparent; border:1px solid #64748b; }
++.toolbar { display:flex; justify-content:space-between; align-items:center; gap:.8rem; flex-wrap:wrap; }
++.toolbar input { min-width:260px; flex:1; }
++.stats { margin:.8rem 0 1rem; color:var(--muted); font-size:.95rem; }
++.lists { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
++.cards { display:grid; gap:.8rem; }
++.card { display:grid; grid-template-columns:96px 1fr; gap:.8rem; background:#172033; border:1px solid #334155; border-radius:12px; overflow:hidden; }
++.card__image { width:100%; height:100%; min-height:100px; object-fit:cover; background:#334155; }
++.card__content { padding:.65rem .75rem .75rem 0; }
++.card__meta,.card__notes{ margin:.2rem 0; color:var(--muted); font-size:.85rem; }
++.card__actions { display:flex; gap:.5rem; margin-top:.6rem; }
++.card__actions button { padding:.45rem .6rem; font-size:.82rem; }
++button.danger { background:transparent; border-color:var(--danger); color:#fecaca; }
++.empty { color:var(--muted); padding:.8rem; border:1px dashed #475569; border-radius:10px; }
++.error { color:#fecaca; background:rgba(239,68,68,.2); border:1px solid rgba(239,68,68,.6); border-radius:8px; font-size:.75rem; padding:.25rem .5rem; display:none; margin-top:.1rem; }
++.invalid { border-color:var(--danger) !important; }
++@media (max-width:880px){ .layout{grid-template-columns:1fr;} }
 +  </style>
 +</head>
 +<body>
 +  <header class="hero">
 +    <div class="hero__content">
-+      <h1>Collion</h1>
-+      <p>Каталог для коллекционеров: храните свою коллекцию и формируйте вишлист.</p>
++      <div>
++        <h1 id="title">Collion</h1>
++        <p id="subtitle">Каталог для коллекционеров: храните свою коллекцию и формируйте вишлист.</p>
++      </div>
++      <button id="lang-toggle" class="lang-switch">EN</button>
 +    </div>
 +  </header>
 +
 +  <main class="layout">
 +    <section class="panel">
-+      <h2>Добавить предмет</h2>
-+      <form id="item-form" class="form">
-+        <label>
-+          Название
-+          <input id="name" name="name" type="text" required placeholder="Например, Barbie Silkstone" />
-+        </label>
-+        <label>
-+          Категория
-+          <input id="category" name="category" type="text" placeholder="Кукла, фигурка, открытка..." />
-+        </label>
-+        <label>
-+          Год
-+          <input id="year" name="year" type="number" min="0" max="2100" placeholder="1998" />
-+        </label>
-+        <label>
-+          Редкость
-+          <select id="rarity" name="rarity">
-+            <option value="">Не указана</option>
-+            <option>Обычная</option>
-+            <option>Редкая</option>
-+            <option>Очень редкая</option>
-+            <option>Лимитированная</option>
-+          </select>
-+        </label>
-+        <label>
-+          Состояние
-+          <select id="condition" name="condition">
-+            <option>Новая</option>
-+            <option>Отличная</option>
-+            <option>Хорошая</option>
-+            <option>Требует реставрации</option>
-+          </select>
-+        </label>
-+        <label>
-+          Фото (URL)
-+          <input id="image" name="image" type="url" placeholder="https://..." />
-+        </label>
-+        <label>
-+          Заметки
-+          <textarea id="notes" name="notes" rows="3" placeholder="Где куплено, цена, история..."></textarea>
-+        </label>
-+        <label>
-+          Раздел
-+          <select id="listType" name="listType">
-+            <option value="collection">Моя коллекция</option>
-+            <option value="wishlist">Вишлист</option>
-+          </select>
-+        </label>
-+        <button type="submit">Сохранить</button>
++      <h2 id="form-heading">Добавить предмет</h2>
++      <form id="item-form" class="form" novalidate>
++        <div class="field"><label for="name" id="label-name">Название</label><input id="name" name="name" type="text" required /><div class="error" data-error-for="name"></div></div>
++        <div class="field"><label for="category" id="label-category">Категория</label><input id="category" name="category" type="text" required /><div class="error" data-error-for="category"></div></div>
++        <div class="field"><label for="year" id="label-year">Год</label><input id="year" name="year" type="number" min="1900" max="2100" required /><div class="error" data-error-for="year"></div></div>
++        <div class="field"><label for="rarity" id="label-rarity">Редкость</label><select id="rarity" name="rarity" required></select><div class="error" data-error-for="rarity"></div></div>
++        <div class="field"><label for="condition" id="label-condition">Состояние</label><select id="condition" name="condition" required></select><div class="error" data-error-for="condition"></div></div>
++        <div class="field"><label for="image" id="label-image">Фото (URL)</label><input id="image" name="image" type="url" required /><div class="error" data-error-for="image"></div></div>
++        <div class="field"><label for="notes" id="label-notes">Заметки</label><textarea id="notes" name="notes" rows="3"></textarea><div class="error" data-error-for="notes"></div></div>
++        <div class="field"><label for="listType" id="label-list">Раздел</label><select id="listType" name="listType" required></select><div class="error" data-error-for="listType"></div></div>
++        <button type="submit" id="save-btn">Сохранить</button>
 +      </form>
 +    </section>
 +
 +    <section class="panel panel--wide">
 +      <div class="toolbar">
-+        <h2>Каталог</h2>
-+        <input id="search" type="search" placeholder="Поиск по названию, категории, заметкам" />
++        <h2 id="catalog-heading">Каталог</h2>
++        <input id="search" type="search" />
 +      </div>
-+
 +      <div class="stats" id="stats"></div>
-+
 +      <div class="lists">
-+        <article>
-+          <h3>Моя коллекция</h3>
-+          <div id="collection-list" class="cards"></div>
-+        </article>
-+        <article>
-+          <h3>Вишлист</h3>
-+          <div id="wishlist-list" class="cards"></div>
-+        </article>
++        <article><h3 id="collection-heading">Моя коллекция</h3><div id="collection-list" class="cards"></div></article>
++        <article><h3 id="wishlist-heading">Вишлист</h3><div id="wishlist-list" class="cards"></div></article>
 +      </div>
 +    </section>
 +  </main>
 +
 +  <template id="item-template">
 +    <article class="card">
-+      <img class="card__image" alt="Фото предмета" />
++      <img class="card__image" alt="" />
 +      <div class="card__content">
 +        <h4 class="card__title"></h4>
 +        <p class="card__meta"></p>
 +        <p class="card__notes"></p>
 +        <div class="card__actions">
 +          <button data-action="toggle"></button>
-+          <button data-action="remove" class="danger">Удалить</button>
++          <button data-action="remove" class="danger"></button>
 +        </div>
 +      </div>
 +    </article>
 +  </template>
 +
-+  <script>
-+const STORAGE_KEY = 'collion-items-v1';
-+const placeholderImage =
-+  'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=320&q=60';
++<script>
++const STORAGE_KEY = 'collion-items-v2';
++const placeholderImage = 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=320&q=60';
++const i18n = {
++  ru: {
++    title:'Collion', subtitle:'Каталог для коллекционеров: храните свою коллекцию и формируйте вишлист.', formHeading:'Добавить предмет',
++    name:'Название', category:'Категория', year:'Год', rarity:'Редкость', condition:'Состояние', image:'Фото (URL)', notes:'Заметки', list:'Раздел',
++    save:'Сохранить', catalog:'Каталог', collection:'Моя коллекция', wishlist:'Вишлист', search:'Поиск по названию, категории, заметкам',
++    rarityOpts:['Не указана','Обычная','Редкая','Очень редкая','Лимитированная'],
++    conditionOpts:['Новая','Отличная','Хорошая','Требует реставрации'], listOpts:['Моя коллекция','Вишлист'],
++    remove:'Удалить', toWishlist:'В вишлист', toCollection:'В коллекцию', noCategory:'Без категории', noNotes:'Без заметок', yearLabel:'год',
++    emptyCollection:'Пока пусто. Добавьте предмет в раздел «Моя коллекция».', emptyWishlist:'Пока пусто. Добавьте предмет в раздел «Вишлист».',
++    stats:(t,c,w,f)=>`Всего: ${t} • В коллекции: ${c} • В вишлисте: ${w} • Найдено: ${f}`,
++    errors:{ required:'Обязательное поле', url:'Введите корректный URL', year:'Год должен быть между 1900 и 2100' }
++  },
++  en: {
++    title:'Collion', subtitle:'Collector catalog: manage your collection and wishlist.', formHeading:'Add item',
++    name:'Name', category:'Category', year:'Year', rarity:'Rarity', condition:'Condition', image:'Photo (URL)', notes:'Notes', list:'Section',
++    save:'Save', catalog:'Catalog', collection:'My collection', wishlist:'Wishlist', search:'Search by name, category, notes',
++    rarityOpts:['Not specified','Common','Rare','Very rare','Limited'],
++    conditionOpts:['New','Excellent','Good','Needs restoration'], listOpts:['My collection','Wishlist'],
++    remove:'Delete', toWishlist:'To wishlist', toCollection:'To collection', noCategory:'No category', noNotes:'No notes', yearLabel:'year',
++    emptyCollection:'No items yet. Add one to “My collection”.', emptyWishlist:'No items yet. Add one to “Wishlist”.',
++    stats:(t,c,w,f)=>`Total: ${t} • Collection: ${c} • Wishlist: ${w} • Found: ${f}`,
++    errors:{ required:'Required field', url:'Enter a valid URL', year:'Year must be between 1900 and 2100' }
++  }
++};
++let lang='ru';
 +
 +const form = document.getElementById('item-form');
 +const searchInput = document.getElementById('search');
@@ -283,170 +136,65 @@ index 0000000000000000000000000000000000000000..4af236f8fb00c24e0af9da45e0e26a53
 +const template = document.getElementById('item-template');
 +
 +const seedItems = [
-+  {
-+    id: makeId(),
-+    name: 'Barbie Silkstone Debut',
-+    category: 'Кукла',
-+    year: '2000',
-+    rarity: 'Лимитированная',
-+    condition: 'Отличная',
-+    image: 'https://images.unsplash.com/photo-1610147836585-4f2ac6f74266?auto=format&fit=crop&w=600&q=80',
-+    notes: 'Стартовый пример с изображением.',
-+    listType: 'collection',
-+    createdAt: Date.now() - 2000
-+  },
-+  {
-+    id: makeId(),
-+    name: 'Monster High Draculaura',
-+    category: 'Кукла',
-+    year: '2012',
-+    rarity: 'Редкая',
-+    condition: 'Хорошая',
-+    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=600&q=80',
-+    notes: 'Пример для вишлиста.',
-+    listType: 'wishlist',
-+    createdAt: Date.now() - 1000
-+  }
++  { id: makeId(), name:'Barbie Silkstone Debut', category:'Doll', year:'2000', rarity:'Limited', condition:'Excellent', image:'https://images.unsplash.com/photo-1610147836585-4f2ac6f74266?auto=format&fit=crop&w=600&q=80', notes:'Starter sample with image.', listType:'collection', createdAt: Date.now()-2000 },
++  { id: makeId(), name:'Monster High Draculaura', category:'Doll', year:'2012', rarity:'Rare', condition:'Good', image:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=600&q=80', notes:'Wishlist sample.', listType:'wishlist', createdAt: Date.now()-1000 }
 +];
 +
 +let items = loadItems();
 +
-+function loadItems() {
-+  try {
-+    const raw = localStorage.getItem(STORAGE_KEY);
-+    if (!raw) return [...seedItems];
-+    const parsed = JSON.parse(raw);
-+    return Array.isArray(parsed) && parsed.length ? parsed : [...seedItems];
-+  } catch {
-+    return [];
-+  }
-+}
++function loadItems(){ try { const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return [...seedItems]; const parsed=JSON.parse(raw); return Array.isArray(parsed)&&parsed.length?parsed:[...seedItems]; } catch { return [...seedItems]; } }
++function saveItems(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
++function makeId(){ return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()); }
 +
-+function saveItems() {
-+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-+}
-+
-+function makeId() {
-+  return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
-+}
-+
-+function createItem(formData) {
-+  return {
-+    id: makeId(),
-+    name: formData.get('name').trim(),
-+    category: formData.get('category').trim(),
-+    year: formData.get('year').trim(),
-+    rarity: formData.get('rarity'),
-+    condition: formData.get('condition'),
-+    image: formData.get('image').trim() || placeholderImage,
-+    notes: formData.get('notes').trim(),
-+    listType: formData.get('listType'),
-+    createdAt: Date.now()
-+  };
-+}
-+
-+function filterItems() {
-+  const query = searchInput.value.toLowerCase().trim();
-+  if (!query) return [...items].sort((a, b) => b.createdAt - a.createdAt);
-+
-+  return items
-+    .filter((item) => {
-+      const haystack = [item.name, item.category, item.notes, item.rarity, item.condition]
-+        .join(' ')
-+        .toLowerCase();
-+      return haystack.includes(query);
-+    })
-+    .sort((a, b) => b.createdAt - a.createdAt);
-+}
-+
-+function renderCards(container, listItems, targetList) {
-+  container.innerHTML = '';
-+
-+  if (!listItems.length) {
-+    container.innerHTML = `<p class="empty">Пока пусто. Добавьте предмет в раздел «${targetList === 'collection' ? 'Моя коллекция' : 'Вишлист'}».</p>`;
-+    return;
-+  }
-+
-+  listItems.forEach((item) => {
-+    const node = template.content.firstElementChild.cloneNode(true);
-+    node.querySelector('.card__image').src = item.image || placeholderImage;
-+    node.querySelector('.card__title').textContent = item.name;
-+    node.querySelector('.card__meta').textContent = [
-+      item.category || 'Без категории',
-+      item.year ? `год: ${item.year}` : '',
-+      item.rarity || '',
-+      item.condition || ''
-+    ]
-+      .filter(Boolean)
-+      .join(' • ');
-+    node.querySelector('.card__notes').textContent = item.notes || 'Без заметок';
-+
-+    const toggleButton = node.querySelector('[data-action="toggle"]');
-+    toggleButton.textContent =
-+      targetList === 'collection' ? 'В вишлист' : 'В коллекцию';
-+    toggleButton.addEventListener('click', () => toggleList(item.id));
-+
-+    node
-+      .querySelector('[data-action="remove"]')
-+      .addEventListener('click', () => removeItem(item.id));
-+
-+    container.appendChild(node);
-+  });
-+}
-+
-+function updateStats(visibleItems) {
-+  const collectionCount = items.filter((item) => item.listType === 'collection').length;
-+  const wishlistCount = items.filter((item) => item.listType === 'wishlist').length;
-+  stats.textContent = `Всего: ${items.length} • В коллекции: ${collectionCount} • В вишлисте: ${wishlistCount} • Найдено: ${visibleItems.length}`;
-+}
-+
-+function render() {
-+  const filtered = filterItems();
-+  renderCards(
-+    collectionList,
-+    filtered.filter((item) => item.listType === 'collection'),
-+    'collection'
-+  );
-+  renderCards(
-+    wishlistList,
-+    filtered.filter((item) => item.listType === 'wishlist'),
-+    'wishlist'
-+  );
-+  updateStats(filtered);
-+}
-+
-+function toggleList(id) {
-+  items = items.map((item) =>
-+    item.id === id
-+      ? { ...item, listType: item.listType === 'collection' ? 'wishlist' : 'collection' }
-+      : item
-+  );
-+  saveItems();
++function applyTranslations(){
++  const t=i18n[lang]; document.documentElement.lang=lang; document.getElementById('lang-toggle').textContent = lang==='ru' ? 'EN' : 'RU';
++  document.getElementById('title').textContent=t.title; document.getElementById('subtitle').textContent=t.subtitle; document.getElementById('form-heading').textContent=t.formHeading;
++  document.getElementById('label-name').textContent=t.name; document.getElementById('label-category').textContent=t.category; document.getElementById('label-year').textContent=t.year;
++  document.getElementById('label-rarity').textContent=t.rarity; document.getElementById('label-condition').textContent=t.condition; document.getElementById('label-image').textContent=t.image;
++  document.getElementById('label-notes').textContent=t.notes; document.getElementById('label-list').textContent=t.list; document.getElementById('save-btn').textContent=t.save;
++  document.getElementById('catalog-heading').textContent=t.catalog; document.getElementById('collection-heading').textContent=t.collection; document.getElementById('wishlist-heading').textContent=t.wishlist;
++  searchInput.placeholder=t.search; document.getElementById('name').placeholder = lang==='ru' ? 'Например, Barbie Silkstone' : 'Example: Barbie Silkstone';
++  document.getElementById('category').placeholder = lang==='ru' ? 'Кукла, фигурка, открытка...' : 'Doll, figure, postcard...';
++  document.getElementById('year').placeholder = '1998'; document.getElementById('image').placeholder='https://...';
++  document.getElementById('notes').placeholder = lang==='ru' ? 'Где куплено, цена, история...' : 'Where bought, price, story...';
++  fillSelect('rarity', t.rarityOpts); fillSelect('condition', t.conditionOpts); fillSelect('listType', t.listOpts, ['collection','wishlist']);
 +  render();
 +}
++function fillSelect(id, texts, values=[]){ const select=document.getElementById(id); const prev=select.value; select.innerHTML=''; texts.forEach((text,idx)=>{ const opt=document.createElement('option'); opt.textContent=text; opt.value=values[idx] ?? text; if(id==='rarity' && idx===0) opt.value=''; select.appendChild(opt); }); select.value = [...select.options].some(o=>o.value===prev) ? prev : select.options[0].value; }
 +
-+function removeItem(id) {
-+  items = items.filter((item) => item.id !== id);
-+  saveItems();
-+  render();
++function setFieldError(field,msg=''){ const el=form.querySelector(`[data-error-for="${field.id}"]`); field.classList.toggle('invalid', Boolean(msg)); if(el){ el.textContent=msg; el.style.display=msg?'block':'none'; }}
++function validateField(field){
++  const t=i18n[lang]; let msg=''; const value=field.value.trim();
++  if(field.required && !value) msg=t.errors.required;
++  else if(field.id==='image' && value){ try { new URL(value); } catch { msg=t.errors.url; } }
++  else if(field.id==='year' && value){ const y=Number(value); if(Number.isNaN(y)||y<1900||y>2100) msg=t.errors.year; }
++  setFieldError(field,msg); return !msg;
 +}
++function validateForm(){ const fields=[...form.querySelectorAll('input,select,textarea')]; let ok=true; fields.forEach((f)=>{ if(!validateField(f)) ok=false; }); return ok; }
 +
-+form.addEventListener('submit', (event) => {
-+  event.preventDefault();
-+  const data = new FormData(form);
-+  const item = createItem(data);
++function createItem(data){ return { id: makeId(), name:data.get('name').trim(), category:data.get('category').trim(), year:data.get('year').trim(), rarity:data.get('rarity'), condition:data.get('condition'), image:data.get('image').trim() || placeholderImage, notes:data.get('notes').trim(), listType:data.get('listType'), createdAt:Date.now() }; }
++function filterItems(){ const q=searchInput.value.toLowerCase().trim(); const sorted=[...items].sort((a,b)=>b.createdAt-a.createdAt); if(!q) return sorted; return sorted.filter((item)=>[item.name,item.category,item.notes,item.rarity,item.condition].join(' ').toLowerCase().includes(q)); }
 +
-+  if (!item.name) return;
++function renderCards(container,listItems,target){
++  container.innerHTML=''; const t=i18n[lang];
++  if(!listItems.length){ container.innerHTML=`<p class="empty">${target==='collection' ? t.emptyCollection : t.emptyWishlist}</p>`; return; }
++  listItems.forEach((item)=>{ const node=template.content.firstElementChild.cloneNode(true); node.querySelector('.card__image').src=item.image||placeholderImage; node.querySelector('.card__image').alt=item.name;
++    node.querySelector('.card__title').textContent=item.name; node.querySelector('.card__meta').textContent=[item.category||t.noCategory,item.year?`${t.yearLabel}: ${item.year}`:'',item.rarity||'',item.condition||''].filter(Boolean).join(' • ');
++    node.querySelector('.card__notes').textContent=item.notes||t.noNotes;
++    const tg=node.querySelector('[data-action="toggle"]'); tg.textContent= target==='collection'?t.toWishlist:t.toCollection; tg.addEventListener('click',()=>toggleList(item.id));
++    const rm=node.querySelector('[data-action="remove"]'); rm.textContent=t.remove; rm.addEventListener('click',()=>removeItem(item.id)); container.appendChild(node); });
++}
++function updateStats(visible){ const t=i18n[lang]; const c=items.filter((i)=>i.listType==='collection').length; const w=items.filter((i)=>i.listType==='wishlist').length; stats.textContent=t.stats(items.length,c,w,visible.length); }
++function render(){ const f=filterItems(); renderCards(collectionList,f.filter((i)=>i.listType==='collection'),'collection'); renderCards(wishlistList,f.filter((i)=>i.listType==='wishlist'),'wishlist'); updateStats(f); }
++function toggleList(id){ items=items.map((item)=>item.id===id?{...item,listType:item.listType==='collection'?'wishlist':'collection'}:item); saveItems(); render(); }
++function removeItem(id){ items=items.filter((item)=>item.id!==id); saveItems(); render(); }
 +
-+  items.push(item);
-+  saveItems();
-+  form.reset();
-+  render();
-+});
-+
++form.addEventListener('submit',(e)=>{ e.preventDefault(); if(!validateForm()) return; const item=createItem(new FormData(form)); items.push(item); saveItems(); form.reset(); [...form.querySelectorAll('.error')].forEach((e)=>e.style.display='none'); [...form.querySelectorAll('.invalid')].forEach((n)=>n.classList.remove('invalid')); render(); });
++form.querySelectorAll('input,select,textarea').forEach((field)=>{ field.addEventListener('input',()=>validateField(field)); field.addEventListener('blur',()=>validateField(field)); });
 +searchInput.addEventListener('input', render);
++document.getElementById('lang-toggle').addEventListener('click', ()=>{ lang = lang === 'ru' ? 'en' : 'ru'; applyTranslations(); });
 +
-+render();
-+  </script>
++applyTranslations();
++</script>
 +</body>
 +</html>
