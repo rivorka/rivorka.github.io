@@ -1,929 +1,452 @@
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Каталог коллекционера</title>
-  <style>
-    :root{
-      --bg:#0b0f1a;
-      --panel:#121a2a;
-      --card:#0f1626;
-      --text:#eaf0ff;
-      --muted:#9fb0d0;
-      --brand:#7c5cff;
-      --brand2:#00d4ff;
-      --danger:#ff4d6d;
-      --ok:#22c55e;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius: 18px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
-      background: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,.25), transparent 60%),
-                  radial-gradient(900px 500px at 90% 10%, rgba(0,212,255,.18), transparent 55%),
-                  var(--bg);
-      color:var(--text);
-    }
-    header{
-      position:sticky; top:0; z-index:10;
-      backdrop-filter: blur(10px);
-      background: rgba(11,15,26,.72);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-    .wrap{max-width:1200px; margin:0 auto; padding:18px 16px;}
-    .top{
-      display:flex; gap:12px; align-items:center; justify-content:space-between;
-      flex-wrap:wrap;
-    }
-    .brand{display:flex; align-items:center; gap:10px;}
-    .logo{
-      width:38px; height:38px; border-radius:12px;
-      background: linear-gradient(135deg, var(--brand), var(--brand2));
-      box-shadow: var(--shadow);
-    }
-    h1{font-size:18px; margin:0;}
-    .sub{color:var(--muted); font-size:13px; margin-top:2px}
-    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-    .tabs{
-      display:flex; gap:8px; flex-wrap:wrap;
-      padding: 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(18,26,42,.55);
-    }
-    .tab{
-      border: none;
-      padding: 9px 12px;
-      border-radius: 999px;
-      cursor:pointer;
-      color: var(--muted);
-      background: transparent;
-      font-weight: 800;
-    }
-    .tab[aria-selected="true"]{
-      color: var(--text);
-      background: linear-gradient(135deg, rgba(124,92,255,.85), rgba(0,212,255,.55));
-    }
-    input, select, button, textarea{
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(18,26,42,.85);
-      color: var(--text);
-      padding: 11px 12px;
-      outline:none;
-    }
-    textarea{min-height:90px; resize: vertical}
-    input::placeholder{color:rgba(159,176,208,.75)}
-    .btn{
-      cursor:pointer;
-      border: none;
-      font-weight: 900;
-      padding: 11px 14px;
-      transition: transform .06s ease;
-      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(0,212,255,.70));
-    }
-    .btn:active{transform: scale(.98)}
-    .btnGhost{
-      background: rgba(18,26,42,.75);
-      border: 1px solid rgba(255,255,255,.12);
-      font-weight: 900;
-    }
-    .btnDanger{
-      background: rgba(255,77,109,.18);
-      border: 1px solid rgba(255,77,109,.35);
-      color: var(--text);
-      font-weight: 900;
-    }
-    .pill{
-      display:inline-flex; gap:8px; align-items:center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.08);
-      color: var(--muted);
-      font-size: 12px;
-      user-select:none;
-    }
-    main{padding: 18px 0 40px}
-    .controls{
-      display:grid;
-      grid-template-columns: 1.4fr .8fr .8fr .8fr auto auto;
-      gap:10px;
-      align-items:center;
-      width:min(1100px, 100%);
-    }
-    @media (max-width: 980px){
-      .controls{grid-template-columns: 1fr 1fr 1fr; }
-    }
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 14px;
-    }
-    .card{
-      grid-column: span 4;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
-      overflow:hidden;
-      box-shadow: var(--shadow);
-      position:relative;
-    }
-    @media (max-width: 980px){ .card{grid-column: span 6;} }
-    @media (max-width: 620px){ .card{grid-column: span 12;} }
-    .thumb{
-      height: 120px;
-      background: linear-gradient(135deg, rgba(124,92,255,.25), rgba(0,212,255,.18));
-      display:flex; align-items:flex-end; justify-content:space-between;
-      padding: 12px;
-      gap:10px;
-    }
-    .badge{
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.25);
-      border: 1px solid rgba(255,255,255,.10);
-      white-space:nowrap;
-    }
-    .badge.ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.18);}
-    .badge.warn{border-color: rgba(255,185,0,.35); background: rgba(255,185,0,.14);}
-    .badge.bad{border-color: rgba(255,77,109,.35); background: rgba(255,77,109,.14);}
-    .body{padding: 12px 12px 14px}
-    .titleRow{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
-    }
-    .title{font-weight: 950; margin:0; font-size: 15px; line-height: 1.25}
-    .metaLine{color: var(--muted); font-size: 12.5px; margin-top:6px; line-height:1.35}
-    .money{
-      display:flex; gap:8px; flex-wrap:wrap;
-      margin-top:10px;
-      color: rgba(234,240,255,.92);
-      font-size: 12.5px;
-    }
-    .money span{
-      padding: 6px 9px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.08);
-    }
-    .actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
-    .actions button{flex:1}
-    .empty{
-      padding: 22px;
-      border-radius: var(--radius);
-      border: 1px dashed rgba(255,255,255,.18);
-      background: rgba(255,255,255,.03);
-      color: var(--muted);
-    }
-
-    /* Modal */
-    .modalBackdrop{
-      position: fixed; inset:0;
-      background: rgba(0,0,0,.55);
-      display:none;
-      align-items:center; justify-content:center;
-      padding: 18px;
-      z-index:100;
-    }
-    .modalBackdrop[aria-hidden="false"]{display:flex;}
-    .modal{
-      width: min(980px, 100%);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(18,26,42,.92);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .modalTop{
-      padding: 14px 14px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.03);
-    }
-    .modalTop strong{font-size: 14px}
-    .x{
-      width: 38px; height: 38px; border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      cursor:pointer;
-      display:grid; place-items:center;
-      font-weight:900;
-    }
-    .modalContent{padding: 14px}
-    .formGrid{
-      display:grid; gap:12px;
-      grid-template-columns: repeat(12, 1fr);
-    }
-    .field{grid-column: span 6; display:flex; flex-direction:column; gap:6px}
-    .field.full{grid-column: span 12}
-    @media (max-width: 760px){ .field{grid-column: span 12} }
-    label{color: var(--muted); font-size: 12px}
-    .help{color: rgba(159,176,208,.75); font-size: 12px}
-    footer{color: rgba(159,176,208,.75); font-size: 12px; padding: 10px 0 40px}
-    a{color:inherit}
-  </style>
-</head>
-<body>
-<header>
-  <div class="wrap">
-    <div class="top">
-      <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1>Каталог коллекционера</h1>
-          <div class="sub">каталог • вишлист • коллекция • заметки • import/export JSON</div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="tabs" role="tablist" aria-label="Режимы">
-          <button class="tab" id="tab_all" role="tab" aria-selected="true" data-view="all">Каталог</button>
-          <button class="tab" id="tab_wish" role="tab" aria-selected="false" data-view="wish">Вишлист</button>
-          <button class="tab" id="tab_owned" role="tab" aria-selected="false" data-view="owned">Коллекция</button>
-        </div>
-        <button class="btn" id="addBtn">＋ Добавить</button>
-      </div>
-    </div>
-
-    <div style="margin-top:12px;" class="controls" role="search">
-      <input id="q" placeholder="Поиск: имя / персонаж / заметки / теги…" autocomplete="off"/>
-      <select id="brand">
-        <option value="all">Все бренды</option>
-      </select>
-      <select id="condition">
-        <option value="all">Любое состояние</option>
-        <option value="new">Новое</option>
-        <option value="good">Хорошее</option>
-        <option value="ok">Ок</option>
-        <option value="bad">Плохое</option>
-      </select>
-      <select id="sort">
-        <option value="recent">Сорт: недавние</option>
-        <option value="market_desc">Средняя цена: ↓</option>
-        <option value="market_asc">Средняя цена: ↑</option>
-        <option value="buy_desc">Покупка: ↓</option>
-        <option value="buy_asc">Покупка: ↑</option>
-        <option value="name_asc">Имя: A→Я</option>
-        <option value="name_desc">Имя: Я→A</option>
-      </select>
-      <button class="btnGhost" id="exportBtn">Экспорт JSON</button>
-      <button class="btnGhost" id="importBtn">Импорт JSON</button>
-      <input id="importFile" type="file" accept="application/json" hidden />
-    </div>
-
-    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-      <span class="pill" id="stats"></span>
-      <span class="pill">Всё офлайн. Данные хранятся в браузере (localStorage).</span>
-    </div>
-  </div>
-</header>
-
-<main class="wrap">
-  <section id="list" class="grid" aria-live="polite"></section>
-  <div id="empty" class="empty" style="display:none; margin-top:14px;">
-    Пусто. Добавь запись или измени фильтры.
-  </div>
-</main>
-
-<footer class="wrap">
-  Если захочешь: можно легко подключить API/бд и фотки вместо заглушки.
-</footer>
-
-<!-- Modal: Add/Edit -->
-<div class="modalBackdrop" id="modal" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-    <div class="modalTop">
-      <strong id="mTitle">Добавить</strong>
-      <button class="x" id="mClose" aria-label="Закрыть">×</button>
-    </div>
-    <div class="modalContent">
-      <div class="formGrid">
-        <div class="field">
-          <label>Название (как хочешь)</label>
-          <input id="f_name" placeholder="Напр: Draculaura базовая" />
-        </div>
-        <div class="field">
-          <label>Бренд</label>
-          <select id="f_brand">
-            <option>Monster High</option>
-            <option>Ever After High</option>
-            <option>Barbie</option>
-            <option>Другие</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Линейка / серия</label>
-          <input id="f_line" placeholder="Напр: G1 / Creeproduction / Signature..." />
-        </div>
-        <div class="field">
-          <label>Персонаж</label>
-          <input id="f_char" placeholder="Напр: Frankie / Raven / Barbie..." />
-        </div>
-
-        <div class="field">
-          <label>Год</label>
-          <input id="f_year" type="number" min="1950" max="2100" placeholder="Напр: 2012" />
-        </div>
-        <div class="field">
-          <label>Состояние</label>
-          <select id="f_condition">
-            <option value="new">Новое</option>
-            <option value="good">Хорошее</option>
-            <option value="ok">Ок</option>
-            <option value="bad">Плохое</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Комплектность</label>
-          <select id="f_complete">
-            <option value="full">Полная</option>
-            <option value="partial">Частичная</option>
-            <option value="nude">Nude / без одежды</option>
-            <option value="unknown">Не знаю</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Статус</label>
-          <select id="f_status">
-            <option value="none">Просто в каталоге</option>
-            <option value="wish">Вишлист</option>
-            <option value="owned">В коллекции</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Цена покупки (Kč)</label>
-          <input id="f_buy" type="number" min="0" step="1" placeholder="Напр: 950" />
-          <div class="help">Если не покупала — оставь пустым.</div>
-        </div>
-        <div class="field">
-          <label>Средняя цена рынка (Kč)</label>
-          <input id="f_market" type="number" min="0" step="1" placeholder="Напр: 1200" />
-          <div class="help">Сюда позже можно подключить авто-расчёт.</div>
-        </div>
-
-        <div class="field full">
-          <label>Заметки</label>
-          <textarea id="f_notes" placeholder="Дефекты, реставрация, где лежит, что докупить..."></textarea>
-        </div>
-
-        <div class="field full">
-          <label>Теги (через запятую)</label>
-          <input id="f_tags" placeholder="Напр: g1, rare, box, boots missing" />
-        </div>
-
-        <div class="field full" style="display:flex; gap:10px; flex-direction:row; flex-wrap:wrap; margin-top:4px;">
-          <button class="btn" id="saveBtn">Сохранить</button>
-          <button class="btnGhost" id="cancelBtn">Отмена</button>
-          <button class="btnDanger" id="deleteBtn" style="display:none;">Удалить</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  // ====== STORAGE ======
-  const LS_KEY = "collector_catalog_v1";
-
-  // Пример стартовых данных (если в localStorage пусто)
-  const seed = [
-    {
-      id: uid(),
-      createdAt: Date.now() - 1000*60*60*24*6,
-      name: "Draculaura — базовая",
-      brand: "Monster High",
-      line: "G1",
-      character: "Draculaura",
-      year: 2012,
-      condition: "good",
-      complete: "partial",
-      status: "owned",
-      buyPrice: 950,
-      marketPrice: 1400,
-      notes: "Чуть пушатся волосы. Не хватает одной серёжки.",
-      tags: ["g1","monster high","pink"]
-    },
-    {
-      id: uid(),
-      createdAt: Date.now() - 1000*60*60*24*2,
-      name: "Raven Queen — wishlist",
-      brand: "Ever After High",
-      line: "Signature",
-      character: "Raven Queen",
-      year: 2014,
-      condition: "good",
-      complete: "full",
-      status: "wish",
-      buyPrice: null,
-      marketPrice: 1800,
-      notes: "Хочу полный комплект и коробку если повезёт.",
-      tags: ["eah","wishlist","rare?"]
-    },
-    {
-      id: uid(),
-      createdAt: Date.now() - 1000*60*60*12,
-      name: "Outfit set",
-      brand: "Barbie",
-      line: "Fashion",
-      character: "—",
-      year: 2020,
-      condition: "new",
-      complete: "full",
-      status: "none",
-      buyPrice: 250,
-      marketPrice: 300,
-      notes: "Под 11.5\" формат.",
-      tags: ["barbie","outfit"]
-    }
-  ];
-
-  function loadDB(){
-    try{
-      const raw = localStorage.getItem(LS_KEY);
-      if(!raw){
-        localStorage.setItem(LS_KEY, JSON.stringify(seed));
-        return seed.slice();
-      }
-      const arr = JSON.parse(raw);
-      if(!Array.isArray(arr)) throw new Error("bad db");
-      return arr;
-    }catch(e){
-      localStorage.setItem(LS_KEY, JSON.stringify(seed));
-      return seed.slice();
-    }
-  }
-  function saveDB(arr){
-    localStorage.setItem(LS_KEY, JSON.stringify(arr));
-  }
-
-  // ====== STATE ======
-  let db = loadDB();
-  let view = "all"; // all | wish | owned
-  let editingId = null;
-
-  // ====== DOM ======
-  const $ = (s) => document.querySelector(s);
-
-  const listEl = $("#list");
-  const emptyEl = $("#empty");
-  const statsEl = $("#stats");
-
-  const qEl = $("#q");
-  const brandEl = $("#brand");
-  const conditionEl = $("#condition");
-  const sortEl = $("#sort");
-
-  const addBtn = $("#addBtn");
-  const exportBtn = $("#exportBtn");
-  const importBtn = $("#importBtn");
-  const importFile = $("#importFile");
-
-  // tabs
-  const tabs = [...document.querySelectorAll(".tab")];
-
-  // modal
-  const modal = $("#modal");
-  const mTitle = $("#mTitle");
-  const mClose = $("#mClose");
-  const saveBtn = $("#saveBtn");
-  const cancelBtn = $("#cancelBtn");
-  const deleteBtn = $("#deleteBtn");
-
-  // form fields
-  const f = {
-    name: $("#f_name"),
-    brand: $("#f_brand"),
-    line: $("#f_line"),
-    char: $("#f_char"),
-    year: $("#f_year"),
-    condition: $("#f_condition"),
-    complete: $("#f_complete"),
-    status: $("#f_status"),
-    buy: $("#f_buy"),
-    market: $("#f_market"),
-    notes: $("#f_notes"),
-    tags: $("#f_tags"),
-  };
-
-  // ====== INIT FILTERS ======
-  function rebuildBrandFilter(){
-    const brands = ["all", ...Array.from(new Set(db.map(x => x.brand).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'ru'))];
-    const current = brandEl.value || "all";
-    brandEl.innerHTML = "";
-    for(const b of brands){
-      const opt = document.createElement("option");
-      opt.value = b;
-      opt.textContent = b === "all" ? "Все бренды" : b;
-      brandEl.appendChild(opt);
-    }
-    brandEl.value = brands.includes(current) ? current : "all";
-  }
-  rebuildBrandFilter();
-
-  // ====== HELPERS ======
-  function uid(){
-    // короткий id, достаточно для локального каталога
-    return "id_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
-  }
-
-  const fmtKc = (n) => (n == null || n === "" || Number.isNaN(Number(n)))
-    ? "—"
-    : new Intl.NumberFormat("ru-RU").format(Number(n)) + " Kč";
-
-  function esc(s){
-    return String(s ?? "")
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  function condLabel(c){
-    if(c==="new") return "Новое";
-    if(c==="good") return "Хорошее";
-    if(c==="ok") return "Ок";
-    if(c==="bad") return "Плохое";
-    return "—";
-  }
-
-  function condClass(c){
-    if(c==="new" || c==="good") return "ok";
-    if(c==="ok") return "warn";
-    if(c==="bad") return "bad";
-    return "";
-  }
-
-  function completeLabel(v){
-    if(v==="full") return "Полная";
-    if(v==="partial") return "Частичная";
-    if(v==="nude") return "Nude";
-    if(v==="unknown") return "Не знаю";
-    return "—";
-  }
-
-  function statusLabel(s){
-    if(s==="wish") return "Вишлист";
-    if(s==="owned") return "Коллекция";
-    if(s==="none") return "Каталог";
-    return "Каталог";
-  }
-
-  function matchesQuery(item, q){
-    if(!q) return true;
-    const hay = [
-      item.name, item.brand, item.line, item.character,
-      item.notes, (item.tags||[]).join(" "),
-      String(item.year ?? "")
-    ].join(" ").toLowerCase();
-    return hay.includes(q.toLowerCase().trim());
-  }
-
-  function getFiltered(){
-    const q = qEl.value.trim();
-    const b = brandEl.value;
-    const c = conditionEl.value;
-
-    let arr = db.slice();
-
-    // view filter
-    if(view === "wish") arr = arr.filter(x => x.status === "wish");
-    if(view === "owned") arr = arr.filter(x => x.status === "owned");
-
-    // search
-    arr = arr.filter(x => matchesQuery(x, q));
-
-    // brand
-    if(b !== "all") arr = arr.filter(x => x.brand === b);
-
-    // condition
-    if(c !== "all") arr = arr.filter(x => x.condition === c);
-
-    // sort
-    const s = sortEl.value;
-    const byName = (a,b)=> (a.name||"").localeCompare(b.name||"",'ru');
-
-    if(s === "recent") arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-    else if(s === "market_desc") arr.sort((a,b)=>(Number(b.marketPrice)||-1)-(Number(a.marketPrice)||-1));
-    else if(s === "market_asc") arr.sort((a,b)=>(Number(a.marketPrice)||1e18)-(Number(b.marketPrice)||1e18));
-    else if(s === "buy_desc") arr.sort((a,b)=>(Number(b.buyPrice)||-1)-(Number(a.buyPrice)||-1));
-    else if(s === "buy_asc") arr.sort((a,b)=>(Number(a.buyPrice)||1e18)-(Number(b.buyPrice)||1e18));
-    else if(s === "name_asc") arr.sort(byName);
-    else if(s === "name_desc") arr.sort((a,b)=>byName(b,a));
-
-    return arr;
-  }
-
-  function setStats(visible){
-    const total = db.length;
-    const wish = db.filter(x=>x.status==="wish").length;
-    const owned = db.filter(x=>x.status==="owned").length;
-    const mode = view === "all" ? "Каталог" : (view==="wish" ? "Вишлист" : "Коллекция");
-    statsEl.textContent = `${mode}: ${visible}/${total} • wish: ${wish} • owned: ${owned}`;
-  }
-
-  // ====== RENDER ======
-  function render(){
-    rebuildBrandFilter();
-
-    const arr = getFiltered();
-    listEl.innerHTML = "";
-    emptyEl.style.display = arr.length ? "none" : "block";
-    setStats(arr.length);
-
-    for(const it of arr){
-      const card = document.createElement("article");
-      card.className = "card";
-
-      const cond = condLabel(it.condition);
-      const condCls = condClass(it.condition);
-
-      const title = it.name || "(без названия)";
-      const meta1 = `${it.brand || "—"} • ${it.line || "—"} • ${it.character || "—"}`;
-      const meta2 = `Год: ${it.year ?? "—"} • Комплект: ${completeLabel(it.complete)} • Статус: ${statusLabel(it.status)}`;
-
-      card.innerHTML = `
-        <div class="thumb">
-          <span class="badge ${condCls}">${esc(cond)}</span>
-          <span class="badge">${esc(statusLabel(it.status))}</span>
-        </div>
-        <div class="body">
-          <div class="titleRow">
-            <h3 class="title">${esc(title)}</h3>
-          </div>
-          <div class="metaLine">${esc(meta1)}</div>
-          <div class="metaLine">${esc(meta2)}</div>
-
-          <div class="money">
-            <span>Покупка: <b>${esc(fmtKc(it.buyPrice))}</b></span>
-            <span>Рынок: <b>${esc(fmtKc(it.marketPrice))}</b></span>
-          </div>
-
-          <div class="actions">
-            <button class="btnGhost" data-action="toggleWish" data-id="${it.id}">
-              ${it.status === "wish" ? "Убрать из вишлиста" : "В вишлист"}
-            </button>
-            <button class="btnGhost" data-action="toggleOwned" data-id="${it.id}">
-              ${it.status === "owned" ? "Убрать из коллекции" : "В коллекцию"}
-            </button>
-            <button class="btn" data-action="edit" data-id="${it.id}">Редактировать</button>
-          </div>
-        </div>
-      `;
-      listEl.appendChild(card);
-    }
-  }
-
-  // ====== TABS ======
-  function setView(next){
-    view = next;
-    for(const t of tabs){
-      const selected = t.dataset.view === view;
-      t.setAttribute("aria-selected", selected ? "true" : "false");
-    }
-    render();
-  }
-  tabs.forEach(t => t.addEventListener("click", ()=> setView(t.dataset.view)));
-
-  // ====== MODAL LOGIC ======
-  function openModal(mode, item){
-    modal.setAttribute("aria-hidden","false");
-    document.body.style.overflow = "hidden";
-
-    if(mode === "add"){
-      mTitle.textContent = "Добавить";
-      editingId = null;
-      deleteBtn.style.display = "none";
-      fillForm({
-        name:"", brand:"Monster High", line:"", character:"", year:"",
-        condition:"good", complete:"full", status:"none",
-        buyPrice:"", marketPrice:"", notes:"", tags:[]
-      });
-    } else {
-      mTitle.textContent = "Редактировать";
-      editingId = item.id;
-      deleteBtn.style.display = "inline-block";
-      fillForm(item);
-    }
-  }
-
-  function closeModal(){
-    modal.setAttribute("aria-hidden","true");
-    document.body.style.overflow = "";
-    editingId = null;
-  }
-
-  function fillForm(item){
-    f.name.value = item.name ?? "";
-    f.brand.value = item.brand ?? "Другие";
-    f.line.value = item.line ?? "";
-    f.char.value = item.character ?? "";
-    f.year.value = item.year ?? "";
-    f.condition.value = item.condition ?? "good";
-    f.complete.value = item.complete ?? "unknown";
-    f.status.value = item.status ?? "none";
-    f.buy.value = item.buyPrice ?? "";
-    f.market.value = item.marketPrice ?? "";
-    f.notes.value = item.notes ?? "";
-    f.tags.value = (item.tags || []).join(", ");
-  }
-
-  function readForm(){
-    const year = f.year.value === "" ? null : Number(f.year.value);
-    const buy = f.buy.value === "" ? null : Number(f.buy.value);
-    const market = f.market.value === "" ? null : Number(f.market.value);
-
-    const tags = f.tags.value
-      .split(",")
-      .map(x=>x.trim())
-      .filter(Boolean);
-
-    return {
-      name: f.name.value.trim(),
-      brand: f.brand.value,
-      line: f.line.value.trim(),
-      character: f.char.value.trim(),
-      year: (year != null && !Number.isNaN(year)) ? year : null,
-      condition: f.condition.value,
-      complete: f.complete.value,
-      status: f.status.value,
-      buyPrice: (buy != null && !Number.isNaN(buy)) ? buy : null,
-      marketPrice: (market != null && !Number.isNaN(market)) ? market : null,
-      notes: f.notes.value.trim(),
-      tags
-    };
-  }
-
-  // ====== CRUD ======
-  function addItem(){
-    openModal("add", null);
-  }
-
-  function editItem(id){
-    const item = db.find(x => x.id === id);
-    if(!item) return;
-    openModal("edit", item);
-  }
-
-  function saveItem(){
-    const data = readForm();
-
-    // минимальная валидация
-    if(!data.name){
-      alert("Название пустое. Впиши хоть что-то 🙂");
-      return;
-    }
-
-    if(editingId){
-      const idx = db.findIndex(x=>x.id===editingId);
-      if(idx === -1) return;
-      db[idx] = { ...db[idx], ...data };
-    } else {
-      db.unshift({
-        id: uid(),
-        createdAt: Date.now(),
-        ...data
-      });
-    }
-
-    saveDB(db);
-    closeModal();
-    render();
-  }
-
-  function deleteItem(){
-    if(!editingId) return;
-    const ok = confirm("Удалить запись? Это действие нельзя отменить.");
-    if(!ok) return;
-
-    db = db.filter(x=>x.id !== editingId);
-    saveDB(db);
-    closeModal();
-    render();
-  }
-
-  function toggleWish(id){
-    const item = db.find(x=>x.id===id);
-    if(!item) return;
-    item.status = (item.status === "wish") ? "none" : "wish";
-    saveDB(db);
-    render();
-  }
-
-  function toggleOwned(id){
-    const item = db.find(x=>x.id===id);
-    if(!item) return;
-    item.status = (item.status === "owned") ? "none" : "owned";
-    saveDB(db);
-    render();
-  }
-
-  // ====== EXPORT / IMPORT ======
-  function exportJSON(){
-    const payload = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      items: db
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "collector_catalog_export.json";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function importJSONFile(file){
-    const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const parsed = JSON.parse(String(reader.result || ""));
-        const arr = Array.isArray(parsed) ? parsed : parsed.items;
-        if(!Array.isArray(arr)) throw new Error("bad format");
-
-        // мягкая нормализация
-        const norm = arr.map(x => ({
-          id: x.id || uid(),
-          createdAt: x.createdAt || Date.now(),
-          name: x.name || "",
-          brand: x.brand || "Другие",
-          line: x.line || "",
-          character: x.character || "",
-          year: x.year ?? null,
-          condition: x.condition || "ok",
-          complete: x.complete || "unknown",
-          status: (x.status==="wish"||x.status==="owned"||x.status==="none") ? x.status : "none",
-          buyPrice: (x.buyPrice == null) ? null : Number(x.buyPrice),
-          marketPrice: (x.marketPrice == null) ? null : Number(x.marketPrice),
-          notes: x.notes || "",
-          tags: Array.isArray(x.tags) ? x.tags : []
-        }));
-
-        db = norm;
-        saveDB(db);
-        closeModal();
-        render();
-        alert("Импорт готов.");
-      }catch(e){
-        alert("Не смог импортировать JSON. Проверь файл/формат.");
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  // ====== EVENTS ======
-  addBtn.addEventListener("click", addItem);
-
-  exportBtn.addEventListener("click", exportJSON);
-
-  importBtn.addEventListener("click", () => importFile.click());
-  importFile.addEventListener("change", (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(file) importJSONFile(file);
-    importFile.value = "";
-  });
-
-  qEl.addEventListener("input", render);
-  brandEl.addEventListener("change", render);
-  conditionEl.addEventListener("change", render);
-  sortEl.addEventListener("change", render);
-
-  listEl.addEventListener("click", (e)=>{
-    const btn = e.target.closest("[data-action]");
-    if(!btn) return;
-    const action = btn.dataset.action;
-    const id = btn.dataset.id;
-
-    if(action === "edit") editItem(id);
-    if(action === "toggleWish") toggleWish(id);
-    if(action === "toggleOwned") toggleOwned(id);
-  });
-
-  mClose.addEventListener("click", closeModal);
-  cancelBtn.addEventListener("click", closeModal);
-  saveBtn.addEventListener("click", saveItem);
-  deleteBtn.addEventListener("click", deleteItem);
-
-  modal.addEventListener("click", (e)=>{
-    if(e.target === modal) closeModal();
-  });
-  document.addEventListener("keydown", (e)=>{
-    if(e.key === "Escape" && modal.getAttribute("aria-hidden")==="false") closeModal();
-  });
-
-  // ====== START ======
-  render();
-</script>
-</body>
-</html>
+diff --git a/index.html b/index.html
+new file mode 100644
+index 0000000000000000000000000000000000000000..4af236f8fb00c24e0af9da45e0e26a53e5766a76
+--- /dev/null
++++ b/index.html
+@@ -0,0 +1,446 @@
++<!DOCTYPE html>
++<html lang="ru">
++<head>
++  <meta charset="UTF-8" />
++  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++  <title>Collion — Каталог коллекционера</title>
++  <style>
++:root {
++  color-scheme: dark;
++  --bg: #111827;
++  --surface: #1f2937;
++  --surface-2: #273547;
++  --text: #f9fafb;
++  --muted: #9ca3af;
++  --accent: #10b981;
++  --danger: #ef4444;
++  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
++}
++
++* { box-sizing: border-box; }
++
++body {
++  margin: 0;
++  background: linear-gradient(145deg, #0f172a, #111827 30%, #0b1220);
++  color: var(--text);
++}
++
++.hero {
++  padding: 2rem 1rem 1rem;
++  border-bottom: 1px solid #334155;
++}
++
++.hero__content {
++  max-width: 1100px;
++  margin: 0 auto;
++}
++
++h1, h2, h3, h4 { margin: 0 0 .6rem; }
++
++.layout {
++  max-width: 1100px;
++  margin: 1rem auto 2rem;
++  display: grid;
++  grid-template-columns: minmax(280px, 340px) 1fr;
++  gap: 1rem;
++  padding: 0 1rem;
++}
++
++.panel {
++  background: var(--surface);
++  border: 1px solid #334155;
++  border-radius: 14px;
++  padding: 1rem;
++}
++
++.panel--wide { min-width: 0; }
++
++.form {
++  display: grid;
++  gap: .7rem;
++}
++
++label {
++  font-size: .9rem;
++  color: var(--muted);
++  display: grid;
++  gap: .35rem;
++}
++
++input, select, textarea, button {
++  border-radius: 8px;
++  border: 1px solid #475569;
++  background: var(--surface-2);
++  color: var(--text);
++  padding: .6rem .75rem;
++  font: inherit;
++}
++
++button {
++  cursor: pointer;
++  border-color: #059669;
++  background: #059669;
++}
++
++button:hover { filter: brightness(1.1); }
++
++.toolbar {
++  display: flex;
++  justify-content: space-between;
++  align-items: center;
++  gap: .8rem;
++  flex-wrap: wrap;
++}
++
++.toolbar input { min-width: 260px; flex: 1; }
++
++.stats {
++  margin: .8rem 0 1rem;
++  color: var(--muted);
++  font-size: .95rem;
++}
++
++.lists {
++  display: grid;
++  gap: 1rem;
++  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
++}
++
++.cards {
++  display: grid;
++  gap: .8rem;
++}
++
++.card {
++  display: grid;
++  grid-template-columns: 96px 1fr;
++  gap: .8rem;
++  background: #172033;
++  border: 1px solid #334155;
++  border-radius: 12px;
++  overflow: hidden;
++}
++
++.card__image {
++  width: 100%;
++  height: 100%;
++  min-height: 100px;
++  object-fit: cover;
++  background: #334155;
++}
++
++.card__content { padding: .65rem .75rem .75rem 0; }
++.card__title { font-size: 1rem; }
++.card__meta, .card__notes {
++  margin: .2rem 0;
++  color: var(--muted);
++  font-size: .85rem;
++}
++
++.card__actions {
++  display: flex;
++  gap: .5rem;
++  margin-top: .6rem;
++}
++
++.card__actions button {
++  padding: .45rem .6rem;
++  font-size: .82rem;
++}
++
++button.danger {
++  background: transparent;
++  border-color: var(--danger);
++  color: #fecaca;
++}
++
++.empty {
++  color: var(--muted);
++  padding: .8rem;
++  border: 1px dashed #475569;
++  border-radius: 10px;
++}
++
++@media (max-width: 880px) {
++  .layout { grid-template-columns: 1fr; }
++}
++  </style>
++</head>
++<body>
++  <header class="hero">
++    <div class="hero__content">
++      <h1>Collion</h1>
++      <p>Каталог для коллекционеров: храните свою коллекцию и формируйте вишлист.</p>
++    </div>
++  </header>
++
++  <main class="layout">
++    <section class="panel">
++      <h2>Добавить предмет</h2>
++      <form id="item-form" class="form">
++        <label>
++          Название
++          <input id="name" name="name" type="text" required placeholder="Например, Barbie Silkstone" />
++        </label>
++        <label>
++          Категория
++          <input id="category" name="category" type="text" placeholder="Кукла, фигурка, открытка..." />
++        </label>
++        <label>
++          Год
++          <input id="year" name="year" type="number" min="0" max="2100" placeholder="1998" />
++        </label>
++        <label>
++          Редкость
++          <select id="rarity" name="rarity">
++            <option value="">Не указана</option>
++            <option>Обычная</option>
++            <option>Редкая</option>
++            <option>Очень редкая</option>
++            <option>Лимитированная</option>
++          </select>
++        </label>
++        <label>
++          Состояние
++          <select id="condition" name="condition">
++            <option>Новая</option>
++            <option>Отличная</option>
++            <option>Хорошая</option>
++            <option>Требует реставрации</option>
++          </select>
++        </label>
++        <label>
++          Фото (URL)
++          <input id="image" name="image" type="url" placeholder="https://..." />
++        </label>
++        <label>
++          Заметки
++          <textarea id="notes" name="notes" rows="3" placeholder="Где куплено, цена, история..."></textarea>
++        </label>
++        <label>
++          Раздел
++          <select id="listType" name="listType">
++            <option value="collection">Моя коллекция</option>
++            <option value="wishlist">Вишлист</option>
++          </select>
++        </label>
++        <button type="submit">Сохранить</button>
++      </form>
++    </section>
++
++    <section class="panel panel--wide">
++      <div class="toolbar">
++        <h2>Каталог</h2>
++        <input id="search" type="search" placeholder="Поиск по названию, категории, заметкам" />
++      </div>
++
++      <div class="stats" id="stats"></div>
++
++      <div class="lists">
++        <article>
++          <h3>Моя коллекция</h3>
++          <div id="collection-list" class="cards"></div>
++        </article>
++        <article>
++          <h3>Вишлист</h3>
++          <div id="wishlist-list" class="cards"></div>
++        </article>
++      </div>
++    </section>
++  </main>
++
++  <template id="item-template">
++    <article class="card">
++      <img class="card__image" alt="Фото предмета" />
++      <div class="card__content">
++        <h4 class="card__title"></h4>
++        <p class="card__meta"></p>
++        <p class="card__notes"></p>
++        <div class="card__actions">
++          <button data-action="toggle"></button>
++          <button data-action="remove" class="danger">Удалить</button>
++        </div>
++      </div>
++    </article>
++  </template>
++
++  <script>
++const STORAGE_KEY = 'collion-items-v1';
++const placeholderImage =
++  'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=320&q=60';
++
++const form = document.getElementById('item-form');
++const searchInput = document.getElementById('search');
++const collectionList = document.getElementById('collection-list');
++const wishlistList = document.getElementById('wishlist-list');
++const stats = document.getElementById('stats');
++const template = document.getElementById('item-template');
++
++const seedItems = [
++  {
++    id: makeId(),
++    name: 'Barbie Silkstone Debut',
++    category: 'Кукла',
++    year: '2000',
++    rarity: 'Лимитированная',
++    condition: 'Отличная',
++    image: 'https://images.unsplash.com/photo-1610147836585-4f2ac6f74266?auto=format&fit=crop&w=600&q=80',
++    notes: 'Стартовый пример с изображением.',
++    listType: 'collection',
++    createdAt: Date.now() - 2000
++  },
++  {
++    id: makeId(),
++    name: 'Monster High Draculaura',
++    category: 'Кукла',
++    year: '2012',
++    rarity: 'Редкая',
++    condition: 'Хорошая',
++    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=600&q=80',
++    notes: 'Пример для вишлиста.',
++    listType: 'wishlist',
++    createdAt: Date.now() - 1000
++  }
++];
++
++let items = loadItems();
++
++function loadItems() {
++  try {
++    const raw = localStorage.getItem(STORAGE_KEY);
++    if (!raw) return [...seedItems];
++    const parsed = JSON.parse(raw);
++    return Array.isArray(parsed) && parsed.length ? parsed : [...seedItems];
++  } catch {
++    return [];
++  }
++}
++
++function saveItems() {
++  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
++}
++
++function makeId() {
++  return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
++}
++
++function createItem(formData) {
++  return {
++    id: makeId(),
++    name: formData.get('name').trim(),
++    category: formData.get('category').trim(),
++    year: formData.get('year').trim(),
++    rarity: formData.get('rarity'),
++    condition: formData.get('condition'),
++    image: formData.get('image').trim() || placeholderImage,
++    notes: formData.get('notes').trim(),
++    listType: formData.get('listType'),
++    createdAt: Date.now()
++  };
++}
++
++function filterItems() {
++  const query = searchInput.value.toLowerCase().trim();
++  if (!query) return [...items].sort((a, b) => b.createdAt - a.createdAt);
++
++  return items
++    .filter((item) => {
++      const haystack = [item.name, item.category, item.notes, item.rarity, item.condition]
++        .join(' ')
++        .toLowerCase();
++      return haystack.includes(query);
++    })
++    .sort((a, b) => b.createdAt - a.createdAt);
++}
++
++function renderCards(container, listItems, targetList) {
++  container.innerHTML = '';
++
++  if (!listItems.length) {
++    container.innerHTML = `<p class="empty">Пока пусто. Добавьте предмет в раздел «${targetList === 'collection' ? 'Моя коллекция' : 'Вишлист'}».</p>`;
++    return;
++  }
++
++  listItems.forEach((item) => {
++    const node = template.content.firstElementChild.cloneNode(true);
++    node.querySelector('.card__image').src = item.image || placeholderImage;
++    node.querySelector('.card__title').textContent = item.name;
++    node.querySelector('.card__meta').textContent = [
++      item.category || 'Без категории',
++      item.year ? `год: ${item.year}` : '',
++      item.rarity || '',
++      item.condition || ''
++    ]
++      .filter(Boolean)
++      .join(' • ');
++    node.querySelector('.card__notes').textContent = item.notes || 'Без заметок';
++
++    const toggleButton = node.querySelector('[data-action="toggle"]');
++    toggleButton.textContent =
++      targetList === 'collection' ? 'В вишлист' : 'В коллекцию';
++    toggleButton.addEventListener('click', () => toggleList(item.id));
++
++    node
++      .querySelector('[data-action="remove"]')
++      .addEventListener('click', () => removeItem(item.id));
++
++    container.appendChild(node);
++  });
++}
++
++function updateStats(visibleItems) {
++  const collectionCount = items.filter((item) => item.listType === 'collection').length;
++  const wishlistCount = items.filter((item) => item.listType === 'wishlist').length;
++  stats.textContent = `Всего: ${items.length} • В коллекции: ${collectionCount} • В вишлисте: ${wishlistCount} • Найдено: ${visibleItems.length}`;
++}
++
++function render() {
++  const filtered = filterItems();
++  renderCards(
++    collectionList,
++    filtered.filter((item) => item.listType === 'collection'),
++    'collection'
++  );
++  renderCards(
++    wishlistList,
++    filtered.filter((item) => item.listType === 'wishlist'),
++    'wishlist'
++  );
++  updateStats(filtered);
++}
++
++function toggleList(id) {
++  items = items.map((item) =>
++    item.id === id
++      ? { ...item, listType: item.listType === 'collection' ? 'wishlist' : 'collection' }
++      : item
++  );
++  saveItems();
++  render();
++}
++
++function removeItem(id) {
++  items = items.filter((item) => item.id !== id);
++  saveItems();
++  render();
++}
++
++form.addEventListener('submit', (event) => {
++  event.preventDefault();
++  const data = new FormData(form);
++  const item = createItem(data);
++
++  if (!item.name) return;
++
++  items.push(item);
++  saveItems();
++  form.reset();
++  render();
++});
++
++searchInput.addEventListener('input', render);
++
++render();
++  </script>
++</body>
++</html>
