@@ -1,311 +1,1172 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Doll Collector</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doll Collector</title>
 
-<style>
-body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#111;
-    color:#fff;
-}
+  <style>
+    :root{
+      --bg-0:#070b18;
+      --bg-1:#0a1230;
+      --bg-2:#0d1b40;
+      --card:#0b1638cc;
+      --line:#183a7a;
+      --text:#eaf2ff;
+      --muted:#a8c1ffcc;
+      --accent:#29d6ff;
+      --accent-2:#66f3ff;
+      --danger:#ff4b9a;
+      --ok:#47ffb5;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --glow: 0 0 0 1px rgba(41,214,255,.16), 0 0 22px rgba(41,214,255,.18);
+      --radius:16px;
+    }
 
-header{
-    padding:20px;
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:center;
-    justify-content:space-between;
-    background:#1c1c1c;
-}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 12% 0%, rgba(41,214,255,.14), transparent 55%),
+        radial-gradient(900px 600px at 85% 10%, rgba(102,243,255,.10), transparent 55%),
+        radial-gradient(900px 700px at 50% 110%, rgba(41,214,255,.08), transparent 55%),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1) 45%, var(--bg-2));
+      min-height:100vh;
+    }
 
-button{
-    padding:8px 14px;
-    border:none;
-    cursor:pointer;
-    border-radius:6px;
-}
+    /* topbar */
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(7,11,24,.78), rgba(7,11,24,.52));
+      border-bottom:1px solid rgba(41,214,255,.16);
+    }
 
-.primary{background:#ff4fa3;color:#fff;}
-.secondary{background:#444;color:#fff;}
+    .wrap{
+      max-width:1180px;
+      margin:0 auto;
+      padding:16px 18px;
+    }
 
-.container{
-    padding:20px;
-}
+    .topbar{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
 
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-    gap:20px;
-}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:220px;
+    }
+    .logo{
+      width:42px;height:42px;border-radius:14px;
+      background:
+        radial-gradient(12px 12px at 30% 30%, rgba(102,243,255,.95), transparent 60%),
+        radial-gradient(18px 18px at 70% 70%, rgba(41,214,255,.65), transparent 60%),
+        linear-gradient(135deg, rgba(41,214,255,.25), rgba(41,214,255,.04));
+      box-shadow: var(--glow), 0 10px 30px rgba(0,0,0,.35);
+      border:1px solid rgba(41,214,255,.22);
+    }
+    .brand h1{
+      font-size:14px;
+      margin:0;
+      letter-spacing:.6px;
+      text-transform:uppercase;
+      color:var(--text);
+    }
+    .brand p{
+      margin:2px 0 0;
+      font-size:12px;
+      color:var(--muted);
+    }
 
-.card{
-    background:#1c1c1c;
-    padding:15px;
-    border-radius:10px;
-}
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
 
-.card h3{
-    margin-top:0;
-}
+    .chiprow{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
 
-input, select{
-    padding:6px;
-    border-radius:6px;
-    border:none;
-}
+    .chip{
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(41,214,255,.18);
+      background: rgba(11,22,56,.55);
+      color:var(--text);
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+      cursor:pointer;
+      transition:.15s transform, .15s border-color, .15s background;
+      user-select:none;
+      font-size:13px;
+    }
+    .chip:hover{ transform: translateY(-1px); border-color: rgba(41,214,255,.34); background: rgba(11,22,56,.72);}
+    .chip.active{
+      border-color: rgba(41,214,255,.55);
+      background: linear-gradient(180deg, rgba(41,214,255,.16), rgba(11,22,56,.70));
+      box-shadow: var(--glow), 0 12px 28px rgba(0,0,0,.22);
+    }
 
-.filters{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-bottom:20px;
-}
+    .btn{
+      padding:10px 14px;
+      border-radius:12px;
+      border:1px solid rgba(41,214,255,.18);
+      background: rgba(11,22,56,.55);
+      color:var(--text);
+      box-shadow: 0 12px 26px rgba(0,0,0,.18);
+      cursor:pointer;
+      transition:.15s transform, .15s border-color, .15s background;
+      font-size:13px;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(41,214,255,.34); background: rgba(11,22,56,.72);}
+    .btn.primary{
+      border-color: rgba(41,214,255,.40);
+      background: linear-gradient(180deg, rgba(41,214,255,.22), rgba(11,22,56,.65));
+      box-shadow: var(--glow), 0 16px 40px rgba(0,0,0,.28);
+    }
+    .btn.danger{
+      border-color: rgba(255,75,154,.35);
+      background: linear-gradient(180deg, rgba(255,75,154,.18), rgba(11,22,56,.65));
+    }
 
-.modal{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,0.8);
-    display:none;
-    align-items:center;
-    justify-content:center;
-}
+    select, input{
+      outline:none;
+      color:var(--text);
+      background: rgba(11,22,56,.55);
+      border:1px solid rgba(41,214,255,.18);
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:13px;
+      box-shadow: 0 12px 26px rgba(0,0,0,.14);
+    }
+    input::placeholder{ color: rgba(168,193,255,.55); }
 
-.modal-content{
-    background:#1c1c1c;
-    padding:20px;
-    width:90%;
-    max-width:400px;
-    border-radius:10px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
+    .content{
+      max-width:1180px;
+      margin:0 auto;
+      padding:18px;
+    }
 
-.close{
-    align-self:flex-end;
-    cursor:pointer;
-    color:red;
-}
+    /* filters */
+    .panel{
+      background: rgba(11,22,56,.55);
+      border:1px solid rgba(41,214,255,.14);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .panel .grow{ flex:1; min-width:220px; }
+    .panel .mini{ min-width:140px; }
+    .panel .label{
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px 4px;
+    }
+    .field{ display:flex; flex-direction:column; gap:6px; }
 
-.total{
-    margin-top:20px;
-    font-size:18px;
-}
+    /* grid cards */
+    .grid{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+      gap:14px;
+    }
+    .card{
+      position:relative;
+      border-radius: var(--radius);
+      border:1px solid rgba(41,214,255,.14);
+      background: linear-gradient(180deg, rgba(11,22,56,.62), rgba(11,22,56,.40));
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .thumb{
+      height:170px;
+      width:100%;
+      background:
+        radial-gradient(120px 80px at 25% 30%, rgba(41,214,255,.18), transparent 70%),
+        radial-gradient(160px 100px at 70% 20%, rgba(102,243,255,.14), transparent 70%),
+        linear-gradient(135deg, rgba(41,214,255,.12), rgba(255,75,154,.06), rgba(11,22,56,.0));
+      border-bottom:1px solid rgba(41,214,255,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .thumb .noimg{
+      font-size:12px;
+      color:rgba(168,193,255,.65);
+      letter-spacing:.3px;
+      padding:10px 12px;
+      border:1px dashed rgba(41,214,255,.22);
+      border-radius:12px;
+      background: rgba(7,11,24,.35);
+    }
 
-@media(max-width:600px){
-    header{flex-direction:column;align-items:flex-start;}
-}
-</style>
+    .cardbody{
+      padding:12px 12px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .title{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .title h3{
+      margin:0;
+      font-size:15px;
+      line-height:1.2;
+    }
+    .meta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .badge{
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(41,214,255,.18);
+      background: rgba(7,11,24,.35);
+      color: var(--muted);
+      font-size:12px;
+    }
+    .price{
+      font-size:14px;
+      color: var(--text);
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:2px;
+    }
+    .iconbtn{
+      flex:1;
+      min-width:90px;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid rgba(41,214,255,.18);
+      background: rgba(7,11,24,.30);
+      color: var(--text);
+      cursor:pointer;
+      transition:.15s transform, .15s border-color, .15s background;
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      user-select:none;
+    }
+    .iconbtn:hover{ transform: translateY(-1px); border-color: rgba(41,214,255,.34); background: rgba(7,11,24,.42);}
+    .iconbtn.danger{ border-color: rgba(255,75,154,.28); }
+    .iconbtn.ok{ border-color: rgba(71,255,181,.25); }
+
+    .cond{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .stars{
+      display:flex;
+      gap:2px;
+      font-size:13px;
+      color: var(--accent-2);
+      text-shadow: 0 0 10px rgba(41,214,255,.22);
+    }
+    .condtext{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    /* footer stats */
+    .stats{
+      margin-top:16px;
+      background: rgba(11,22,56,.55);
+      border:1px solid rgba(41,214,255,.14);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:14px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .stats .kpi{
+      display:flex;
+      gap:10px;
+      align-items:baseline;
+      flex-wrap:wrap;
+    }
+    .stats .kpi strong{
+      font-size:16px;
+      color:var(--text);
+    }
+    .stats .kpi span{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background: rgba(0,0,0,.62);
+      z-index:50;
+    }
+    .modal.show{ display:flex; }
+    .modalbox{
+      width:min(520px, 100%);
+      border-radius: 18px;
+      border:1px solid rgba(41,214,255,.18);
+      background: linear-gradient(180deg, rgba(7,11,24,.86), rgba(11,22,56,.75));
+      box-shadow: var(--shadow), var(--glow);
+      overflow:hidden;
+    }
+    .modalhead{
+      padding:14px 14px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid rgba(41,214,255,.12);
+    }
+    .modalhead h2{
+      margin:0;
+      font-size:14px;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+      color:var(--text);
+    }
+    .x{
+      cursor:pointer;
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid rgba(41,214,255,.18);
+      background: rgba(7,11,24,.25);
+      color: var(--text);
+      user-select:none;
+    }
+    .modalbody{
+      padding:14px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .modalbody .full{ grid-column: 1 / -1; }
+    .help{
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.35;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(41,214,255,.12);
+      background: rgba(7,11,24,.28);
+    }
+    .modalftr{
+      padding:14px;
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      border-top:1px solid rgba(41,214,255,.12);
+    }
+
+    /* toast */
+    .toast{
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      max-width: 360px;
+      background: rgba(7,11,24,.82);
+      border:1px solid rgba(41,214,255,.18);
+      border-radius:16px;
+      box-shadow: var(--shadow), var(--glow);
+      padding:12px 12px;
+      display:none;
+      z-index:60;
+    }
+    .toast.show{ display:block; }
+    .toast strong{ font-size:13px; }
+    .toast p{ margin:4px 0 0; font-size:12px; color:var(--muted); line-height:1.35; }
+
+    @media (max-width:620px){
+      .modalbody{ grid-template-columns:1fr; }
+    }
+  </style>
 </head>
+
 <body>
-
 <header>
-<div>
-<button onclick="setLang('ru')" class="secondary">RU</button>
-<button onclick="setLang('en')" class="secondary">EN</button>
-<select onchange="setCurrency(this.value)">
-<option value="CZK">CZK</option>
-<option value="USD">USD</option>
-<option value="EUR">EUR</option>
-<option value="RUB">RUB</option>
-<option value="UAH">UAH</option>
-</select>
-</div>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1 id="ui_title">Doll Collector</h1>
+          <p id="ui_sub">Каталог • Вишлист • Коллекция</p>
+        </div>
+      </div>
 
-<div>
-<button class="primary" onclick="openModal()">+ Добавить</button>
-<button class="secondary" onclick="showSection('catalog')">Каталог</button>
-<button class="secondary" onclick="showSection('wishlist')">Вишлист</button>
-<button class="secondary" onclick="showSection('collection')">Коллекция</button>
-</div>
+      <div class="controls">
+        <div class="chiprow">
+          <div class="chip active" id="tab_catalog" onclick="showSection('catalog')">Каталог</div>
+          <div class="chip" id="tab_wishlist" onclick="showSection('wishlist')">Вишлист</div>
+          <div class="chip" id="tab_collection" onclick="showSection('collection')">Коллекция</div>
+        </div>
+
+        <select id="currencySel" onchange="setCurrency(this.value)">
+          <option value="CZK">CZK</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="RUB">RUB</option>
+          <option value="UAH">UAH</option>
+        </select>
+
+        <button class="btn" onclick="toggleLang()" id="langBtn">RU</button>
+        <button class="btn primary" onclick="openAddModal()" id="addBtn">+ Добавить</button>
+      </div>
+    </div>
+  </div>
 </header>
 
-<div class="container">
+<main class="content">
+  <div class="panel">
+    <div class="field grow">
+      <div class="label" id="lbl_search">Поиск</div>
+      <input id="search" placeholder="Название..." oninput="render()" />
+    </div>
 
-<div class="filters">
-<input type="text" id="search" placeholder="Поиск..." oninput="render()">
-<select id="brandFilter" onchange="render()">
-<option value="">Все фирмы</option>
-<option>Monster High</option>
-<option>Barbie</option>
-<option>Ever After High</option>
-</select>
-<input type="number" id="maxPrice" placeholder="Макс цена" oninput="render()">
-<select onchange="sortPrice(this.value)">
-<option value="">Сортировка</option>
-<option value="asc">Цена ↑</option>
-<option value="desc">Цена ↓</option>
-</select>
-</div>
+    <div class="field mini">
+      <div class="label" id="lbl_brand">Фирма</div>
+      <select id="brandFilter" onchange="render()">
+        <option value="" id="opt_allBrands">Все</option>
+      </select>
+    </div>
 
-<div id="content" class="grid"></div>
-<div class="total" id="totalValue"></div>
+    <div class="field mini">
+      <div class="label" id="lbl_max">Макс цена (в базе)</div>
+      <input id="maxPrice" type="number" placeholder="например 900" oninput="render()" />
+    </div>
 
-</div>
+    <div class="field mini">
+      <div class="label" id="lbl_condition">Состояние (мин)</div>
+      <select id="minCond" onchange="render()">
+        <option value="0" id="cond_any">Любое</option>
+        <option value="1">★</option>
+        <option value="2">★★</option>
+        <option value="3">★★★</option>
+        <option value="4">★★★★</option>
+        <option value="5">★★★★★</option>
+      </select>
+    </div>
 
+    <div class="field mini">
+      <div class="label" id="lbl_sort">Сортировка</div>
+      <select id="sortSel" onchange="setSort(this.value)">
+        <option value="" id="sort_none">Нет</option>
+        <option value="asc" id="sort_asc">Цена ↑</option>
+        <option value="desc" id="sort_desc">Цена ↓</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="stats" id="stats">
+    <div class="kpi">
+      <strong id="kpi_left">—</strong>
+      <span id="kpi_left_sub">—</span>
+    </div>
+    <div class="kpi">
+      <strong id="kpi_right">—</strong>
+      <span id="kpi_right_sub">—</span>
+    </div>
+  </div>
+</main>
+
+<!-- ADD / EDIT MODAL -->
 <div class="modal" id="modal">
-<div class="modal-content">
-<span class="close" onclick="closeModal()">X</span>
-<input type="text" id="nameInput" placeholder="Название">
-<input type="text" id="brandInput" placeholder="Фирма">
-<input type="number" id="priceInput" placeholder="Цена">
-<button class="primary" onclick="addCustomDoll()">Сохранить</button>
+  <div class="modalbox">
+    <div class="modalhead">
+      <h2 id="modalTitle">Добавить куклу</h2>
+      <div class="x" onclick="closeModal()">✕</div>
+    </div>
+
+    <div class="modalbody">
+      <div class="field full">
+        <div class="label" id="m_lbl_name">Название*</div>
+        <input id="m_name" placeholder="например Draculaura Basic G1" />
+      </div>
+
+      <div class="field">
+        <div class="label" id="m_lbl_brand">Фирма*</div>
+        <input id="m_brand" placeholder="Monster High" />
+      </div>
+
+      <div class="field">
+        <div class="label" id="m_lbl_price">Цена (в базе, CZK)*</div>
+        <input id="m_price" type="number" placeholder="900" />
+      </div>
+
+      <div class="field">
+        <div class="label" id="m_lbl_cond">Рейтинг состояния*</div>
+        <select id="m_cond">
+          <option value="5">★★★★★ (Mint)</option>
+          <option value="4">★★★★☆ (Very good)</option>
+          <option value="3">★★★☆☆ (Good)</option>
+          <option value="2">★★☆☆☆ (Used)</option>
+          <option value="1">★☆☆☆☆ (Damaged)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="label" id="m_lbl_photo">Фото</div>
+        <input id="m_photo" type="file" accept="image/*" />
+      </div>
+
+      <div class="help full" id="m_help">
+        Поля со * обязательны. Фото сохраняется локально (в браузере) через LocalStorage.
+      </div>
+    </div>
+
+    <div class="modalftr">
+      <button class="btn" onclick="closeModal()" id="m_cancel">Отмена</button>
+      <button class="btn primary" onclick="saveModal()" id="m_save">Сохранить</button>
+    </div>
+  </div>
 </div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <strong id="toastTitle">—</strong>
+  <p id="toastText">—</p>
 </div>
 
 <script>
+/** ----------------------------
+ *  i18n
+ * ---------------------------- */
+let lang = localStorage.getItem("lang") || "ru";
 
-let currency="CZK"
-let lang="ru"
-let currentSection="catalog"
-let sortDirection=""
+const T = {
+  ru: {
+    title: "Doll Collector",
+    sub: "Каталог • Вишлист • Коллекция",
+    catalog: "Каталог",
+    wishlist: "Вишлист",
+    collection: "Коллекция",
+    add: "+ Добавить",
+    search: "Поиск",
+    searchPh: "Название...",
+    brand: "Фирма",
+    all: "Все",
+    max: "Макс цена (в базе)",
+    maxPh: "например 900",
+    conditionMin: "Состояние (мин)",
+    any: "Любое",
+    sort: "Сортировка",
+    sortNone: "Нет",
+    sortAsc: "Цена ↑",
+    sortDesc: "Цена ↓",
+    modalAdd: "Добавить куклу",
+    modalEdit: "Редактировать куклу",
+    mName: "Название*",
+    mBrand: "Фирма*",
+    mPrice: "Цена (в базе, CZK)*",
+    mCond: "Рейтинг состояния*",
+    mPhoto: "Фото",
+    mHelp: "Поля со * обязательны. Фото сохраняется локально (в браузере) через LocalStorage.",
+    cancel: "Отмена",
+    save: "Сохранить",
+    noimg: "Нет фото",
+    toWish: "В вишлист",
+    toColl: "В коллекцию",
+    edit: "Редакт.",
+    remove: "Убрать",
+    statsLeftCatalog: "Показано",
+    statsRightCatalog: "Всего в базе",
+    statsLeftWish: "В вишлисте",
+    statsRightWish: "Сумма",
+    statsLeftColl: "В коллекции",
+    statsRightColl: "Сумма",
+    toastMissingTitle: "Не хватает данных",
+    toastMissingText: "Заполни: название, фирму и цену (и рейтинг состояния).",
+    toastSavedTitle: "Сохранено",
+    toastSavedText: "Готово. Всё сохранено локально.",
+    toastAddedWish: "Вишлист",
+    toastAddedWishText: "Добавлено в вишлист.",
+    toastAddedColl: "Коллекция",
+    toastAddedCollText: "Добавлено в коллекцию.",
+    toastRemoved: "Убрано",
+    toastRemovedText: "Удалено из списка.",
+    baseNote: "Цена хранится в базовой валюте (CZK). Конвертация — ориентировочная."
+  },
+  en: {
+    title: "Doll Collector",
+    sub: "Catalog • Wishlist • Collection",
+    catalog: "Catalog",
+    wishlist: "Wishlist",
+    collection: "Collection",
+    add: "+ Add",
+    search: "Search",
+    searchPh: "Name...",
+    brand: "Brand",
+    all: "All",
+    max: "Max price (base)",
+    maxPh: "e.g. 900",
+    conditionMin: "Condition (min)",
+    any: "Any",
+    sort: "Sort",
+    sortNone: "None",
+    sortAsc: "Price ↑",
+    sortDesc: "Price ↓",
+    modalAdd: "Add doll",
+    modalEdit: "Edit doll",
+    mName: "Name*",
+    mBrand: "Brand*",
+    mPrice: "Price (base, CZK)*",
+    mCond: "Condition rating*",
+    mPhoto: "Photo",
+    mHelp: "Fields with * are required. Photos are stored locally (in your browser) via LocalStorage.",
+    cancel: "Cancel",
+    save: "Save",
+    noimg: "No photo",
+    toWish: "Wishlist",
+    toColl: "Collection",
+    edit: "Edit",
+    remove: "Remove",
+    statsLeftCatalog: "Shown",
+    statsRightCatalog: "Total in base",
+    statsLeftWish: "In wishlist",
+    statsRightWish: "Sum",
+    statsLeftColl: "In collection",
+    statsRightColl: "Sum",
+    toastMissingTitle: "Missing fields",
+    toastMissingText: "Fill: name, brand and price (and condition rating).",
+    toastSavedTitle: "Saved",
+    toastSavedText: "Done. Everything is stored locally.",
+    toastAddedWish: "Wishlist",
+    toastAddedWishText: "Added to wishlist.",
+    toastAddedColl: "Collection",
+    toastAddedCollText: "Added to collection.",
+    toastRemoved: "Removed",
+    toastRemovedText: "Removed from the list.",
+    baseNote: "Prices are stored in base currency (CZK). Conversion is approximate."
+  }
+};
 
-const rates={
-CZK:1,
-USD:0.043,
-EUR:0.040,
-RUB:4,
-UAH:1.7
+/** ----------------------------
+ *  Currency
+ * ---------------------------- */
+let currency = localStorage.getItem("currency") || "CZK";
+
+/* ОРИЕНТИРОВОЧНО. Если хочешь — сделаю автокурс через API (уже нужен backend или публичный endpoint). */
+const rates = {
+  CZK: 1,
+  USD: 0.043,
+  EUR: 0.040,
+  RUB: 4.0,
+  UAH: 1.7
+};
+
+function convert(priceCZK){
+  const r = rates[currency] ?? 1;
+  return (priceCZK * r).toFixed(2);
 }
 
-let dolls=JSON.parse(localStorage.getItem("dolls"))||[
-{id:1,name:"Draculaura Basic G1",brand:"Monster High",price:900},
-{id:2,name:"Clawdeen Wolf G3",brand:"Monster High",price:750},
-{id:3,name:"Barbie Dreamhouse",brand:"Barbie",price:1200}
-]
+/** ----------------------------
+ *  Data
+ *  Doll shape:
+ *  { id, name, brand, priceCZK, condition(1-5), photoDataUrl|null }
+ * ---------------------------- */
+const LS_KEYS = {
+  dolls:"dolls_v2",
+  wishlist:"wishlist_v2",
+  collection:"collection_v2"
+};
 
-let wishlist=JSON.parse(localStorage.getItem("wishlist"))||[]
-let collection=JSON.parse(localStorage.getItem("collection"))||[]
+let dolls = JSON.parse(localStorage.getItem(LS_KEYS.dolls)) || [
+  {id: 1, name:"Draculaura Basic G1", brand:"Monster High", priceCZK: 900, condition: 4, photoDataUrl: null},
+  {id: 2, name:"Clawdeen Wolf G3", brand:"Monster High", priceCZK: 750, condition: 4, photoDataUrl: null},
+  {id: 3, name:"Barbie Dreamhouse", brand:"Barbie", priceCZK: 1200, condition: 5, photoDataUrl: null},
+  {id: 4, name:"Raven Queen Basic", brand:"Ever After High", priceCZK: 850, condition: 3, photoDataUrl: null},
+];
 
-function save(){
-localStorage.setItem("dolls",JSON.stringify(dolls))
-localStorage.setItem("wishlist",JSON.stringify(wishlist))
-localStorage.setItem("collection",JSON.stringify(collection))
+let wishlist = JSON.parse(localStorage.getItem(LS_KEYS.wishlist)) || [];
+let collection = JSON.parse(localStorage.getItem(LS_KEYS.collection)) || [];
+
+function saveAll(){
+  localStorage.setItem(LS_KEYS.dolls, JSON.stringify(dolls));
+  localStorage.setItem(LS_KEYS.wishlist, JSON.stringify(wishlist));
+  localStorage.setItem(LS_KEYS.collection, JSON.stringify(collection));
+  localStorage.setItem("currency", currency);
+  localStorage.setItem("lang", lang);
 }
 
-function convert(price){
-return (price*rates[currency]).toFixed(2)
+/** ----------------------------
+ *  UI State
+ * ---------------------------- */
+let section = "catalog";      // catalog | wishlist | collection
+let sortDir = "";             // "", "asc", "desc"
+let editingId = null;         // null or doll id
+
+/** ----------------------------
+ *  Helpers
+ * ---------------------------- */
+function uniqueBrands(){
+  const set = new Set(dolls.map(d => (d.brand || "").trim()).filter(Boolean));
+  return Array.from(set).sort((a,b)=>a.localeCompare(b));
+}
+
+function stars(n){
+  n = Math.max(0, Math.min(5, Number(n)||0));
+  return "★★★★★".slice(0,n) + "☆☆☆☆☆".slice(0, 5-n);
+}
+
+function toast(title, text){
+  const el = document.getElementById("toast");
+  document.getElementById("toastTitle").textContent = title;
+  document.getElementById("toastText").textContent = text;
+  el.classList.add("show");
+  clearTimeout(window.__toastT);
+  window.__toastT = setTimeout(()=> el.classList.remove("show"), 2600);
+}
+
+function getList(){
+  if(section==="wishlist") return wishlist;
+  if(section==="collection") return collection;
+  return dolls;
+}
+
+function setActiveTabs(){
+  document.getElementById("tab_catalog").classList.toggle("active", section==="catalog");
+  document.getElementById("tab_wishlist").classList.toggle("active", section==="wishlist");
+  document.getElementById("tab_collection").classList.toggle("active", section==="collection");
+}
+
+/** ----------------------------
+ *  Render
+ * ---------------------------- */
+function applyI18n(){
+  const tr = T[lang];
+
+  document.title = tr.title;
+  document.getElementById("ui_title").textContent = tr.title;
+  document.getElementById("ui_sub").textContent = tr.sub;
+
+  document.getElementById("tab_catalog").textContent = tr.catalog;
+  document.getElementById("tab_wishlist").textContent = tr.wishlist;
+  document.getElementById("tab_collection").textContent = tr.collection;
+
+  document.getElementById("addBtn").textContent = tr.add;
+  document.getElementById("langBtn").textContent = lang.toUpperCase();
+
+  document.getElementById("lbl_search").textContent = tr.search;
+  const search = document.getElementById("search");
+  search.placeholder = tr.searchPh;
+
+  document.getElementById("lbl_brand").textContent = tr.brand;
+  document.getElementById("opt_allBrands").textContent = tr.all;
+
+  document.getElementById("lbl_max").textContent = tr.max;
+  document.getElementById("maxPrice").placeholder = tr.maxPh;
+
+  document.getElementById("lbl_condition").textContent = tr.conditionMin;
+  document.getElementById("cond_any").textContent = tr.any;
+
+  document.getElementById("lbl_sort").textContent = tr.sort;
+  document.getElementById("sort_none").textContent = tr.sortNone;
+  document.getElementById("sort_asc").textContent = tr.sortAsc;
+  document.getElementById("sort_desc").textContent = tr.sortDesc;
+
+  // modal labels
+  document.getElementById("m_lbl_name").textContent = tr.mName;
+  document.getElementById("m_lbl_brand").textContent = tr.mBrand;
+  document.getElementById("m_lbl_price").textContent = tr.mPrice;
+  document.getElementById("m_lbl_cond").textContent = tr.mCond;
+  document.getElementById("m_lbl_photo").textContent = tr.mPhoto;
+  document.getElementById("m_help").textContent = tr.mHelp;
+  document.getElementById("m_cancel").textContent = tr.cancel;
+  document.getElementById("m_save").textContent = tr.save;
+}
+
+function rebuildBrandFilter(){
+  const sel = document.getElementById("brandFilter");
+  const cur = sel.value;
+  // keep first option
+  sel.innerHTML = `<option value="" id="opt_allBrands">${T[lang].all}</option>`;
+  uniqueBrands().forEach(b=>{
+    const opt = document.createElement("option");
+    opt.value = b;
+    opt.textContent = b;
+    sel.appendChild(opt);
+  });
+  // restore if possible
+  sel.value = cur;
 }
 
 function render(){
-let content=document.getElementById("content")
-content.innerHTML=""
-let search=document.getElementById("search").value.toLowerCase()
-let brand=document.getElementById("brandFilter").value
-let max=document.getElementById("maxPrice").value
+  setActiveTabs();
 
-let list=currentSection==="catalog"?dolls:
-currentSection==="wishlist"?wishlist:collection
+  const tr = T[lang];
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
 
-let filtered=list.filter(d=>
-d.name.toLowerCase().includes(search) &&
-(!brand || d.brand===brand) &&
-(!max || d.price<=max)
-)
+  const q = (document.getElementById("search").value || "").toLowerCase().trim();
+  const brand = document.getElementById("brandFilter").value;
+  const max = Number(document.getElementById("maxPrice").value || 0);
+  const minCond = Number(document.getElementById("minCond").value || 0);
 
-if(sortDirection==="asc") filtered.sort((a,b)=>a.price-b.price)
-if(sortDirection==="desc") filtered.sort((a,b)=>b.price-a.price)
+  let list = getList().slice();
 
-filtered.forEach(d=>{
-let card=document.createElement("div")
-card.className="card"
-card.innerHTML=`
-<h3>${d.name}</h3>
-<p>${d.brand}</p>
-<p>${convert(d.price)} ${currency}</p>
-${currentSection==="catalog"?
-`<button onclick="addToWishlist(${d.id})">♡</button>
-<button onclick="addToCollection(${d.id})">+</button>`:""}
-`
-content.appendChild(card)
-})
+  // filter
+  list = list.filter(d=>{
+    const okName = !q || (d.name || "").toLowerCase().includes(q);
+    const okBrand = !brand || d.brand === brand;
+    const okMax = !max || (d.priceCZK <= max);
+    const okCond = !minCond || (Number(d.condition||0) >= minCond);
+    return okName && okBrand && okMax && okCond;
+  });
 
-if(currentSection==="collection"){
-let total=collection.reduce((sum,d)=>sum+d.price,0)
-document.getElementById("totalValue").innerText=
-(lang==="ru"?"Общая стоимость: ":"Total value: ")+convert(total)+" "+currency
-}else{
-document.getElementById("totalValue").innerText=""
+  // sort
+  if(sortDir==="asc") list.sort((a,b)=> (a.priceCZK||0) - (b.priceCZK||0));
+  if(sortDir==="desc") list.sort((a,b)=> (b.priceCZK||0) - (a.priceCZK||0));
+
+  // cards
+  list.forEach(d=>{
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const thumb = document.createElement("div");
+    thumb.className = "thumb";
+    if(d.photoDataUrl){
+      const img = document.createElement("img");
+      img.src = d.photoDataUrl;
+      img.alt = d.name || "doll";
+      thumb.appendChild(img);
+    } else {
+      const no = document.createElement("div");
+      no.className = "noimg";
+      no.textContent = tr.noimg;
+      thumb.appendChild(no);
+    }
+
+    const body = document.createElement("div");
+    body.className = "cardbody";
+
+    const title = document.createElement("div");
+    title.className = "title";
+    title.innerHTML = `
+      <h3>${escapeHtml(d.name || "")}</h3>
+      <span class="badge">${escapeHtml(d.brand || "")}</span>
+    `;
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.innerHTML = `
+      <span class="price">${convert(d.priceCZK)} ${currency}</span>
+      <span class="badge">CZK: ${Number(d.priceCZK||0).toFixed(0)}</span>
+    `;
+
+    const cond = document.createElement("div");
+    cond.className = "cond";
+    cond.innerHTML = `
+      <div class="stars" title="${Number(d.condition||0)} / 5">${stars(d.condition)}</div>
+      <div class="condtext">${tr.baseNote}</div>
+    `;
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    if(section === "catalog"){
+      actions.appendChild(mkBtn(tr.toWish, ()=> addTo("wishlist", d.id), "iconbtn"));
+      actions.appendChild(mkBtn(tr.toColl, ()=> addTo("collection", d.id), "iconbtn ok"));
+      actions.appendChild(mkBtn(tr.edit, ()=> openEditModal(d.id), "iconbtn"));
+    } else if(section === "wishlist"){
+      actions.appendChild(mkBtn(tr.remove, ()=> removeFrom("wishlist", d.id), "iconbtn danger"));
+      actions.appendChild(mkBtn(tr.toColl, ()=> addTo("collection", d.id), "iconbtn ok"));
+      actions.appendChild(mkBtn(tr.edit, ()=> openEditModal(d.id), "iconbtn"));
+    } else {
+      actions.appendChild(mkBtn(tr.remove, ()=> removeFrom("collection", d.id), "iconbtn danger"));
+      actions.appendChild(mkBtn(tr.edit, ()=> openEditModal(d.id), "iconbtn"));
+    }
+
+    body.appendChild(title);
+    body.appendChild(meta);
+    body.appendChild(cond);
+    body.appendChild(actions);
+
+    card.appendChild(thumb);
+    card.appendChild(body);
+    grid.appendChild(card);
+  });
+
+  // stats
+  const statsLeft = document.getElementById("kpi_left");
+  const statsLeftSub = document.getElementById("kpi_left_sub");
+  const statsRight = document.getElementById("kpi_right");
+  const statsRightSub = document.getElementById("kpi_right_sub");
+
+  if(section==="catalog"){
+    statsLeft.textContent = String(list.length);
+    statsLeftSub.textContent = tr.statsLeftCatalog;
+    statsRight.textContent = String(dolls.length);
+    statsRightSub.textContent = tr.statsRightCatalog;
+  } else if(section==="wishlist"){
+    const sum = wishlist.reduce((s,d)=> s + (d.priceCZK||0), 0);
+    statsLeft.textContent = String(wishlist.length);
+    statsLeftSub.textContent = tr.statsLeftWish;
+    statsRight.textContent = `${convert(sum)} ${currency}`;
+    statsRightSub.textContent = tr.statsRightWish;
+  } else {
+    const sum = collection.reduce((s,d)=> s + (d.priceCZK||0), 0);
+    statsLeft.textContent = String(collection.length);
+    statsLeftSub.textContent = tr.statsLeftColl;
+    statsRight.textContent = `${convert(sum)} ${currency}`;
+    statsRightSub.textContent = tr.statsRightColl;
+  }
 }
+
+/** ----------------------------
+ *  Actions (wishlist/collection)
+ * ---------------------------- */
+function addTo(where, id){
+  const tr = T[lang];
+  const doll = dolls.find(x=>x.id===id);
+  if(!doll) return;
+
+  const target = (where==="wishlist") ? wishlist : collection;
+  if(!target.some(x=>x.id===id)){
+    target.push(doll);
+    saveAll();
+    toast(where==="wishlist" ? tr.toastAddedWish : tr.toastAddedColl,
+          where==="wishlist" ? tr.toastAddedWishText : tr.toastAddedCollText);
+    render();
+  }
 }
 
-function addToWishlist(id){
-let doll=dolls.find(d=>d.id===id)
-if(!wishlist.some(d=>d.id===id)){
-wishlist.push(doll)
-save()
-}
-}
-
-function addToCollection(id){
-let doll=dolls.find(d=>d.id===id)
-if(!collection.some(d=>d.id===id)){
-collection.push(doll)
-save()
-}
+function removeFrom(where, id){
+  const tr = T[lang];
+  const target = (where==="wishlist") ? wishlist : collection;
+  const idx = target.findIndex(x=>x.id===id);
+  if(idx>=0){
+    target.splice(idx,1);
+    saveAll();
+    toast(tr.toastRemoved, tr.toastRemovedText);
+    render();
+  }
 }
 
-function openModal(){
-document.getElementById("modal").style.display="flex"
+/** ----------------------------
+ *  Modal (add/edit) + photo upload
+ * ---------------------------- */
+function openAddModal(){
+  editingId = null;
+  fillModal({
+    name:"",
+    brand:"",
+    priceCZK:"",
+    condition:5,
+    photoDataUrl:null
+  });
+  document.getElementById("modalTitle").textContent = T[lang].modalAdd;
+  document.getElementById("modal").classList.add("show");
+}
+
+function openEditModal(id){
+  const d = dolls.find(x=>x.id===id);
+  if(!d) return;
+  editingId = id;
+  fillModal(d);
+  document.getElementById("modalTitle").textContent = T[lang].modalEdit;
+  document.getElementById("modal").classList.add("show");
+}
+
+function fillModal(d){
+  document.getElementById("m_name").value = d.name || "";
+  document.getElementById("m_brand").value = d.brand || "";
+  document.getElementById("m_price").value = (d.priceCZK ?? "");
+  document.getElementById("m_cond").value = String(d.condition ?? 5);
+  document.getElementById("m_photo").value = ""; // reset file input
 }
 
 function closeModal(){
-document.getElementById("modal").style.display="none"
+  document.getElementById("modal").classList.remove("show");
+  editingId = null;
 }
 
-function addCustomDoll(){
-let name=document.getElementById("nameInput").value
-let brand=document.getElementById("brandInput").value
-let price=document.getElementById("priceInput").value
+async function saveModal(){
+  const tr = T[lang];
 
-if(!name||!brand||!price){
-alert(lang==="ru"?"Заполни все поля":"Fill all fields")
-return
+  const name = (document.getElementById("m_name").value || "").trim();
+  const brand = (document.getElementById("m_brand").value || "").trim();
+  const price = Number(document.getElementById("m_price").value || 0);
+  const condition = Number(document.getElementById("m_cond").value || 0);
+  const file = document.getElementById("m_photo").files?.[0] || null;
+
+  if(!name || !brand || !price || !condition){
+    toast(tr.toastMissingTitle, tr.toastMissingText);
+    return;
+  }
+
+  let photoDataUrl = null;
+
+  // if editing: keep old photo unless new file selected
+  if(editingId){
+    const existing = dolls.find(x=>x.id===editingId);
+    photoDataUrl = existing?.photoDataUrl || null;
+  }
+
+  if(file){
+    // read as dataURL
+    photoDataUrl = await fileToDataUrl(file);
+  }
+
+  if(editingId){
+    const idx = dolls.findIndex(x=>x.id===editingId);
+    if(idx>=0){
+      dolls[idx] = {
+        ...dolls[idx],
+        name, brand,
+        priceCZK: price,
+        condition,
+        photoDataUrl
+      };
+
+      // sync objects already stored inside wishlist/collection
+      wishlist = wishlist.map(x => x.id===editingId ? dolls[idx] : x);
+      collection = collection.map(x => x.id===editingId ? dolls[idx] : x);
+    }
+  } else {
+    const newDoll = {
+      id: Date.now(),
+      name,
+      brand,
+      priceCZK: price,
+      condition,
+      photoDataUrl
+    };
+    dolls.push(newDoll);
+  }
+
+  saveAll();
+  rebuildBrandFilter();
+  toast(tr.toastSavedTitle, tr.toastSavedText);
+  closeModal();
+  render();
 }
 
-let newDoll={
-id:Date.now(),
-name,
-brand,
-price:Number(price)
+function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
-dolls.push(newDoll)
-save()
-closeModal()
-render()
+/** ----------------------------
+ *  Navigation & Settings
+ * ---------------------------- */
+function showSection(s){
+  section = s;
+  render();
 }
 
 function setCurrency(c){
-currency=c
-render()
+  currency = c;
+  saveAll();
+  render();
 }
 
-function setLang(l){
-lang=l
-render()
+function toggleLang(){
+  lang = (lang==="ru") ? "en" : "ru";
+  saveAll();
+  applyI18n();
+  rebuildBrandFilter();
+  render();
 }
 
-function showSection(sec){
-currentSection=sec
-render()
+function setSort(v){
+  sortDir = v;
+  render();
 }
 
-function sortPrice(dir){
-sortDirection=dir
-render()
+/** ----------------------------
+ *  Utils
+ * ---------------------------- */
+function mkBtn(text, fn, cls){
+  const b = document.createElement("button");
+  b.className = cls || "iconbtn";
+  b.textContent = text;
+  b.onclick = fn;
+  return b;
 }
 
-render()
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 
+/** ----------------------------
+ *  Init
+ * ---------------------------- */
+(function init(){
+  // hydrate selects
+  document.getElementById("currencySel").value = currency;
+
+  applyI18n();
+  rebuildBrandFilter();
+
+  // close modal on backdrop click
+  document.getElementById("modal").addEventListener("click", (e)=>{
+    if(e.target.id==="modal") closeModal();
+  });
+
+  render();
+})();
 </script>
 </body>
 </html>
